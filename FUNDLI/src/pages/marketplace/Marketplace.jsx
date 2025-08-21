@@ -4,8 +4,6 @@ import {
   Search, 
   Filter, 
   DollarSign, 
-  Calendar, 
-  User,
   TrendingUp,
   Shield,
   Eye
@@ -38,9 +36,8 @@ const Marketplace = () => {
         }
 
         const result = await response.json();
-        // Map pool data to loan display format
         const mappedLoans = (result.data.pools || []).map(pool => ({
-          id: pool._id || pool.id,
+          id: pool._id || pool.id || Math.random().toString(),
           purpose: pool.name || pool.purpose || 'Lending Pool',
           borrower: pool.lender?.firstName + ' ' + pool.lender?.lastName || 'Lender',
           amount: pool.size || pool.amount || 0,
@@ -98,7 +95,6 @@ const Marketplace = () => {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           Loan Marketplace
@@ -108,7 +104,6 @@ const Marketplace = () => {
         </p>
       </div>
 
-      {/* Search and Filters */}
       <div className="card p-6">
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1">
@@ -141,7 +136,6 @@ const Marketplace = () => {
         </div>
       </div>
 
-      {/* Loans Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredLoans.map((loan, index) => (
           <motion.div
@@ -151,69 +145,65 @@ const Marketplace = () => {
             transition={{ duration: 0.6, delay: index * 0.1 }}
             className="card p-6 hover:shadow-medium transition-all duration-200"
           >
-            {/* Loan Header */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                  {loan.purpose}
+                  {loan.purpose || 'Lending Pool'}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  by {loan.borrower}
+                  by {loan.borrower || 'Lender'}
                 </p>
               </div>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskScoreColor(loan.riskScore)}`}>
-                Risk {loan.riskScore}
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskScoreColor(loan.riskScore || 'B')}`}>
+                Risk {loan.riskScore || 'B'}
               </span>
             </div>
 
-            {/* Loan Details */}
             <div className="space-y-3 mb-6">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Amount</span>
                 <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  ${loan.amount.toLocaleString()}
+                  ${(loan.amount || 0).toLocaleString()}
                 </span>
               </div>
               
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600 dark:text-gray-400">ROI</span>
                 <span className="text-lg font-bold text-success">
-                  {loan.roi}%
+                  {loan.roi || 0}%
                 </span>
               </div>
               
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Duration</span>
                 <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {loan.duration} months
+                  {loan.duration || 12} months
                 </span>
               </div>
               
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Collateral</span>
                 <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {loan.collateral}
+                  {loan.collateral || 'Pool Assets'}
                 </span>
               </div>
             </div>
 
-            {/* Funding Progress */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Funding Progress</span>
                 <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {loan.funded}%
+                  {loan.funded || 0}%
                 </span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                 <div
                   className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${loan.funded}%` }}
+                  style={{ width: `${loan.funded || 0}%` }}
                 />
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex space-x-3">
               <button className="flex-1 btn-primary text-sm py-2">
                 Invest Now
@@ -226,7 +216,6 @@ const Marketplace = () => {
         ))}
       </div>
 
-      {/* Empty State */}
       {filteredLoans.length === 0 && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -243,14 +232,13 @@ const Marketplace = () => {
         </motion.div>
       )}
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="card p-6 text-center">
           <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center mx-auto mb-4">
             <DollarSign className="h-6 w-6 text-primary-600 dark:text-primary-400" />
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
-            ${loans.reduce((sum, loan) => sum + loan.amount, 0).toLocaleString()}
+            ${loans.reduce((sum, loan) => sum + (loan.amount || 0), 0).toLocaleString()}
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Total Available

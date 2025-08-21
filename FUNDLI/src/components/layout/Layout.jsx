@@ -17,7 +17,7 @@ const Layout = () => {
           <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         )}
         
-        <main className={`flex-1 ${isAuthenticated ? 'lg:ml-64' : ''}`}>
+        <main className={`flex-1 ${isAuthenticated ? 'lg:ml-64' : ''} pt-16`}>
           <div className="p-4 lg:p-8">
             <Outlet />
           </div>

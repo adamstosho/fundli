@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { DollarSign, Users, TrendingUp, Calendar, Eye, BarChart3, CreditCard } from 'lucide-react';
+import { DollarSign, Users, TrendingUp, BarChart3, Eye } from 'lucide-react';
 
 const PoolDetails = () => {
   const { id } = useParams();
@@ -88,16 +88,27 @@ const PoolDetails = () => {
     );
   }
 
-  const fundingProgress = (pool.funded / pool.size) * 100;
+  // Safe values with fallbacks
+  const poolSize = pool.size || 0;
+  const fundedAmount = pool.funded || 0;
+  const interestRate = pool.interestRate || 0;
+  const investors = pool.investors || 0;
+  const duration = pool.duration || 0;
+  const poolName = pool.name || 'Pool Details';
+  const poolId = pool.id || 'N/A';
+  const createdAt = pool.createdAt ? new Date(pool.createdAt).toLocaleDateString() : 'N/A';
+  const loans = pool.loans || [];
+  
+  const fundingProgress = poolSize > 0 ? (fundedAmount / poolSize) * 100 : 0;
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          {pool.name}
+          {poolName}
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Pool ID: {pool.id} • Created {new Date(pool.createdAt).toLocaleDateString()}
+          Pool ID: {poolId} • Created {createdAt}
         </p>
       </div>
 
@@ -113,7 +124,7 @@ const PoolDetails = () => {
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pool Size</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                ${pool.size.toLocaleString()}
+                ${poolSize.toLocaleString()}
               </p>
             </div>
             <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center">
@@ -132,7 +143,7 @@ const PoolDetails = () => {
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Funded Amount</p>
               <p className="text-2xl font-bold text-success">
-                ${pool.funded.toLocaleString()}
+                ${fundedAmount.toLocaleString()}
               </p>
             </div>
             <div className="w-12 h-12 bg-success-100 dark:bg-success-900 rounded-lg flex items-center justify-center">
@@ -151,7 +162,7 @@ const PoolDetails = () => {
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Interest Rate</p>
               <p className="text-2xl font-bold text-accent">
-                {pool.interestRate}%
+                {interestRate}%
               </p>
             </div>
             <div className="w-12 h-12 bg-accent-100 dark:bg-accent-900 rounded-lg flex items-center justify-center">
@@ -170,7 +181,7 @@ const PoolDetails = () => {
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Investors</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {pool.investors}
+                {investors}
               </p>
             </div>
             <div className="w-12 h-12 bg-secondary-100 dark:bg-secondary-900 rounded-lg flex items-center justify-center">
@@ -192,7 +203,7 @@ const PoolDetails = () => {
             Funding Progress
           </h3>
           <span className="text-sm text-gray-600 dark:text-gray-400">
-            {pool.funded.toLocaleString()} of {pool.size.toLocaleString()} funded
+            {fundedAmount.toLocaleString()} of {poolSize.toLocaleString()} funded
           </span>
         </div>
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
@@ -208,177 +219,129 @@ const PoolDetails = () => {
         </div>
       </motion.div>
 
-      {/* Pool Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="lg:col-span-2"
-        >
-          <div className="card p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Pool Information
-            </h3>
-            <div className="space-y-4">
-              <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                <span className="text-gray-600 dark:text-gray-400">Pool Name</span>
-                <span className="font-medium text-gray-900 dark:text-white">{pool.name}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                <span className="text-gray-600 dark:text-gray-400">Duration</span>
-                <span className="font-medium text-gray-900 dark:text-white">{pool.duration} months</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                <span className="text-gray-600 dark:text-gray-400">Interest Rate</span>
-                <span className="font-medium text-accent">{pool.interestRate}% annually</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                <span className="text-gray-600 dark:text-gray-400">Risk Level</span>
-                <span className="font-medium text-gray-900 dark:text-white capitalize">{pool.riskLevel}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                <span className="text-gray-600 dark:text-gray-400">Status</span>
-                <span className="font-medium text-success capitalize">{pool.status}</span>
-              </div>
-              <div className="flex justify-between py-2">
-                <span className="text-gray-600 dark:text-gray-400">Created</span>
-                <span className="font-medium text-gray-900 dark:text-white">
-                  {new Date(pool.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-            </div>
+      {/* Pool Information */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.6 }}
+        className="card p-6"
+      >
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Pool Information
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+            <span className="text-gray-600 dark:text-gray-400">Pool Name</span>
+            <span className="font-medium text-gray-900 dark:text-white">{poolName}</span>
           </div>
-        </motion.div>
-
-        {/* Sidebar */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.7 }}
-          className="space-y-6"
-        >
-          {/* Quick Actions */}
-          <div className="card p-6 bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800">
-            <h3 className="font-semibold text-primary-900 dark:text-primary-100 mb-4">
-              Quick Actions
-            </h3>
-            <div className="space-y-3">
-              <button className="w-full btn-primary text-sm py-2">
-                <Eye className="h-4 w-4 mr-2" />
-                View All Loans
-              </button>
-              <button className="w-full btn-outline text-sm py-2">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Performance Report
-              </button>
-            </div>
+          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+            <span className="text-gray-600 dark:text-gray-400">Duration</span>
+            <span className="font-medium text-gray-900 dark:text-white">{duration} months</span>
           </div>
-
-          {/* Pool Stats */}
-          <div className="card p-6">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-              Pool Statistics
-            </h3>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Total Loans</span>
-                <span className="font-medium text-gray-900 dark:text-white">{pool.loans.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Active Loans</span>
-                <span className="font-medium text-success">
-                  {pool.loans.filter(loan => loan.status === 'active').length}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Pending Loans</span>
-                <span className="font-medium text-warning">
-                  {pool.loans.filter(loan => loan.status === 'pending').length}
-                </span>
-              </div>
-            </div>
+          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+            <span className="text-gray-600 dark:text-gray-400">Interest Rate</span>
+            <span className="font-medium text-accent">{interestRate}% annually</span>
           </div>
-        </motion.div>
-      </div>
+          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+            <span className="text-gray-600 dark:text-gray-400">Risk Level</span>
+            <span className="font-medium text-gray-900 dark:text-white capitalize">{pool.riskLevel || 'N/A'}</span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+            <span className="text-gray-600 dark:text-gray-400">Status</span>
+            <span className="font-medium text-success capitalize">{pool.status || 'N/A'}</span>
+          </div>
+          <div className="flex justify-between py-2">
+            <span className="text-gray-600 dark:text-gray-400">Created</span>
+            <span className="font-medium text-gray-900 dark:text-white">
+              {createdAt}
+            </span>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Loans List */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.8 }}
+        transition={{ duration: 0.6, delay: 0.7 }}
         className="card overflow-hidden mt-8"
       >
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Pool Loans
+            Pool Loans ({loans.length})
           </h3>
         </div>
         
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-800">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Loan ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Borrower
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  ROI
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-              {pool.loans.map((loan, index) => (
-                <motion.tr
-                  key={loan.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 * index }}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                    {loan.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                    {loan.borrower}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                    ${loan.amount.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-success">
-                    {loan.roi}%
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`badge ${
-                      loan.status === 'active' 
-                        ? 'badge-success' 
-                        : 'badge-warning'
-                    }`}>
-                      {loan.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <button className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
-                      <Eye className="h-4 w-4" />
-                    </button>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {loans.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Loan ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Borrower
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    ROI
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                {loans.map((loan, index) => (
+                  <motion.tr
+                    key={loan.id || index}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.1 * index }}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                      {loan.id || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                      {loan.borrower || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                      ${(loan.amount || 0).toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-success">
+                      {loan.roi || 0}%
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`badge ${
+                        loan.status === 'active' 
+                          ? 'badge-success' 
+                          : 'badge-warning'
+                      }`}>
+                        {loan.status || 'N/A'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <button className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+                        <Eye className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-500 dark:text-gray-400">No loans found in this pool</p>
+          </div>
+        )}
       </motion.div>
     </div>
   );

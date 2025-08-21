@@ -150,7 +150,7 @@ const CreatePool = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="poolSize" className="form-label">
-                  Pool Size (USD)
+                  Amount (USD)
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -166,9 +166,12 @@ const CreatePool = () => {
                     value={formData.poolSize}
                     onChange={handleChange}
                     className="input-field pl-10"
-                    placeholder="Enter pool size"
+                    placeholder="Enter total amount available for borrowing"
                   />
                 </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Total amount available for borrowing in this pool
+                </p>
               </div>
 
               <div>
@@ -198,7 +201,7 @@ const CreatePool = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="interestRate" className="form-label">
-                  Annual Interest Rate (%)
+                  Monthly Interest Rate (%)
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -208,16 +211,19 @@ const CreatePool = () => {
                     id="interestRate"
                     name="interestRate"
                     type="number"
-                    min="1"
-                    max="25"
+                    min="0.1"
+                    max="5"
                     step="0.1"
                     required
                     value={formData.interestRate}
                     onChange={handleChange}
                     className="input-field pl-10"
-                    placeholder="Enter interest rate"
+                    placeholder="Enter monthly interest rate"
                   />
                 </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Monthly interest rate charged to borrowers
+                </p>
               </div>
 
               <div>
