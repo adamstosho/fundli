@@ -69,8 +69,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/pools', poolRoutes);
 app.use('/api/investments', investmentRoutes);
 // app.use('/api/marketplace', marketplaceRoutes);
-// app.use('/api/referrals', referralRoutes);
-// app.use('/api/admin', adminRoutes);
+app.use('/api/referrals', referralRoutes);
+app.use('/api/admin', adminRoutes);
 // app.use('/api/notifications', notificationRoutes);
 
 // 404 handler for undefined routes

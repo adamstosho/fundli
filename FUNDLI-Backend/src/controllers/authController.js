@@ -28,7 +28,7 @@ const generateOTP = () => {
 // @access  Public
 const register = async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, password, userType, company } = req.body;
+    const { firstName, lastName, email, phone, password, userType, company, referralCode } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -49,6 +49,21 @@ const register = async (req, res) => {
       userType,
       company
     });
+
+    // Handle referral code if provided
+    if (referralCode) {
+      try {
+        const ReferralService = require('../services/referralService');
+        await ReferralService.createReferral(referralCode, user._id);
+        
+        // Update user to show they were referred
+        user.referredBy = referralCode;
+        await user.save();
+      } catch (referralError) {
+        console.warn('Referral code error:', referralError.message);
+        // Don't fail registration if referral fails
+      }
+    }
 
     // Generate OTP
     const otp = generateOTP();
@@ -74,7 +89,8 @@ const register = async (req, res) => {
           email: user.email,
           userType: user.userType,
           kycStatus: user.kycStatus,
-          isEmailVerified: user.isEmailVerified
+          isEmailVerified: user.isEmailVerified,
+          referralCode: user.referralCode
         },
         accessToken,
         refreshToken

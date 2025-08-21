@@ -28,7 +28,29 @@ const referralSchema = new mongoose.Schema({
     required: true
   },
   
-  // Referral Rewards
+  // New referral program fields
+  hasCompletedAction: {
+    type: Boolean,
+    default: false
+  },
+  
+  completedActions: [{
+    actionType: {
+      type: String,
+      enum: ['loan_application', 'investment', 'kyc_verification', 'first_payment', 'pool_creation'],
+      required: true
+    },
+    completedAt: {
+      type: Date,
+      default: Date.now
+    },
+    transactionAmount: {
+      type: Number,
+      default: 0
+    }
+  }],
+  
+  // Referral Rewards (2% of transactions)
   rewardAmount: {
     type: Number,
     default: 0
@@ -66,7 +88,7 @@ const referralSchema = new mongoose.Schema({
   // What triggered the completion
   completionTrigger: {
     type: String,
-    enum: ['loan_application', 'investment', 'kyc_verification', 'first_payment'],
+    enum: ['loan_application', 'investment', 'kyc_verification', 'first_payment', 'pool_creation'],
     required: false
   },
   
@@ -78,7 +100,7 @@ const referralSchema = new mongoose.Schema({
     endDate: Date,
     rewardPercentage: {
       type: Number,
-      default: 5, // 5% default
+      default: 2, // 2% as per new requirements
       min: 0,
       max: 100
     },
@@ -190,17 +212,40 @@ referralSchema.methods.markAsCompleted = function(trigger, adminId = null) {
   return this.save();
 };
 
+// New method for tracking actions
+referralSchema.methods.trackAction = function(actionType, transactionAmount = 0) {
+  if (!this.hasCompletedAction) {
+    this.hasCompletedAction = true;
+  }
+  
+  this.completedActions.push({
+    actionType,
+    completedAt: new Date(),
+    transactionAmount
+  });
+  
+  return this.save();
+};
+
+// New method for calculating 2% reward
 referralSchema.methods.calculateReward = function(transactionAmount) {
-  if (!this.campaign || !transactionAmount) return 0;
+  if (!transactionAmount) return 0;
   
-  let reward = (transactionAmount * this.campaign.rewardPercentage) / 100;
+  // 2% of transaction amount as per new requirements
+  const reward = (transactionAmount * 2) / 100;
   
-  // Apply maximum reward limit
-  if (this.campaign.maxReward && reward > this.campaign.maxReward) {
-    reward = this.campaign.maxReward;
+  // Apply maximum reward limit if campaign has one
+  if (this.campaign && this.campaign.maxReward && reward > this.campaign.maxReward) {
+    return this.campaign.maxReward;
   }
   
   return Math.round(reward * 100) / 100; // Round to 2 decimal places
+};
+
+// New method to check if referral meets requirements
+referralSchema.methods.meetsRewardRequirements = function() {
+  // This will be checked at the referrer level, not individual referral level
+  return this.hasCompletedAction;
 };
 
 referralSchema.methods.extendExpiration = function(days) {
@@ -230,6 +275,76 @@ referralSchema.statics.findByStatus = function(status) {
 
 referralSchema.statics.findByReferralCode = function(code) {
   return this.find({ referralCode: code });
+};
+
+// New method to check if referrer is eligible for rewards
+referralSchema.statics.checkReferrerEligibility = async function(referrerId) {
+  const referrals = await this.find({ referrer: referrerId });
+  
+  if (referrals.length < 5) {
+    return { eligible: false, reason: 'Need at least 5 referrals' };
+  }
+  
+  const completedActions = referrals.filter(ref => ref.hasCompletedAction).length;
+  
+  if (completedActions < 3) {
+    return { eligible: false, reason: 'Need at least 3 referrals to complete actions' };
+  }
+  
+  return { eligible: true, reason: 'Eligible for rewards' };
+};
+
+// New method to get referrer statistics
+referralSchema.statics.getReferrerStats = async function(referrerId) {
+  const referrals = await this.find({ referrer: referrerId });
+  
+  const stats = {
+    totalReferred: referrals.length,
+    completedActions: referrals.filter(ref => ref.hasCompletedAction).length,
+    pendingReferrals: referrals.filter(ref => ref.status === 'pending').length,
+    completedReferrals: referrals.filter(ref => ref.status === 'completed').length,
+    totalRewards: referrals.reduce((sum, ref) => sum + (ref.rewardAmount || 0), 0),
+    isEligibleForRewards: false
+  };
+  
+  // Check eligibility
+  const eligibility = await this.checkReferrerEligibility(referrerId);
+  stats.isEligibleForRewards = eligibility.eligible;
+  
+  return stats;
+};
+
+// New method to process transaction rewards
+referralSchema.statics.processTransactionReward = async function(referredUserId, transactionAmount, actionType) {
+  const referral = await this.findOne({ referred: referredUserId });
+  
+  if (!referral) return null;
+  
+  // Track the action
+  await referral.trackAction(actionType, transactionAmount);
+  
+  // Check if referrer is eligible for rewards
+  const eligibility = await this.checkReferrerEligibility(referral.referrer);
+  
+  if (eligibility.eligible) {
+    // Calculate and assign reward
+    const reward = referral.calculateReward(transactionAmount);
+    referral.rewardAmount = (referral.rewardAmount || 0) + reward;
+    
+    // Update referrer's wallet
+    const User = mongoose.model('User');
+    await User.findByIdAndUpdate(referral.referrer, {
+      $inc: { 
+        referralEarnings: reward,
+        walletBalance: reward
+      }
+    });
+    
+    await referral.save();
+    return reward;
+  }
+  
+  return 0;
 };
 
 referralSchema.statics.findExpiredReferrals = function() {

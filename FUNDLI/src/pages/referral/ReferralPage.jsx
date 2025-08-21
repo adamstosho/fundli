@@ -17,31 +17,58 @@ const ReferralPage = () => {
           throw new Error('Authentication required');
         }
 
-        // For now, we'll use the user data from localStorage since referral API might not be implemented yet
-        const userData = JSON.parse(localStorage.getItem('user') || '{}');
-        
-        const referralData = {
-          referralCode: userData.referralCode || 'FUNDLI2024',
-          totalReferrals: 0,
-          successfulReferrals: 0,
-          pendingReferrals: 0,
-          totalEarnings: userData.referralEarnings || 0,
-          pendingEarnings: 0,
-          referralHistory: []
-        };
-        
-        setReferralData(referralData);
+        // Try to fetch real referral data from the API
+        try {
+          const response = await fetch('http://localhost:5000/api/referrals/stats', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            setReferralData(result.data);
+          } else {
+            throw new Error('Failed to fetch referral data');
+          }
+        } catch (apiError) {
+          console.warn('Using fallback referral data:', apiError);
+          // Fallback to user data from localStorage
+          const userData = JSON.parse(localStorage.getItem('user') || '{}');
+          
+          const referralData = {
+            referralCode: userData.referralCode || 'FUNDLI2024',
+            totalReferred: 0,
+            completedActions: 0,
+            isEligibleForRewards: false,
+            referralEarnings: userData.referralEarnings || 0,
+            walletBalance: userData.walletBalance || 0,
+            requirements: {
+              totalNeeded: 5,
+              actionsNeeded: 3,
+              currentTotal: 0,
+              currentActions: 0
+            }
+          };
+          
+          setReferralData(referralData);
+        }
       } catch (error) {
         console.error('Error loading referral data:', error);
         // Fallback to basic data
         setReferralData({
           referralCode: 'FUNDLI2024',
-          totalReferrals: 0,
-          successfulReferrals: 0,
-          pendingReferrals: 0,
-          totalEarnings: 0,
-          pendingEarnings: 0,
-          referralHistory: []
+          totalReferred: 0,
+          completedActions: 0,
+          isEligibleForRewards: false,
+          referralEarnings: 0,
+          walletBalance: 0,
+          requirements: {
+            totalNeeded: 5,
+            actionsNeeded: 3,
+            currentTotal: 0,
+            currentActions: 0
+          }
         });
       } finally {
         setIsLoading(false);
@@ -105,7 +132,7 @@ const ReferralPage = () => {
             Your Referral Code
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            Share this code with friends and earn $30 for each successful referral
+            Share this code with friends and earn 2% of their transactions after meeting requirements
           </p>
         </div>
 
@@ -156,7 +183,7 @@ const ReferralPage = () => {
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Referrals</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {referralData.totalReferrals}
+                {referralData.totalReferred}
               </p>
             </div>
             <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center">
@@ -175,7 +202,7 @@ const ReferralPage = () => {
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Successful</p>
               <p className="text-2xl font-bold text-success">
-                {referralData.successfulReferrals}
+                {referralData.completedActions}
               </p>
             </div>
             <div className="w-12 h-12 bg-success-100 dark:bg-success-900 rounded-lg flex items-center justify-center">
@@ -194,7 +221,7 @@ const ReferralPage = () => {
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Earnings</p>
               <p className="text-2xl font-bold text-accent">
-                ${referralData.totalEarnings}
+                ${referralData.referralEarnings}
               </p>
             </div>
             <div className="w-12 h-12 bg-accent-100 dark:bg-accent-900 rounded-lg flex items-center justify-center">
@@ -213,7 +240,7 @@ const ReferralPage = () => {
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending</p>
               <p className="text-2xl font-bold text-warning">
-                ${referralData.pendingEarnings}
+                ${referralData.walletBalance}
               </p>
             </div>
             <div className="w-12 h-12 bg-warning-100 dark:bg-warning-900 rounded-lg flex items-center justify-center">
@@ -222,6 +249,61 @@ const ReferralPage = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Requirements Progress */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.7 }}
+        className="card p-6 mb-8"
+      >
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">
+          Your Progress Towards Rewards
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="text-center">
+            <h4 className="font-medium text-gray-900 dark:text-white mb-2">Referrals (Need 5)</h4>
+            <p className="text-2xl font-bold text-primary-600 dark:text-primary-400 mb-2">
+              {referralData.requirements?.currentTotal || 0} / {referralData.requirements?.totalNeeded || 5}
+            </p>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+              <div
+                className="bg-primary-600 h-3 rounded-full transition-all duration-300"
+                style={{ 
+                  width: `${Math.min(100, ((referralData.requirements?.currentTotal || 0) / (referralData.requirements?.totalNeeded || 5)) * 100)}%` 
+                }}
+              ></div>
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <h4 className="font-medium text-gray-900 dark:text-white mb-2">Actions (Need 3)</h4>
+            <p className="text-2xl font-bold text-success-600 dark:text-success-400 mb-2">
+              {referralData.requirements?.currentActions || 0} / {referralData.requirements?.actionsNeeded || 3}
+            </p>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+              <div
+                className="bg-success-600 h-3 rounded-full transition-all duration-300"
+                style={{ 
+                  width: `${Math.min(100, ((referralData.requirements?.currentActions || 0) / (referralData.requirements?.actionsNeeded || 3)) * 100)}%` 
+                }}
+              ></div>
+            </div>
+          </div>
+        </div>
+        
+        {referralData.isEligibleForRewards && (
+          <div className="mt-6 p-4 bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 rounded-lg text-center">
+            <CheckCircle className="h-6 w-6 text-success-600 mx-auto mb-2" />
+            <p className="text-success-800 dark:text-success-200 font-medium">
+              🎉 Congratulations! You're eligible for rewards!
+            </p>
+            <p className="text-success-700 dark:text-success-300 text-sm mt-1">
+              You'll earn 2% of every transaction made by your referred users.
+            </p>
+          </div>
+        )}
+      </motion.div>
 
       {/* How It Works */}
       <motion.div
@@ -296,41 +378,14 @@ const ReferralPage = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-              {referralData.referralHistory.map((referral, index) => (
-                <motion.tr
-                  key={referral.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 * index }}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        {referral.name}
-                      </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {referral.email}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                    {new Date(referral.date).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`badge ${
-                      referral.status === 'completed' 
-                        ? 'badge-success' 
-                        : 'badge-warning'
-                    }`}>
-                      {referral.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                    ${referral.earnings}
-                  </td>
-                </motion.tr>
-              ))}
+              {/* Referral history data is not available in the current API response,
+                  so we'll display a placeholder or remove this section if not needed.
+                  For now, we'll keep it as is, but it will show an empty table. */}
+              <tr>
+                <td colSpan="4" className="px-6 py-4 whitespace-nowrap text-center text-gray-500 dark:text-gray-400">
+                  Referral history data not available in this version.
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -347,10 +402,11 @@ const ReferralPage = () => {
           Referral Program Terms
         </h3>
         <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-          <li>• Referral rewards are paid after the referred user completes KYC verification</li>
-          <li>• Each successful referral earns $30 in platform credits</li>
+          <li>• You must refer at least 5 new users to be eligible for rewards</li>
+          <li>• At least 3 of your referred users must complete platform actions (KYC, loans, investments, etc.)</li>
+          <li>• Once eligible, you earn 2% of every transaction made by your referred users</li>
           <li>• Referred users must be new to the platform</li>
-          <li>• Rewards are subject to platform terms and conditions</li>
+          <li>• Rewards are paid directly to your wallet balance</li>
           <li>• Fundli reserves the right to modify or terminate the referral program</li>
         </ul>
       </motion.div>

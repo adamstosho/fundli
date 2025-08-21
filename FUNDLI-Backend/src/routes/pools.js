@@ -36,6 +36,14 @@ router.post('/', protect, async (req, res) => {
 
     console.log('Pool created successfully:', pool);
 
+    // Track referral action for pool creation
+    try {
+      const ReferralService = require('../services/referralService');
+      await ReferralService.handlePlatformAction(req.user.id, 'pool_creation');
+    } catch (referralError) {
+      console.warn('Referral tracking error for pool creation:', referralError.message);
+    }
+
     res.status(201).json({
       status: 'success',
       message: 'Lending pool created successfully',

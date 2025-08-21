@@ -150,6 +150,23 @@ const userSchema = new mongoose.Schema({
     default: 0
   },
   
+  // New referral program fields
+  referralStats: {
+    totalReferred: {
+      type: Number,
+      default: 0
+    },
+    completedActions: {
+      type: Number,
+      default: 0
+    },
+    isEligibleForRewards: {
+      type: Boolean,
+      default: false
+    },
+    rewardEligibilityDate: Date
+  },
+  
   // Account Status
   isActive: {
     type: Boolean,
