@@ -525,44 +525,27 @@ const logout = async (req, res) => {
   }
 };
 
-// @desc    Get current user
-// @route   GET /api/auth/me
-// @access  Private
+// Get current user profile
 const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select('-password');
     
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
+
     res.status(200).json({
       status: 'success',
-      data: {
-        user: {
-          id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          phone: user.phone,
-          userType: user.userType,
-          kycStatus: user.kycStatus,
-          isEmailVerified: user.isEmailVerified,
-          isPhoneVerified: user.isPhoneVerified,
-          profilePicture: user.profilePicture,
-          bio: user.bio,
-          creditScore: user.creditScore,
-          walletBalance: user.walletBalance,
-          referralCode: user.referralCode,
-          referralEarnings: user.referralEarnings,
-          preferences: user.preferences,
-          createdAt: user.createdAt
-        }
-      }
+      data: user
     });
-
   } catch (error) {
-    console.error('Get me error:', error);
+    console.error('Error fetching user profile:', error);
     res.status(500).json({
       status: 'error',
-      message: 'Failed to get user information',
-      error: error.message
+      message: 'Failed to fetch user profile'
     });
   }
 };

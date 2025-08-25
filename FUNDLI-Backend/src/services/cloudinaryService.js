@@ -9,6 +9,12 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+// Debug Cloudinary configuration
+console.log('Cloudinary Configuration:');
+console.log('Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME ? 'Set' : 'Not Set');
+console.log('API Key:', process.env.CLOUDINARY_API_KEY ? 'Set' : 'Not Set');
+console.log('API Secret:', process.env.CLOUDINARY_API_SECRET ? 'Set' : 'Not Set');
+
 class CloudinaryService {
   constructor() {
     this.uploadPresets = {
@@ -183,6 +189,114 @@ class CloudinaryService {
   }
 
   /**
+   * Test Cloudinary connectivity
+   * @returns {Promise<Object>} Test result
+   */
+  async testConnection() {
+    try {
+      console.log('Testing Cloudinary connection...');
+      const result = await cloudinary.api.ping();
+      console.log('Cloudinary connection test result:', result);
+      return {
+        success: true,
+        message: 'Cloudinary connection successful',
+        result
+      };
+    } catch (error) {
+      console.error('Cloudinary connection test failed:', error);
+      return {
+        success: false,
+        message: 'Cloudinary connection failed',
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Upload KYC document
+   * @param {string} base64Data - Base64 encoded image data
+   * @param {string} documentType - Type of document (idFront, idBack, selfie, proofOfAddress)
+   * @returns {Promise<Object>} Upload result
+   */
+  async uploadKYCDocument(base64Data, documentType) {
+    try {
+      // Validate input
+      if (!base64Data) {
+        throw new Error('No base64 data provided');
+      }
+      
+      if (typeof base64Data !== 'string') {
+        throw new Error('Base64 data must be a string');
+      }
+      
+      // Check if Cloudinary is properly configured
+      if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+        throw new Error('Cloudinary configuration incomplete. Please check environment variables.');
+      }
+      
+      // Ensure base64 data has proper format
+      let formattedData = base64Data;
+      if (!base64Data.startsWith('data:image/')) {
+        // If it's just base64 without data URL prefix, add it
+        formattedData = `data:image/jpeg;base64,${base64Data}`;
+      }
+      
+      console.log(`Uploading KYC document ${documentType} to Cloudinary...`);
+      console.log(`Data length: ${formattedData.length}`);
+      console.log(`Data starts with: ${formattedData.substring(0, 50)}...`);
+      
+      const result = await cloudinary.uploader.upload(formattedData, {
+        folder: `fundli/kyc/${documentType}`,
+        resource_type: 'image',
+        transformation: [
+          { quality: 'auto:good' },
+          { fetch_format: 'auto' }
+        ]
+      });
+      
+      console.log(`KYC document ${documentType} uploaded successfully:`, result.secure_url);
+      return result;
+      
+    } catch (error) {
+      console.error(`KYC document upload failed for ${documentType}:`, error);
+      
+      // Provide more specific error messages
+      if (error.message.includes('Invalid api_key')) {
+        throw new Error('Invalid Cloudinary API key');
+      } else if (error.message.includes('Invalid signature')) {
+        throw new Error('Invalid Cloudinary API secret');
+      } else if (error.message.includes('Invalid cloud_name')) {
+        throw new Error('Invalid Cloudinary cloud name');
+      } else if (error.message.includes('File is empty')) {
+        throw new Error('Uploaded file appears to be empty or corrupted');
+      } else {
+        throw new Error(`KYC document upload failed: ${error.message}`);
+      }
+    }
+  }
+
+  /**
+   * Upload profile picture
+   * @param {string} base64Data - Base64 encoded image data
+   * @returns {Promise<Object>} Upload result
+   */
+  async uploadProfilePicture(base64Data) {
+    try {
+      return await cloudinary.uploader.upload(base64Data, {
+        folder: 'fundli/profile',
+        resource_type: 'image',
+        transformation: [
+          { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+          { quality: 'auto:good' },
+          { fetch_format: 'auto' }
+        ]
+      });
+    } catch (error) {
+      throw new Error(`Profile picture upload failed: ${error.message}`);
+    }
+  }
+
+  /**
    * Upload loan collateral documents
    * @param {Array} collateralFiles - Array of collateral file paths
    * @param {Array} supportingDocs - Array of supporting document paths
@@ -225,27 +339,6 @@ class CloudinaryService {
 
     } catch (error) {
       throw new Error(`Loan collateral upload failed: ${error.message}`);
-    }
-  }
-
-  /**
-   * Upload profile picture
-   * @param {string} base64Data - Base64 encoded image data
-   * @returns {Promise<Object>} Upload result
-   */
-  async uploadProfilePicture(base64Data) {
-    try {
-      return await cloudinary.uploader.upload(base64Data, {
-        folder: 'fundli/profile',
-        resource_type: 'image',
-        transformation: [
-          { width: 400, height: 400, crop: 'fill', gravity: 'face' },
-          { quality: 'auto:good' },
-          { fetch_format: 'auto' }
-        ]
-      });
-    } catch (error) {
-      throw new Error(`Profile picture upload failed: ${error.message}`);
     }
   }
 

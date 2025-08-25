@@ -54,14 +54,14 @@ const BorrowerDashboard = () => {
           console.log('Fetched loans data:', loansData);
           
           // Process loans data
-          const activeLoans = loansData.loans?.filter(loan => loan.status === 'active') || [];
-          const pendingLoans = loansData.loans?.filter(loan => loan.status === 'pending') || [];
+          const activeLoans = loansData.data?.loans?.filter(loan => loan.status === 'active') || [];
+          const pendingLoans = loansData.data?.loans?.filter(loan => loan.status === 'pending') || [];
           
-          setRecentLoans(loansData.loans || []);
+          setRecentLoans(loansData.data?.loans || []);
           
           // Calculate stats from real data
-          const totalBorrowed = loansData.loans?.reduce((sum, loan) => sum + (loan.amount || 0), 0) || 0;
-          const totalRepaid = loansData.loans?.reduce((sum, loan) => sum + (loan.repaidAmount || 0), 0) || 0;
+          const totalBorrowed = loansData.data?.loans?.reduce((sum, loan) => sum + (loan.loanAmount || 0), 0) || 0;
+          const totalRepaid = loansData.data?.loans?.reduce((sum, loan) => sum + (loan.amountPaid || 0), 0) || 0;
           
           setStats({
             totalBorrowed,
@@ -75,7 +75,7 @@ const BorrowerDashboard = () => {
             .filter(loan => loan.nextPaymentDate)
             .map(loan => ({
               id: loan._id,
-              amount: loan.monthlyPayment || loan.amount / loan.term,
+              amount: loan.monthlyPayment || loan.loanAmount / loan.duration,
               dueDate: loan.nextPaymentDate,
               loanPurpose: loan.purpose
             }));
@@ -171,7 +171,7 @@ const BorrowerDashboard = () => {
           </p>
         </div>
         
-        {kycStatus === 'pending' && (
+        {kycStatus === 'pending' && user?.userType !== 'admin' && (
           <div className="mt-4 lg:mt-0">
             <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
               <div className="flex items-center space-x-2">
@@ -353,7 +353,7 @@ const BorrowerDashboard = () => {
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
                       <h4 className="font-medium text-gray-900 dark:text-white">
-                        ${loan.amount.toLocaleString()}
+                        ${loan.loanAmount?.toLocaleString() || 0}
                       </h4>
                       {getStatusBadge(loan.status)}
                     </div>
@@ -368,7 +368,7 @@ const BorrowerDashboard = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      ${(loan.amount - (loan.repaidAmount || 0)).toLocaleString()}
+                      ${((loan.loanAmount || 0) - (loan.amountPaid || 0)).toLocaleString()}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-500">
                       Remaining
@@ -453,7 +453,7 @@ const BorrowerDashboard = () => {
       </div>
 
       {/* KYC Status */}
-      {kycStatus === 'pending' && (
+      {kycStatus === 'pending' && user?.userType !== 'admin' && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

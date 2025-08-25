@@ -1,10 +1,65 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, CheckCircle, XCircle, AlertCircle, DollarSign, Calendar, FileText, Eye } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, AlertCircle, DollarSign, Calendar, FileText, Eye, Shield } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const LoanStatus = () => {
+  const { user } = useAuth();
   const [loans, setLoans] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Check KYC status
+  if ((!user?.kycStatus || user.kycStatus !== 'approved') && user?.userType !== 'admin') {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            KYC Verification Required
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            You must complete KYC verification before viewing loan status
+          </p>
+        </div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card p-8 text-center"
+        >
+          <div className="w-16 h-16 bg-warning-100 dark:bg-warning-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Shield className="h-8 w-8 text-warning-600 dark:text-warning-400" />
+          </div>
+          
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            KYC Verification Required
+          </h2>
+          
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            {user?.kycStatus === 'pending' 
+              ? 'Your KYC verification is currently under review. Please wait for admin approval.'
+              : 'You need to complete KYC verification to access this feature.'
+            }
+          </p>
+          
+          {user?.kycStatus !== 'pending' && (
+            <button
+              onClick={() => window.location.href = '/kyc-upload'}
+              className="btn-primary"
+            >
+              Complete KYC Verification
+            </button>
+          )}
+          
+          <button
+            onClick={() => window.location.href = `/dashboard/${user?.userType || 'borrower'}`}
+            className="btn-outline ml-4"
+          >
+            Back to Dashboard
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     const loadLoans = async () => {

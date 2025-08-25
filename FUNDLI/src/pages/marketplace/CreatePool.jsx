@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { DollarSign, Calendar, TrendingUp, Shield, CheckCircle, AlertCircle, ArrowRight, Calculator } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const CreatePool = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     poolName: '',
     poolSize: '',
@@ -19,6 +21,39 @@ const CreatePool = () => {
   const [success, setSuccess] = useState(false);
 
   const navigate = useNavigate();
+
+  // Check if user needs to complete KYC
+  if (user?.kycStatus !== 'approved' && user?.userType !== 'admin') {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 text-center">
+          <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Shield className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            KYC Verification Required
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            You need to complete your KYC verification before you can create lending pools.
+          </p>
+          <div className="space-y-3">
+            <button
+              onClick={() => navigate('/kyc-upload')}
+              className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors"
+            >
+              Complete KYC Verification
+            </button>
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="w-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            >
+              Back to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;

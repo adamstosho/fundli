@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-const ProtectedRoute = ({ children, userType = null }) => {
+const ProtectedRoute = ({ children, userType: requiredUserType = null }) => {
   const { isAuthenticated, userType: currentUserType, isLoading } = useAuth();
   const location = useLocation();
 
@@ -19,7 +19,7 @@ const ProtectedRoute = ({ children, userType = null }) => {
   }
 
   // If specific user type is required, check if user has permission
-  if (userType && currentUserType !== userType) {
+  if (requiredUserType && currentUserType !== requiredUserType) {
     // Redirect to appropriate dashboard based on user type
     if (currentUserType === 'borrower') {
       return <Navigate to="/dashboard/borrower" replace />;

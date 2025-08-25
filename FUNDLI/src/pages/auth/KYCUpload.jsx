@@ -33,13 +33,15 @@ const KYCUpload = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [uploadProgress, setUploadProgress] = useState({});
+  const [isUserDataLoaded, setIsUserDataLoaded] = useState(false);
   
   const fileInputRefs = useRef({});
   const { submitKYC, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
-  const { email, userType } = location.state || {};
+  // Get userType from authenticated user, with fallback to location.state
+  const userType = user?.userType || location.state?.userType;
 
   // Check if user is authenticated
   useEffect(() => {
@@ -54,13 +56,46 @@ const KYCUpload = () => {
     } else {
       console.log('User is authenticated:', user);
       console.log('User KYC status:', user?.kycStatus);
+      console.log('User type from user object:', user?.userType);
+      console.log('Location state:', location.state);
+      console.log('Final userType value:', userType);
     }
-  }, [isAuthenticated, navigate, user]);
+  }, [isAuthenticated, navigate, user, userType]);
+
+  // Wait for user data to be properly loaded
+  useEffect(() => {
+    if (isAuthenticated && user && user.userType) {
+      console.log('User data fully loaded:', user);
+      console.log('Ready for KYC submission');
+      setIsUserDataLoaded(true);
+    } else {
+      setIsUserDataLoaded(false);
+    }
+  }, [isAuthenticated, user]);
 
   // If not authenticated, don't render the form
   if (!isAuthenticated) {
     return null;
   }
+
+  // Debug section to help troubleshoot navigation
+  const debugNavigation = () => {
+    console.log('=== DEBUG NAVIGATION ===');
+    console.log('User object:', user);
+    console.log('User type from user object:', user?.userType);
+    console.log('Location state:', location.state);
+    console.log('Final userType value:', userType);
+    console.log('Is authenticated:', isAuthenticated);
+    
+    if (userType) {
+      const dashboardPath = `/dashboard/${userType}`;
+      console.log('Would navigate to:', dashboardPath);
+      // Test navigation
+      navigate(dashboardPath, { replace: true });
+    } else {
+      console.error('No userType found!');
+    }
+  };
 
   const idTypes = [
     { value: 'passport', label: 'Passport' },
@@ -244,15 +279,25 @@ const KYCUpload = () => {
       if (result.success) {
         setSuccess(result.message);
         console.log('KYC submitted successfully, navigating to dashboard for userType:', userType);
+        console.log('User object:', user);
+        console.log('Location state:', location.state);
         
         // Navigate to the appropriate dashboard based on userType
-        const dashboardPath = `/dashboard/${userType}`;
-        console.log('Navigating to dashboard:', dashboardPath);
-        
-        // Add a small delay to show success message before navigation
-        setTimeout(() => {
-          navigate(dashboardPath, { replace: true });
-        }, 2000);
+        if (userType) {
+          const dashboardPath = `/dashboard/${userType}`;
+          console.log('Navigating to dashboard:', dashboardPath);
+          
+          // Add a delay to show success message and ensure user data is updated
+          setTimeout(() => {
+            console.log('About to navigate to:', dashboardPath);
+            console.log('Current user object:', user);
+            console.log('Current userType:', userType);
+            navigate(dashboardPath, { replace: true });
+          }, 3000); // Increased delay to 3 seconds
+        } else {
+          console.error('No userType found, cannot navigate to dashboard');
+          setError('User type not found. Please contact support.');
+        }
       } else {
         console.log('KYC submission failed:', result.message);
         setError(result.message || 'Failed to submit KYC. Please try again.');
@@ -268,7 +313,7 @@ const KYCUpload = () => {
 
   const isFormValid = formData.idNumber && formData.dateOfBirth && formData.address && 
                      formData.city && formData.country && formData.postalCode &&
-                     documents.idFront && documents.selfie;
+                     documents.idFront && documents.selfie && isUserDataLoaded;
 
   const renderFileUpload = (field, label, description, required = false) => (
     <div className="space-y-2">
@@ -575,6 +620,14 @@ const KYCUpload = () => {
 
             {/* Submit Button */}
             <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
+              {!isUserDataLoaded && (
+                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p className="text-sm text-blue-700 dark:text-blue-300 text-center">
+                    Loading user data... Please wait before submitting KYC.
+                  </p>
+                </div>
+              )}
+              
               <button
                 type="submit"
                 disabled={!isFormValid || isLoading}
@@ -582,12 +635,23 @@ const KYCUpload = () => {
               >
                 {isLoading ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : !isUserDataLoaded ? (
+                  'Loading user data...'
                 ) : (
                   <>
                     Submit KYC Verification
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </>
                 )}
+              </button>
+              
+              {/* Debug Button - Remove after fixing */}
+              <button
+                type="button"
+                onClick={debugNavigation}
+                className="w-full mt-3 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+              >
+                🐛 Debug Navigation (Click to test)
               </button>
               
               <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-3">

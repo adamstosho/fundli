@@ -11,7 +11,8 @@ import {
   CreditCard,
   ArrowRight,
   PieChart,
-  Target
+  Target,
+  Shield
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -488,6 +489,38 @@ const LenderDashboard = () => {
           </div>
         )}
       </motion.div>
+
+      {/* KYC Status */}
+      {user?.kycStatus === 'pending' && user?.userType !== 'admin' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
+          className="card p-6 bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center">
+                <Shield className="h-6 w-6 text-primary-600 dark:text-primary-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Complete Your KYC Verification
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Verify your identity to unlock all platform features and create lending pools
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/kyc-upload"
+              className="btn-primary"
+            >
+              Complete KYC
+            </Link>
+          </div>
+        </motion.div>
+      )}
 
       {/* Performance Chart Placeholder */}
       <motion.div

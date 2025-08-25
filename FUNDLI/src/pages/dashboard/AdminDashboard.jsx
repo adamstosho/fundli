@@ -27,7 +27,7 @@ const AdminDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading data
+    // Load real admin dashboard data
     const loadDashboardData = async () => {
       try {
         setIsLoading(true);
@@ -37,18 +37,68 @@ const AdminDashboard = () => {
           throw new Error('Authentication required');
         }
 
-        // For now, we'll show empty data since admin API might not be implemented yet
-        // This can be updated when the admin endpoints are ready
-        setStats({
-          totalUsers: 0,
-          pendingKYC: 0,
-          pendingLoans: 0,
-          totalTransactions: 0
+        // Fetch admin dashboard statistics
+        const response = await fetch('http://localhost:5000/api/admin/dashboard/stats', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         });
-        
-        setRecentActivities([]);
+
+        if (response.ok) {
+          const result = await response.json();
+          const data = result.data;
+          
+          // Update stats with real data
+          setStats({
+            totalUsers: data.users.total,
+            pendingKYC: data.users.pendingKYC,
+            pendingLoans: data.loans.pending,
+            totalTransactions: data.loans.total + data.pools.total
+          });
+          
+          // Process recent activities
+          const activities = [];
+          
+          // Add recent users
+          data.recentActivities.users.forEach(user => {
+            activities.push({
+              type: 'user_registered',
+              message: `${user.firstName} ${user.lastName} registered as ${user.userType}`,
+              timestamp: user.createdAt,
+              userType: user.userType
+            });
+          });
+          
+          // Add recent KYC submissions
+          data.recentActivities.kyc.forEach(kyc => {
+            activities.push({
+              type: `kyc_${kyc.kycStatus}`,
+              message: `${kyc.firstName} ${kyc.lastName} KYC status: ${kyc.kycStatus}`,
+              timestamp: kyc.createdAt,
+              userType: 'kyc'
+            });
+          });
+          
+          // Add recent loans
+          data.recentActivities.loans.forEach(loan => {
+            activities.push({
+              type: `loan_${loan.status}`,
+              message: `Loan application for $${loan.loanAmount} - ${loan.purpose} (${loan.status})`,
+              timestamp: loan.createdAt,
+              userType: 'loan'
+            });
+          });
+          
+          // Sort activities by timestamp
+          activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+          setRecentActivities(activities.slice(0, 10));
+          
+        } else {
+          throw new Error('Failed to fetch admin dashboard data');
+        }
       } catch (error) {
         console.error('Error loading admin dashboard data:', error);
+        // Set default values if API fails
         setStats({
           totalUsers: 0,
           pendingKYC: 0,
@@ -269,10 +319,10 @@ const AdminDashboard = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {activity.action}
+                  {activity.message}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  User: {activity.user}
+                  User Type: {activity.userType}
                 </p>
               </div>
               <div className="flex-shrink-0 text-right">

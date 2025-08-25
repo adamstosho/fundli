@@ -1,36 +1,58 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Search, Filter, Eye, CheckCircle, XCircle, Clock, DollarSign, User } from 'lucide-react';
+import { FileText, Search, Filter, Eye, CheckCircle, XCircle, Clock, DollarSign, User, AlertCircle } from 'lucide-react';
 
 const LoanManagement = () => {
   const [loans, setLoans] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loansPerPage, setLoansPerPage] = useState(10);
+  const [pagination, setPagination] = useState({
+    totalPages: 0,
+    totalItems: 0,
+    currentPage: 1,
+    itemsPerPage: 10,
+  });
+  const [isProcessing, setIsProcessing] = useState(null);
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     const loadLoans = async () => {
       try {
         setIsLoading(true);
+        setError('');
         
         const token = localStorage.getItem('accessToken');
         if (!token) {
           throw new Error('Authentication required');
         }
 
-        // For now, we'll show an empty state since admin loan API might not be implemented yet
-        // This can be updated when the admin loan endpoints are ready
-        setLoans([]);
+        const response = await fetch(`http://localhost:5000/api/admin/loans?page=${currentPage}&limit=${loansPerPage}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setLoans(result.data.loans);
+          setPagination(result.data.pagination);
+        } else {
+          throw new Error('Failed to fetch loans');
+        }
       } catch (error) {
         console.error('Error loading loans:', error);
-        setLoans([]);
+        setError('Failed to load loans');
       } finally {
         setIsLoading(false);
       }
     };
 
     loadLoans();
-  }, []);
+  }, [currentPage, loansPerPage]);
 
   const filteredLoans = loans.filter(loan => {
     const matchesSearch = loan.borrower.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -66,14 +88,53 @@ const LoanManagement = () => {
     }
   };
 
-  const handleLoanApproval = (id, action) => {
-    setLoans(prev => 
-      prev.map(loan => 
-        loan.id === id 
-          ? { ...loan, status: action === 'approve' ? 'approved' : 'rejected' }
-          : loan
-      )
-    );
+  const handleLoanApproval = async (loanId, action, reason = '') => {
+    try {
+      setIsProcessing(loanId);
+      
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const endpoint = action === 'approve' 
+        ? `http://localhost:5000/api/admin/loans/${loanId}/approve`
+        : `http://localhost:5000/api/admin/loans/${loanId}/reject`;
+
+      const body = action === 'approve' 
+        ? JSON.stringify({ notes: reason || 'Approved by Admin' })
+        : JSON.stringify({ reason: reason || 'Rejected by Admin' });
+
+      const response = await fetch(endpoint, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setSuccess(`Loan ${action}d successfully`);
+        // Update the loan status in the local state
+        setLoans(prev => prev.map(loan => 
+          loan._id === loanId 
+            ? { ...loan, status: action === 'approve' ? 'approved' : 'rejected' }
+            : loan
+        ));
+        setTimeout(() => setSuccess(''), 3000);
+      } else {
+        throw new Error(result.message || `Failed to ${action} loan`);
+      }
+    } catch (error) {
+      console.error(`Error ${action}ing loan:`, error);
+      setError(`Failed to ${action} loan: ${error.message}`);
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setIsProcessing(null);
+    }
   };
 
   if (isLoading) {
@@ -95,6 +156,29 @@ const LoanManagement = () => {
         </p>
       </div>
 
+      {/* Success/Error Messages */}
+      {success && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mb-6 bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg flex items-center"
+        >
+          <CheckCircle className="h-5 w-5 mr-2" />
+          {success}
+        </motion.div>
+      )}
+
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mb-6 bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg flex items-center"
+        >
+          <AlertCircle className="h-5 w-5 mr-2" />
+          {error}
+        </motion.div>
+      )}
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <motion.div
@@ -107,7 +191,7 @@ const LoanManagement = () => {
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Loans</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {loans.length}
+                {pagination.totalItems}
               </p>
             </div>
             <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center">
@@ -233,16 +317,19 @@ const LoanManagement = () => {
             <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Borrower
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Loan Details
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
+                  Borrower
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Risk Score
+                  Duration
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Interest Rate
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Submitted
@@ -253,84 +340,127 @@ const LoanManagement = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredLoans.map((loan, index) => (
-                <motion.tr
-                  key={loan.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 * index }}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">
-                          {loan.borrower.charAt(0)}
-                        </span>
-                      </div>
-                      <div className="ml-4">
+              {loans.length > 0 ? (
+                loans.map((loan) => (
+                  <motion.tr
+                    key={loan._id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {loan.borrower}
+                          ${loan.loanAmount?.toLocaleString() || 0}
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {loan.email}
+                          {loan.purpose}
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        ${loan.amount.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          {loan.borrower?.firstName} {loan.borrower?.lastName}
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {loan.borrower?.email}
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {loan.purpose}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                      {loan.duration} months
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                      {loan.interestRate}%
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`badge ${
+                        loan.status === 'approved' 
+                          ? 'badge-success' 
+                          : loan.status === 'rejected'
+                          ? 'badge-error'
+                          : loan.status === 'pending'
+                          ? 'badge-warning'
+                          : 'badge-info'
+                      }`}>
+                        {loan.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                      {formatDate(loan.createdAt)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end space-x-2">
+                        <button
+                          onClick={() => handleLoanApproval(loan._id, 'approve')}
+                          className="text-success-600 dark:text-success-400 hover:text-success-700 dark:hover:text-success-300"
+                          disabled={isProcessing === loan._id}
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleLoanApproval(loan._id, 'reject')}
+                          className="text-error-600 dark:text-error-400 hover:text-error-700 dark:hover:text-error-300"
+                          disabled={isProcessing === loan._id}
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </button>
                       </div>
-                    </div>
+                    </td>
+                  </motion.tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                    {isLoading ? 'Loading...' : 'No loans found'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`badge ${getStatusColor(loan.status)}`}>
-                      {loan.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`badge ${getRiskScoreColor(loan.riskScore)}`}>
-                      {loan.riskScore}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                    {new Date(loan.submittedDate).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div className="flex items-center space-x-2">
-                      <button className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      
-                      {loan.status === 'pending' && (
-                        <>
-                          <button
-                            onClick={() => handleLoanApproval(loan.id, 'approve')}
-                            className="text-success-600 dark:text-success-400 hover:text-success-700 dark:hover:text-success-300"
-                          >
-                            <CheckCircle className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => handleLoanApproval(loan.id, 'reject')}
-                            className="text-error-600 dark:text-error-400 hover:text-error-700 dark:hover:text-error-300"
-                          >
-                            <XCircle className="h-4 w-4" />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </motion.tr>
-              ))}
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </motion.div>
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
+          className="card p-6 mt-6"
+        >
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-700 dark:text-gray-300">
+              Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to{' '}
+              {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of{' '}
+              {pagination.totalItems} results
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={pagination.currentPage === 1}
+                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              
+              <span className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md">
+                Page {pagination.currentPage} of {pagination.totalPages}
+              </span>
+              
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(pagination.totalPages, prev + 1))}
+                disabled={pagination.currentPage === pagination.totalPages}
+                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 };

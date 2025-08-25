@@ -19,6 +19,114 @@ const requireAdmin = async (req, res, next) => {
   }
 };
 
+// @route   POST /api/admin/kyc/test-data
+// @desc    Create test KYC data for development/testing
+// @access  Private (Admin only)
+router.post('/kyc/test-data', protect, requireAdmin, async (req, res) => {
+  try {
+    // Find existing users and update their KYC status to pending
+    const users = await User.find({ userType: { $ne: 'admin' } }).limit(5);
+    
+    if (users.length === 0) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'No users found to create test KYC data'
+      });
+    }
+
+    const updatedUsers = [];
+    
+    for (const user of users) {
+      // Set KYC status to pending and add some test documents
+      user.kycStatus = 'pending';
+      user.kycDocuments = {
+        idType: 'passport',
+        idNumber: 'TEST' + Math.random().toString(36).substr(2, 9),
+        dateOfBirth: new Date('1990-01-01'),
+        address: {
+          street: '123 Test Street',
+          city: 'Test City',
+          state: 'Test State',
+          country: 'US',
+          postalCode: '12345'
+        },
+        documents: {
+          idFront: {
+            url: 'https://via.placeholder.com/300x200?text=ID+Front',
+            publicId: 'test_id_front',
+            uploadedAt: new Date()
+          },
+          idBack: {
+            url: 'https://via.placeholder.com/300x200?text=ID+Back',
+            publicId: 'test_id_back',
+            uploadedAt: new Date()
+          },
+          selfie: {
+            url: 'https://via.placeholder.com/300x300?text=Selfie',
+            publicId: 'test_selfie',
+            uploadedAt: new Date()
+          },
+          proofOfAddress: {
+            url: 'https://via.placeholder.com/300x200?text=Address+Proof',
+            publicId: 'test_address_proof',
+            uploadedAt: new Date()
+          }
+        },
+        submittedAt: new Date()
+      };
+      
+      await user.save();
+      updatedUsers.push({
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        kycStatus: user.kycStatus
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: `Created test KYC data for ${updatedUsers.length} users`,
+      data: updatedUsers
+    });
+  } catch (error) {
+    console.error('Error creating test KYC data:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to create test KYC data',
+      error: error.message
+    });
+  }
+});
+
+// @route   GET /api/admin/kyc/stats
+// @desc    Get comprehensive KYC statistics
+// @access  Private (Admin only)
+router.get('/kyc/stats', protect, requireAdmin, async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const pendingKYC = await User.countDocuments({ kycStatus: 'pending' });
+    const approvedKYC = await User.countDocuments({ kycStatus: 'approved' });
+    const rejectedKYC = await User.countDocuments({ kycStatus: 'rejected' });
+    
+    res.status(200).json({
+      status: 'success',
+      data: {
+        total: totalUsers,
+        pending: pendingKYC,
+        approved: approvedKYC,
+        rejected: rejectedKYC
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching KYC stats:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch KYC statistics'
+    });
+  }
+});
+
 // @route   GET /api/admin/kyc/pending
 // @desc    Get all pending KYC submissions
 // @access  Private (Admin only)
@@ -26,7 +134,7 @@ router.get('/kyc/pending', protect, requireAdmin, async (req, res) => {
   try {
     const pendingKYC = await User.find({ 
       kycStatus: 'pending' 
-    }).select('firstName lastName email kycDocuments createdAt');
+    }).select('firstName lastName email kycDocuments createdAt userType phone kycStatus');
 
     res.status(200).json({
       status: 'success',
@@ -37,6 +145,79 @@ router.get('/kyc/pending', protect, requireAdmin, async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to fetch pending KYC'
+    });
+  }
+});
+
+// @route   GET /api/admin/kyc/approved
+// @desc    Get all approved KYC submissions
+// @access  Private (Admin only)
+router.get('/kyc/approved', protect, requireAdmin, async (req, res) => {
+  try {
+    const approvedKYC = await User.find({ 
+      kycStatus: 'approved' 
+    }).select('firstName lastName email kycDocuments createdAt userType updatedAt phone kycStatus');
+
+    res.status(200).json({
+      status: 'success',
+      data: approvedKYC
+    });
+  } catch (error) {
+    console.error('Error fetching approved KYC:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch approved KYC'
+    });
+  }
+});
+
+// @route   GET /api/admin/kyc/all
+// @desc    Get all KYC submissions (pending, approved, rejected)
+// @access  Private (Admin only)
+router.get('/kyc/all', protect, requireAdmin, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, status, search } = req.query;
+    const skip = (page - 1) * limit;
+
+    let query = {};
+    
+    // Filter by status if provided
+    if (status && status !== 'all') {
+      query.kycStatus = status;
+    }
+    
+    // Search by name or email if provided
+    if (search) {
+      query.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const allKYC = await User.find(query)
+      .select('firstName lastName email kycDocuments createdAt userType kycStatus updatedAt phone')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await User.countDocuments(query);
+
+    res.status(200).json({
+      status: 'success',
+      data: allKYC,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        itemsPerPage: parseInt(limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching all KYC:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch KYC applications'
     });
   }
 });
@@ -151,6 +332,36 @@ router.put('/kyc/:userId/reject', protect, requireAdmin, async (req, res) => {
   }
 });
 
+// @route   GET /api/admin/kyc/:userId/details
+// @desc    Get detailed KYC information for a specific user
+// @access  Private (Admin only)
+router.get('/kyc/:userId/details', protect, requireAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId)
+      .select('firstName lastName email kycDocuments createdAt userType kycStatus updatedAt phone');
+
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: user
+    });
+  } catch (error) {
+    console.error('Error fetching KYC details:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch KYC details'
+    });
+  }
+});
+
 // @route   GET /api/admin/referrals/stats
 // @desc    Get overall referral statistics
 // @access  Private (Admin only)
@@ -179,6 +390,401 @@ router.get('/referrals/stats', protect, requireAdmin, async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to fetch referral statistics'
+    });
+  }
+});
+
+// @route   GET /api/admin/dashboard/stats
+// @desc    Get comprehensive admin dashboard statistics
+// @access  Private (Admin only)
+router.get('/dashboard/stats', protect, requireAdmin, async (req, res) => {
+  try {
+    // Get user statistics
+    const totalUsers = await User.countDocuments();
+    const pendingKYC = await User.countDocuments({ kycStatus: 'pending' });
+    const approvedKYC = await User.countDocuments({ kycStatus: 'approved' });
+    const rejectedKYC = await User.countDocuments({ kycStatus: 'rejected' });
+    
+    // Get user type breakdown
+    const borrowers = await User.countDocuments({ userType: 'borrower' });
+    const lenders = await User.countDocuments({ userType: 'lender' });
+    const admins = await User.countDocuments({ userType: 'admin' });
+
+    // Get loan statistics
+    const Loan = require('../models/Loan');
+    const totalLoans = await Loan.countDocuments();
+    const pendingLoans = await Loan.countDocuments({ status: 'pending' });
+    const approvedLoans = await Loan.countDocuments({ status: 'approved' });
+    const activeLoans = await Loan.countDocuments({ status: 'active' });
+    const completedLoans = await Loan.countDocuments({ status: 'completed' });
+
+    // Get lending pool statistics
+    const LendingPool = require('../models/LendingPool');
+    const totalPools = await LendingPool.countDocuments();
+    const activePools = await LendingPool.countDocuments({ status: 'active' });
+    const fundedPools = await LendingPool.countDocuments({ status: 'funded' });
+
+    // Get recent activities (last 7 days)
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    
+    const recentUsers = await User.find({ 
+      createdAt: { $gte: sevenDaysAgo } 
+    }).select('firstName lastName email userType createdAt').sort({ createdAt: -1 }).limit(5);
+
+    const recentLoans = await Loan.find({ 
+      createdAt: { $gte: sevenDaysAgo } 
+    }).select('loanAmount purpose status createdAt').sort({ createdAt: -1 }).limit(5);
+
+    const recentKYC = await User.find({ 
+      'kycDocuments.submittedAt': { $gte: sevenDaysAgo } 
+    }).select('firstName lastName email kycStatus createdAt').sort({ createdAt: -1 }).limit(5);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        users: {
+          total: totalUsers,
+          pendingKYC,
+          approvedKYC,
+          rejectedKYC,
+          breakdown: { borrowers, lenders, admins }
+        },
+        loans: {
+          total: totalLoans,
+          pending: pendingLoans,
+          approved: approvedLoans,
+          active: activeLoans,
+          completed: completedLoans
+        },
+        pools: {
+          total: totalPools,
+          active: activePools,
+          funded: fundedPools
+        },
+        recentActivities: {
+          users: recentUsers,
+          loans: recentLoans,
+          kyc: recentKYC
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching admin dashboard stats:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch dashboard statistics'
+    });
+  }
+});
+
+// @route   GET /api/admin/users/stats
+// @desc    Get user statistics for admin dashboard
+// @access  Private (Admin only)
+router.get('/users/stats', protect, requireAdmin, async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const activeUsers = await User.countDocuments({ isActive: true });
+    const pendingKYC = await User.countDocuments({ kycStatus: 'pending' });
+    const approvedKYC = await User.countDocuments({ kycStatus: 'approved' });
+    const rejectedKYC = await User.countDocuments({ kycStatus: 'rejected' });
+    const borrowers = await User.countDocuments({ userType: 'borrower' });
+    const lenders = await User.countDocuments({ userType: 'lender' });
+    const admins = await User.countDocuments({ userType: 'admin' });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        totalUsers,
+        activeUsers,
+        inactiveUsers: totalUsers - activeUsers,
+        pendingKYC,
+        approvedKYC,
+        rejectedKYC,
+        userTypes: {
+          borrowers,
+          lenders,
+          admins
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching user statistics:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch user statistics'
+    });
+  }
+});
+
+// @route   PUT /api/admin/users/:userId
+// @desc    Update user by admin
+// @access  Private (Admin only)
+router.put('/users/:userId', protect, requireAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { isActive, kycStatus, userType } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
+
+    // Prevent admin from changing their own status
+    if (userId === req.user.id) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Cannot modify your own account'
+      });
+    }
+
+    // Update allowed fields
+    if (typeof isActive === 'boolean') user.isActive = isActive;
+    if (kycStatus && ['pending', 'approved', 'rejected'].includes(kycStatus)) {
+      user.kycStatus = kycStatus;
+    }
+    if (userType && ['borrower', 'lender', 'admin'].includes(userType)) {
+      user.userType = userType;
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'User updated successfully',
+      data: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        userType: user.userType,
+        isActive: user.isActive,
+        kycStatus: user.kycStatus
+      }
+    });
+
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to update user'
+    });
+  }
+});
+
+// @route   GET /api/admin/users
+// @desc    Get all users with pagination and filtering
+// @access  Private (Admin only)
+router.get('/users', protect, requireAdmin, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, userType, kycStatus, search, isActive } = req.query;
+    
+    const query = {};
+    
+    // Add filters
+    if (userType) query.userType = userType;
+    if (kycStatus) query.kycStatus = kycStatus;
+    if (isActive !== undefined) query.isActive = isActive === 'true';
+    if (search) {
+      query.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const skip = (page - 1) * limit;
+    
+    const users = await User.find(query)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await User.countDocuments(query);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        users,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(total / limit),
+          totalItems: total,
+          itemsPerPage: parseInt(limit)
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch users'
+    });
+  }
+});
+
+// @route   GET /api/admin/loans
+// @desc    Get all loans with pagination and filtering
+// @access  Private (Admin only)
+router.get('/loans', protect, requireAdmin, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, status, purpose, search } = req.query;
+    
+    const query = {};
+    
+    // Add filters
+    if (status) query.status = status;
+    if (purpose) query.purpose = purpose;
+    if (search) {
+      query.$or = [
+        { purpose: { $regex: search, $options: 'i' } },
+        { purposeDescription: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const skip = (page - 1) * limit;
+    
+    const loans = await Loan.find(query)
+      .populate('borrower', 'firstName lastName email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Loan.countDocuments(query);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        loans,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(total / limit),
+          totalLoans: total,
+          loansPerPage: parseInt(limit)
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching loans:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch loans'
+    });
+  }
+});
+
+// @route   PUT /api/admin/loans/:loanId/approve
+// @desc    Approve a loan application
+// @access  Private (Admin only)
+router.put('/loans/:loanId/approve', protect, requireAdmin, async (req, res) => {
+  try {
+    const { loanId } = req.params;
+    const { notes } = req.body;
+
+    const loan = await Loan.findById(loanId);
+    if (!loan) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Loan not found'
+      });
+    }
+
+    if (loan.status !== 'pending') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Loan is not in pending status'
+      });
+    }
+
+    // Update loan status to approved
+    loan.status = 'approved';
+    loan.approvedBy = req.user.id;
+    loan.approvedAt = new Date();
+    if (notes) {
+      loan.notes = notes;
+    }
+
+    await loan.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Loan approved successfully',
+      data: {
+        loanId: loan._id,
+        status: loan.status,
+        approvedAt: loan.approvedAt
+      }
+    });
+
+  } catch (error) {
+    console.error('Error approving loan:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to approve loan'
+    });
+  }
+});
+
+// @route   PUT /api/admin/loans/:loanId/reject
+// @desc    Reject a loan application
+// @access  Private (Admin only)
+router.put('/loans/:loanId/reject', protect, requireAdmin, async (req, res) => {
+  try {
+    const { loanId } = req.params;
+    const { reason } = req.body;
+
+    if (!reason) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Rejection reason is required'
+      });
+    }
+
+    const loan = await Loan.findById(loanId);
+    if (!loan) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Loan not found'
+      });
+    }
+
+    if (loan.status !== 'pending') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Loan is not in pending status'
+      });
+    }
+
+    // Update loan status to rejected
+    loan.status = 'rejected';
+    loan.rejectionReason = reason;
+    loan.rejectedAt = new Date();
+
+    await loan.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Loan rejected successfully',
+      data: {
+        loanId: loan._id,
+        status: loan.status,
+        rejectedAt: loan.rejectedAt,
+        reason
+      }
+    });
+
+  } catch (error) {
+    console.error('Error rejecting loan:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to reject loan'
     });
   }
 });

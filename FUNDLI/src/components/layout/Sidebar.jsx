@@ -12,6 +12,7 @@ const Sidebar = ({ open, onClose }) => {
   const navigation = {
     borrower: [
       { name: 'Dashboard', href: '/dashboard/borrower', icon: Home },
+      ...(userType !== 'admin' ? [{ name: 'KYC Verification', href: '/kyc-upload', icon: Shield }] : []),
       { name: 'Apply for Loan', href: '/loans/apply', icon: DollarSign },
       { name: 'Loan Status', href: '/loans/status', icon: FileText },
       { name: 'Repayment Schedule', href: '/loans/repayment', icon: Calendar },
@@ -20,6 +21,7 @@ const Sidebar = ({ open, onClose }) => {
     ],
     lender: [
       { name: 'Dashboard', href: '/dashboard/lender', icon: Home },
+      ...(userType !== 'admin' ? [{ name: 'KYC Verification', href: '/kyc-upload', icon: Shield }] : []),
       { name: 'Create Pool', href: '/marketplace/create-pool', icon: DollarSign },
       { name: 'Browse Loans', href: '/marketplace/browse', icon: CreditCard },
       { name: 'My Investments', href: '/dashboard/lender', icon: TrendingUp },

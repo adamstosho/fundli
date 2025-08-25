@@ -85,44 +85,122 @@ router.post('/kyc', [
     console.log('User found in database:', user.email);
     console.log('Current KYC status:', user.kycStatus);
 
-    // Upload documents to Cloudinary (temporarily disabled for testing)
+    // Upload documents to Cloudinary
     const uploadedDocuments = {};
     
-    // For now, just store basic file info without Cloudinary upload
-    if (idFront) {
-      uploadedDocuments.idFront = {
-        filename: 'id_front.jpg',
-        mimetype: 'image/jpeg',
-        size: 0,
-        uploadedAt: new Date()
-      };
+    // Test Cloudinary connection first
+    try {
+      console.log('Testing Cloudinary connection...');
+      const connectionTest = await cloudinaryService.testConnection();
+      console.log('Cloudinary connection test result:', connectionTest);
+      
+      if (!connectionTest.success) {
+        throw new Error(`Cloudinary connection failed: ${connectionTest.message}`);
+      }
+    } catch (connectionError) {
+      console.error('Cloudinary connection test failed:', connectionError);
+      return res.status(500).json({
+        status: 'error',
+        message: 'Cloudinary service unavailable',
+        error: connectionError.message
+      });
     }
     
-    if (selfie) {
-      uploadedDocuments.selfie = {
-        filename: 'selfie.jpg',
-        mimetype: 'image/jpeg',
-        size: 0,
-        uploadedAt: new Date()
-      };
-    }
-    
-    if (idBack) {
-      uploadedDocuments.idBack = {
-        filename: 'id_back.jpg',
-        mimetype: 'image/jpeg',
-        size: 0,
-        uploadedAt: new Date()
-      };
-    }
-    
-    if (proofOfAddress) {
-      uploadedDocuments.proofOfAddress = {
-        filename: 'proof_of_address.jpg',
-        mimetype: 'image/jpeg',
-        size: 0,
-        uploadedAt: new Date()
-      };
+    try {
+      // Upload ID Front
+      if (idFront) {
+        console.log('Uploading ID Front to Cloudinary...');
+        console.log('ID Front data type:', typeof idFront);
+        console.log('ID Front data length:', idFront ? idFront.length : 'undefined');
+        
+        let idFrontResult;
+        try {
+          idFrontResult = await cloudinaryService.uploadKYCDocument(idFront, 'idFront');
+        } catch (kycError) {
+          console.log('KYC upload failed, trying profile picture method:', kycError.message);
+          idFrontResult = await cloudinaryService.uploadProfilePicture(idFront);
+        }
+        
+        uploadedDocuments.idFront = {
+          url: idFrontResult.secure_url,
+          publicId: idFrontResult.public_id,
+          uploadedAt: new Date()
+        };
+        console.log('ID Front uploaded successfully:', idFrontResult.secure_url);
+      }
+      
+      // Upload Selfie
+      if (selfie) {
+        console.log('Uploading Selfie to Cloudinary...');
+        console.log('Selfie data type:', typeof selfie);
+        console.log('Selfie data length:', selfie ? selfie.length : 'undefined');
+        
+        let selfieResult;
+        try {
+          selfieResult = await cloudinaryService.uploadKYCDocument(selfie, 'selfie');
+        } catch (kycError) {
+          console.log('KYC upload failed, trying profile picture method:', kycError.message);
+          selfieResult = await cloudinaryService.uploadProfilePicture(selfie);
+        }
+        
+        uploadedDocuments.selfie = {
+          url: selfieResult.secure_url,
+          publicId: selfieResult.public_id,
+          uploadedAt: new Date()
+        };
+        console.log('Selfie uploaded successfully:', selfieResult.secure_url);
+      }
+      
+      // Upload ID Back
+      if (idBack) {
+        console.log('Uploading ID Back to Cloudinary...');
+        console.log('ID Back data type:', typeof idBack);
+        console.log('ID Back data length:', idBack ? idBack.length : 'undefined');
+        
+        let idBackResult;
+        try {
+          idBackResult = await cloudinaryService.uploadKYCDocument(idBack, 'idBack');
+        } catch (kycError) {
+          console.log('KYC upload failed, trying profile picture method:', kycError.message);
+          idBackResult = await cloudinaryService.uploadProfilePicture(idBack);
+        }
+        
+        uploadedDocuments.idBack = {
+          url: idBackResult.secure_url,
+          publicId: idBackResult.public_id,
+          uploadedAt: new Date()
+        };
+        console.log('ID Back uploaded successfully:', idBackResult.secure_url);
+      }
+      
+      // Upload Proof of Address
+      if (proofOfAddress) {
+        console.log('Uploading Proof of Address to Cloudinary...');
+        console.log('Proof data type:', typeof proofOfAddress);
+        console.log('Proof data length:', proofOfAddress ? proofOfAddress.length : 'undefined');
+        
+        let proofResult;
+        try {
+          proofResult = await cloudinaryService.uploadKYCDocument(proofOfAddress, 'proofOfAddress');
+        } catch (kycError) {
+          console.log('KYC upload failed, trying profile picture method:', kycError.message);
+          proofResult = await cloudinaryService.uploadProfilePicture(proofOfAddress);
+        }
+        
+        uploadedDocuments.proofOfAddress = {
+          url: proofResult.secure_url,
+          publicId: proofResult.public_id,
+          uploadedAt: new Date()
+        };
+        console.log('Proof of Address uploaded successfully:', proofResult.secure_url);
+      }
+    } catch (uploadError) {
+      console.error('Error uploading documents to Cloudinary:', uploadError);
+      return res.status(500).json({
+        status: 'error',
+        message: 'Failed to upload documents to Cloudinary',
+        error: uploadError.message
+      });
     }
 
     // Update KYC information

@@ -692,23 +692,67 @@ export const AuthProvider = ({ children }) => {
       console.log('KYC submission result:', result);
 
       if (response.ok) {
-        // Update local state
-        const updatedUser = { 
-          ...JSON.parse(localStorage.getItem('user') || '{}'),
-          kycStatus: 'pending',
-          isEmailVerified: true 
-        };
-        
-        // Update localStorage
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        
-        dispatch({
-          type: 'UPDATE_USER',
-          payload: { 
+        // Refresh user data from backend to get the latest information
+        try {
+          const userResponse = await fetch('http://localhost:5000/api/auth/me', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (userResponse.ok) {
+            const userResult = await userResponse.json();
+            const freshUserData = userResult.data;
+            
+            // Update localStorage with fresh user data
+            localStorage.setItem('user', JSON.stringify(freshUserData));
+            
+            // Update state with complete user data
+            dispatch({
+              type: 'AUTH_SUCCESS',
+              payload: freshUserData
+            });
+            
+            console.log('KYC submission - User data refreshed:', freshUserData);
+          } else {
+            console.warn('Failed to refresh user data, using fallback update');
+            // Fallback: update local state with minimal changes
+            const updatedUser = { 
+              ...JSON.parse(localStorage.getItem('user') || '{}'),
+              kycStatus: 'pending',
+              isEmailVerified: true 
+            };
+            
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            
+            dispatch({
+              type: 'UPDATE_USER',
+              payload: { 
+                kycStatus: 'pending',
+                isEmailVerified: true 
+              }
+            });
+          }
+        } catch (refreshError) {
+          console.warn('Error refreshing user data, using fallback update:', refreshError);
+          // Fallback: update local state with minimal changes
+          const updatedUser = { 
+            ...JSON.parse(localStorage.getItem('user') || '{}'),
             kycStatus: 'pending',
             isEmailVerified: true 
-          }
-        });
+          };
+          
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          
+          dispatch({
+            type: 'UPDATE_USER',
+            payload: { 
+              kycStatus: 'pending',
+              isEmailVerified: true 
+            }
+          });
+        }
+        
         return { success: true, message: result.message };
       } else {
         console.error('KYC submission failed:', result);
@@ -735,6 +779,50 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: 'CLEAR_ERROR' });
   };
 
+  // Refresh user data from backend
+  const refreshUserData = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch('http://localhost:5000/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const userData = result.data;
+        
+        // Update localStorage with fresh user data
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        // Update state
+        dispatch({
+          type: 'AUTH_SUCCESS',
+          payload: {
+            user: userData,
+            accessToken: token,
+            refreshToken: localStorage.getItem('refreshToken')
+          }
+        });
+
+        console.log('User data refreshed successfully:', userData);
+        return userData;
+      } else {
+        throw new Error('Failed to refresh user data');
+      }
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+      // If refresh fails, clear auth data and redirect to login
+      logout();
+      throw error;
+    }
+  };
+
   const value = {
     ...state,
     register,
@@ -752,6 +840,7 @@ export const AuthProvider = ({ children }) => {
     submitKYC,
     refreshAuthToken,
     clearError,
+    refreshUserData,
   };
 
   return (

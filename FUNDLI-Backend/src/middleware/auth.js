@@ -93,6 +93,11 @@ const requireKYC = async (req, res, next) => {
       });
     }
 
+    // Admin users don't need KYC verification
+    if (req.user.userType === 'admin') {
+      return next();
+    }
+
     if (req.user.kycStatus !== 'approved') {
       return res.status(403).json({
         status: 'error',

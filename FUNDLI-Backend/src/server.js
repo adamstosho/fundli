@@ -53,19 +53,18 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    message: 'Fundli Backend API is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
   });
 });
 
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-// app.use('/api/loans', loanRoutes);
+app.use('/api/loans', loanRoutes);
 app.use('/api/pools', poolRoutes);
 app.use('/api/investments', investmentRoutes);
 // app.use('/api/marketplace', marketplaceRoutes);
