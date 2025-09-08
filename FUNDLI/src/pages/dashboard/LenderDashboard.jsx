@@ -15,6 +15,9 @@ import {
   Shield
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import LoanApplications from '../../components/lender/LoanApplications';
+import PendingLoansSection from '../../components/common/PendingLoansSection';
+import WalletBalanceCard from '../../components/common/WalletBalanceCard';
 
 const LenderDashboard = () => {
   const { user } = useAuth();
@@ -29,6 +32,7 @@ const LenderDashboard = () => {
   const [myPools, setMyPools] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -191,6 +195,35 @@ const LenderDashboard = () => {
         </p>
       </div>
 
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-200 dark:border-gray-700">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'overview'
+                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            Portfolio Overview
+          </button>
+          <button
+            onClick={() => setActiveTab('applications')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'applications'
+                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            Loan Applications
+          </button>
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'overview' && (
+        <>
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <motion.div
@@ -276,6 +309,11 @@ const LenderDashboard = () => {
             </div>
           </div>
         </motion.div>
+      </div>
+
+      {/* Wallet Balance */}
+      <div className="mb-8">
+        <WalletBalanceCard userType="lender" />
       </div>
 
       {/* Quick Actions */}
@@ -402,11 +440,50 @@ const LenderDashboard = () => {
         </motion.div>
       </div>
 
-      {/* My Pools Section */}
+      {/* KYC Management Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.8 }}
+        className="card p-6"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            KYC Management
+          </h3>
+          <Link
+            to="/lender/kyc"
+            className="btn-primary-sm flex items-center space-x-2"
+          >
+            <Shield className="h-4 w-4" />
+            <span>Manage KYC</span>
+          </Link>
+        </div>
+        
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Shield className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+          </div>
+          <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Review Borrower KYC Applications
+          </h4>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            Manage and approve borrower KYC verifications to enable loan processing
+          </p>
+          <Link
+            to="/lender/kyc"
+            className="btn-primary-sm"
+          >
+            Go to KYC Management
+          </Link>
+        </div>
+      </motion.div>
+
+      {/* My Pools Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.9 }}
         className="card p-6"
       >
         <div className="flex items-center justify-between mb-6">
@@ -490,37 +567,10 @@ const LenderDashboard = () => {
         )}
       </motion.div>
 
-      {/* KYC Status */}
-      {user?.kycStatus === 'pending' && user?.userType !== 'admin' && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.7 }}
-          className="card p-6 bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center">
-                <Shield className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Complete Your KYC Verification
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Verify your identity to unlock all platform features and create lending pools
-                </p>
-              </div>
-            </div>
-            <Link
-              to="/kyc-upload"
-              className="btn-primary"
-            >
-              Complete KYC
-            </Link>
-          </div>
-        </motion.div>
-      )}
+      {/* KYC verification is now optional */}
+
+      {/* Pending Loans Section */}
+      <PendingLoansSection userType="lender" title="Available Loan Applications" />
 
       {/* Performance Chart Placeholder */}
       <motion.div
@@ -558,6 +608,13 @@ const LenderDashboard = () => {
           </div>
         </div>
       </motion.div>
+        </>
+      )}
+
+      {/* Loan Applications Tab */}
+      {activeTab === 'applications' && (
+        <LoanApplications />
+      )}
     </div>
   );
 };

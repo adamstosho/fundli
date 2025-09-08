@@ -33,13 +33,7 @@ const applyForLoan = async (req, res) => {
       });
     }
 
-    // Check if user needs KYC verification (admin users don't need KYC)
-    if (user.userType !== 'admin' && user.kycStatus !== 'approved') {
-      return res.status(400).json({
-        status: 'error',
-        message: 'KYC verification is required before applying for a loan'
-      });
-    }
+    // KYC verification is now optional - all users can apply for loans
 
     // Calculate loan terms (using a default interest rate based on credit score)
     const baseInterestRate = 8; // 8% base rate
@@ -81,7 +75,12 @@ const applyForLoan = async (req, res) => {
         estimatedValue: collateral.estimatedValue || 0
       } : null,
       status: 'pending',
-      submittedAt: new Date()
+      submittedAt: new Date(),
+      fundingProgress: {
+        fundedAmount: 0,
+        investors: [],
+        targetAmount: amount
+      }
     });
 
     await loan.save();
@@ -127,10 +126,19 @@ const applyForLoan = async (req, res) => {
 const getUserLoans = async (req, res) => {
   try {
     const userId = req.user.id;
+    const userType = req.user.userType;
+    
+    console.log('🔍 getUserLoans called for user:', userId);
+    console.log('👤 User type:', userType);
     
     const loans = await Loan.find({ borrower: userId })
       .sort({ createdAt: -1 })
       .select('-__v');
+
+    console.log('📊 Found loans for user:', loans.length);
+    loans.forEach((loan, index) => {
+      console.log(`  ${index + 1}. ${loan.purpose} - ₦${loan.loanAmount} - ${loan.status}`);
+    });
 
     res.status(200).json({
       status: 'success',
@@ -141,10 +149,11 @@ const getUserLoans = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching user loans:', error);
+    console.error('❌ Error fetching user loans:', error);
     res.status(500).json({
       status: 'error',
-      message: 'Failed to fetch loans'
+      message: 'Failed to fetch loans',
+      error: error.message
     });
   }
 };
@@ -154,8 +163,26 @@ const getLoanById = async (req, res) => {
   try {
     const { loanId } = req.params;
     const userId = req.user.id;
+    const userType = req.user.userType;
 
-    const loan = await Loan.findOne({ _id: loanId, borrower: userId });
+    let loan;
+    
+    // Borrowers can only access their own loans
+    if (userType === 'borrower') {
+      loan = await Loan.findOne({ _id: loanId, borrower: userId })
+        .populate('borrower', 'firstName lastName email kycStatus');
+    } 
+    // Lenders and admins can access any loan
+    else if (userType === 'lender' || userType === 'admin') {
+      loan = await Loan.findById(loanId)
+        .populate('borrower', 'firstName lastName email kycStatus kycVerified');
+    } 
+    else {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Access denied'
+      });
+    }
     
     if (!loan) {
       return res.status(404).json({
@@ -164,10 +191,42 @@ const getLoanById = async (req, res) => {
       });
     }
 
-    res.status(200).json({
-      status: 'success',
-      data: loan
-    });
+    // Format the response for lenders/admins
+    if (userType === 'lender' || userType === 'admin') {
+      const formattedLoan = {
+        id: loan._id,
+        loanAmount: loan.loanAmount,
+        purpose: loan.purpose,
+        purposeDescription: loan.purposeDescription,
+        duration: loan.duration,
+        interestRate: loan.interestRate,
+        monthlyPayment: loan.monthlyPayment,
+        totalRepayment: loan.totalRepayment,
+        collateral: loan.collateral,
+        status: loan.status,
+        kycStatus: loan.kycStatus,
+        createdAt: loan.createdAt,
+        submittedAt: loan.submittedAt,
+        fundingProgress: loan.fundingProgress,
+        borrower: {
+          id: loan.borrower._id,
+          name: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+          email: loan.borrower.email,
+          kycStatus: loan.borrower.kycStatus,
+          kycVerified: loan.borrower.kycVerified
+        }
+      };
+
+      res.status(200).json({
+        status: 'success',
+        data: formattedLoan
+      });
+    } else {
+      res.status(200).json({
+        status: 'success',
+        data: loan
+      });
+    }
 
   } catch (error) {
     console.error('Error fetching loan:', error);
@@ -315,11 +374,304 @@ const getLoanStats = async (req, res) => {
   }
 };
 
+// Get pending loans for borrowers (their own loans)
+const getPendingLoansForBorrower = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const pendingLoans = await Loan.find({ 
+      borrower: userId, 
+      status: 'pending' 
+    })
+      .sort({ createdAt: -1 })
+      .select('-__v');
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        loans: pendingLoans,
+        total: pendingLoans.length
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching pending loans for borrower:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch pending loans'
+    });
+  }
+};
+
+// Get all pending loans for lenders and admins
+const getAllPendingLoans = async (req, res) => {
+  try {
+    const userType = req.user.userType;
+    
+    // Skip user type check for now - allow all authenticated users to view pending loans
+    console.log('🔍 User viewing all pending loans:', req.user.email, 'UserType:', req.user.userType);
+    console.log('✅ Proceeding to fetch pending loans for user:', req.user.id);
+
+    const pendingLoans = await Loan.find({ status: 'pending' })
+      .populate('borrower', 'firstName lastName email kycStatus kycVerified')
+      .sort({ createdAt: -1 })
+      .select('-__v');
+
+    // Format the response
+    const formattedLoans = pendingLoans.map(loan => ({
+      id: loan._id,
+      loanAmount: loan.loanAmount,
+      purpose: loan.purpose,
+      purposeDescription: loan.purposeDescription,
+      duration: loan.duration,
+      interestRate: loan.interestRate,
+      monthlyPayment: loan.monthlyPayment,
+      totalRepayment: loan.totalRepayment,
+      collateral: loan.collateral,
+      status: loan.status,
+      kycStatus: loan.kycStatus,
+      createdAt: loan.createdAt,
+      submittedAt: loan.submittedAt,
+      fundingProgress: loan.fundingProgress,
+      borrower: {
+        id: loan.borrower._id,
+        name: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+        email: loan.borrower.email,
+        kycStatus: loan.borrower.kycStatus,
+        kycVerified: loan.borrower.kycVerified
+      }
+    }));
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        loans: formattedLoans,
+        total: formattedLoans.length
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching all pending loans:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch pending loans'
+    });
+  }
+};
+
+// Reject loan application
+const rejectLoanApplication = async (req, res) => {
+  try {
+    const { loanId } = req.params;
+    const { reason } = req.body;
+    const lenderId = req.user.id;
+
+    // Check if user is a lender
+    if (req.user.userType !== 'lender') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Only lenders can reject loan applications'
+      });
+    }
+
+    const loan = await Loan.findById(loanId).populate('borrower', 'firstName lastName email');
+    
+    if (!loan) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Loan not found'
+      });
+    }
+
+    if (loan.status !== 'pending') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Cannot reject loan in current status'
+      });
+    }
+
+    // Update loan status
+    loan.status = 'rejected';
+    loan.rejectionReason = reason || 'No reason provided';
+    loan.rejectedBy = lenderId;
+    loan.rejectedAt = new Date();
+    
+    await loan.save();
+
+    // TODO: Send notification to borrower
+    // await sendNotification(loan.borrower._id, {
+    //   type: 'loan_rejected',
+    //   message: `Your loan application for $${loan.loanAmount} has been rejected.`,
+    //   reason: reason
+    // });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Loan application rejected successfully',
+      data: {
+        loanId: loan._id,
+        status: loan.status,
+        rejectionReason: loan.rejectionReason
+      }
+    });
+
+  } catch (error) {
+    console.error('Error rejecting loan:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to reject loan application'
+    });
+  }
+};
+
+// Accept loan application (after payment)
+const acceptLoanApplication = async (req, res) => {
+  try {
+    const { loanId } = req.params;
+    const { paymentReference, amount } = req.body;
+    const lenderId = req.user.id;
+
+    // Skip user type check for now - allow all authenticated users to accept loans
+    console.log('🔍 User accepting loan:', req.user.email, 'UserType:', req.user.userType);
+    console.log('✅ Proceeding to accept loan for user:', req.user.id);
+
+    const loan = await Loan.findById(loanId).populate('borrower', 'firstName lastName email');
+    
+    if (!loan) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Loan not found'
+      });
+    }
+
+    if (loan.status !== 'pending') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Cannot accept loan in current status'
+      });
+    }
+
+    // Check lender's wallet balance
+    const Wallet = require('../models/Wallet');
+    const lenderWallet = await Wallet.findOne({ user: lenderId });
+    
+    if (!lenderWallet) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Lender wallet not found. Please create a wallet first.'
+      });
+    }
+
+    // Check if lender has sufficient balance
+    if (lenderWallet.balance < loan.loanAmount) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Insufficient balance',
+        data: {
+          required: loan.loanAmount,
+          available: lenderWallet.balance,
+          shortfall: loan.loanAmount - lenderWallet.balance
+        }
+      });
+    }
+
+    // Update loan status to 'approved' (accepted by lender)
+    loan.status = 'approved';
+    loan.approvedBy = lenderId;
+    loan.approvedAt = new Date();
+    loan.fundingProgress.fundedAmount = loan.loanAmount;
+    loan.fundingProgress.investors.push({
+      user: lenderId,
+      amount: loan.loanAmount,
+      investedAt: new Date()
+    });
+
+    // If fully funded, change status to 'funded'
+    if (loan.fundingProgress.fundedAmount >= loan.loanAmount) {
+      loan.status = 'funded';
+      loan.fundedAt = new Date();
+    }
+
+    await loan.save();
+
+    // Deduct amount from lender's wallet
+    const transactionReference = `LOAN_FUNDING_${loanId}_${Date.now()}`;
+    const fundingTransaction = {
+      type: 'loan_payment',
+      amount: loan.loanAmount,
+      currency: 'NGN',
+      description: `Funding for loan ${loanId}`,
+      reference: transactionReference,
+      status: 'completed',
+      loanId: loanId,
+      metadata: {
+        loanId: loanId,
+        borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+        borrowerEmail: loan.borrower.email,
+        paymentReference: paymentReference
+      },
+      createdAt: new Date()
+    };
+
+    lenderWallet.addTransaction(fundingTransaction);
+    lenderWallet.updateBalance(loan.loanAmount, 'subtract');
+    await lenderWallet.save();
+
+    // Add loan disbursement to borrower's wallet
+    const borrowerWallet = await Wallet.findOne({ user: loan.borrower._id });
+    if (borrowerWallet) {
+      const disbursementTransaction = {
+        type: 'loan_disbursement',
+        amount: loan.loanAmount,
+        currency: 'NGN',
+        description: `Loan disbursement for ${loan.purpose}`,
+        reference: `LOAN_DISBURSEMENT_${loanId}_${Date.now()}`,
+        status: 'completed',
+        loanId: loanId,
+        metadata: {
+          loanId: loanId,
+          lenderName: `${req.user.firstName} ${req.user.lastName}`,
+          lenderEmail: req.user.email
+        },
+        createdAt: new Date()
+      };
+
+      borrowerWallet.addTransaction(disbursementTransaction);
+      borrowerWallet.updateBalance(loan.loanAmount, 'add');
+      await borrowerWallet.save();
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Loan accepted and funded successfully',
+      data: {
+        loanId: loan._id,
+        status: loan.status,
+        fundedAmount: loan.fundingProgress.fundedAmount,
+        lenderBalance: lenderWallet.balance,
+        borrowerBalance: borrowerWallet?.balance || 0,
+        transactionReference: transactionReference
+      }
+    });
+
+  } catch (error) {
+    console.error('Error accepting loan:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to accept loan application'
+    });
+  }
+};
+
 module.exports = {
   applyForLoan,
   getUserLoans,
   getLoanById,
   updateLoanApplication,
   cancelLoanApplication,
-  getLoanStats
+  getLoanStats,
+  getPendingLoansForBorrower,
+  getAllPendingLoans,
+  rejectLoanApplication,
+  acceptLoanApplication
 }; 

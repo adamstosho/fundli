@@ -47,7 +47,7 @@ const Navbar = ({ onMenuClick }) => {
           {/* Navigation Links - Desktop */}
           <div className="hidden lg:flex items-center space-x-8">
             <Link
-              to="/marketplace/browse"
+              to={user?.userType === 'borrower' ? '/borrower/browse-loans' : '/marketplace/browse'}
               className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
             >
               Browse Loans

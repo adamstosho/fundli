@@ -21,6 +21,13 @@ import Settings from './pages/settings/Settings';
 import UserManagement from './pages/admin/UserManagement';
 import KYCManagement from './pages/admin/KYCManagement';
 import LoanManagement from './pages/admin/LoanManagement';
+import CollateralManagement from './pages/admin/CollateralManagement';
+import LenderKYCManagement from './components/lender/KYCManagement';
+import BrowseLoans from './pages/borrower/BrowseLoans';
+import PaymentPage from './pages/PaymentPage';
+import WalletPage from './pages/WalletPage';
+import DepositPage from './pages/DepositPage';
+import TransferPage from './pages/TransferPage';
 
 // 404 Error Component
 const NotFound = () => (
@@ -127,6 +134,19 @@ export const router = createBrowserRouter([
         ]
       },
       {
+        path: 'borrower',
+        children: [
+          {
+            path: 'browse-loans',
+            element: (
+              <ProtectedRoute userType="borrower">
+                <BrowseLoans />
+              </ProtectedRoute>
+            )
+          }
+        ]
+      },
+      {
         path: 'marketplace',
         children: [
           {
@@ -140,6 +160,44 @@ export const router = createBrowserRouter([
           { path: 'browse', element: <Marketplace /> },
           { path: 'pool/:id', element: <PoolDetails /> }
         ]
+      },
+      {
+        path: 'lender',
+        children: [
+          { path: 'kyc', element: <LenderKYCManagement /> }
+        ]
+      },
+      {
+        path: 'wallet',
+        element: (
+          <ProtectedRoute>
+            <WalletPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: 'deposit',
+        element: (
+          <ProtectedRoute>
+            <DepositPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: 'transfer',
+        element: (
+          <ProtectedRoute>
+            <TransferPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: 'payment/:loanId',
+        element: (
+          <ProtectedRoute userType="lender">
+            <PaymentPage />
+          </ProtectedRoute>
+        )
       },
       {
         path: 'referral',
@@ -194,6 +252,14 @@ export const router = createBrowserRouter([
             element: (
               <ProtectedRoute userType="admin">
                 <LoanManagement />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: 'collateral',
+            element: (
+              <ProtectedRoute userType="admin">
+                <CollateralManagement />
               </ProtectedRoute>
             )
           }

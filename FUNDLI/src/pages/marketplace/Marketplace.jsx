@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Search, 
@@ -6,7 +7,7 @@ import {
   DollarSign, 
   TrendingUp,
   Shield,
-  Eye
+  Trash2
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -16,59 +17,11 @@ const Marketplace = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, loanId: null, loanName: '' });
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
 
-  // Check KYC status
-  if ((!user?.kycStatus || user.kycStatus !== 'approved') && user?.userType !== 'admin') {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            KYC Verification Required
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            You must complete KYC verification before accessing the marketplace
-          </p>
-        </div>
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="card p-8 text-center"
-        >
-          <div className="w-16 h-16 bg-warning-100 dark:bg-warning-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Shield className="h-8 w-8 text-warning-600 dark:text-warning-400" />
-          </div>
-          
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            KYC Verification Required
-          </h2>
-          
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            {user?.kycStatus === 'pending' 
-              ? 'Your KYC verification is currently under review. Please wait for admin approval.'
-              : 'You need to complete KYC verification to access this feature.'
-            }
-          </p>
-          
-          {user?.kycStatus !== 'pending' && (
-            <button
-              onClick={() => window.location.href = '/kyc-upload'}
-              className="btn-primary"
-            >
-              Complete KYC Verification
-            </button>
-          )}
-          
-          <button
-            onClick={() => window.location.href = `/dashboard/${user?.userType || 'borrower'}`}
-            className="btn-outline ml-4"
-          >
-            Back to Dashboard
-          </button>
-        </motion.div>
-      </div>
-    );
-  }
+  // KYC verification is now optional - all users can access the marketplace
 
   useEffect(() => {
     const loadMarketplaceData = async () => {
@@ -80,6 +33,7 @@ const Marketplace = () => {
           throw new Error('Authentication required');
         }
 
+        console.log('Making API call to /api/pools...');
         const response = await fetch('http://localhost:5000/api/pools', {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -87,23 +41,29 @@ const Marketplace = () => {
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch lending pools');
+          const errorText = await response.text();
+          console.error('API Error Response:', errorText);
+          throw new Error(`Failed to fetch lending pools: ${response.status} ${response.statusText}`);
         }
 
         const result = await response.json();
-        const mappedLoans = (result.data.pools || []).map(pool => ({
-          id: pool._id || pool.id || Math.random().toString(),
-          purpose: pool.name || pool.purpose || 'Lending Pool',
-          borrower: pool.lender?.firstName + ' ' + pool.lender?.lastName || 'Lender',
-          amount: pool.size || pool.amount || 0,
-          category: pool.category || 'business',
-          roi: pool.interestRate || pool.roi || 0,
+        console.log('Raw API response:', result);
+        console.log('Pools data:', result.data?.pools);
+                const mappedLoans = (result.data.pools || []).map(pool => ({
+          id: pool.id || pool._id || Math.random().toString(),
+          purpose: pool.name || 'Lending Pool',
+          borrower: pool.creator?.firstName + ' ' + pool.creator?.lastName || 'Lender',
+          amount: pool.poolSize || 0,
+          category: 'business', // Default category since pools don't have categories yet
+          roi: pool.interestRate || 0,
           duration: pool.duration || 12,
           riskScore: pool.riskLevel === 'low' ? 'A' : pool.riskLevel === 'medium' ? 'B' : 'C',
-          collateral: pool.collateral || 'Pool Assets',
-          funded: pool.funded || 0,
-          image: pool.image || null
+          collateral: 'Pool Assets',
+          funded: pool.fundingProgress || 0,
+          image: null,
+          creatorId: pool.creator?.id || pool.creator?._id || pool.creator
         }));
+        console.log('Mapped loans:', mappedLoans);
         setLoans(mappedLoans);
       } catch (error) {
         console.error('Error loading marketplace data:', error);
@@ -115,6 +75,64 @@ const Marketplace = () => {
 
     loadMarketplaceData();
   }, []);
+
+  const handleDeleteClick = (loanId, loanName) => {
+    // Check if the pool has any funding
+    const loan = loans.find(l => l.id === loanId);
+    if (loan && loan.funded > 0) {
+      showNotification('Cannot delete pool with active investments', 'error');
+      return;
+    }
+    setDeleteModal({ isOpen: true, loanId, loanName });
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      setIsDeleting(true);
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch(`http://localhost:5000/api/pools/${deleteModal.loanId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete pool: ${response.status} ${response.statusText}`);
+      }
+
+      // Remove the deleted loan from the state
+      setLoans(prevLoans => prevLoans.filter(loan => loan.id !== deleteModal.loanId));
+      
+      // Close the modal
+      setDeleteModal({ isOpen: false, loanId: null, loanName: '' });
+      
+      // Show success notification
+      showNotification('Pool deleted successfully!', 'success');
+      console.log('Pool deleted successfully');
+    } catch (error) {
+      console.error('Error deleting pool:', error);
+      showNotification('Failed to delete pool. Please try again.', 'error');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({ isOpen: false, loanId: null, loanName: '' });
+  };
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => {
+      setNotification({ show: false, message: '', type: 'success' });
+    }, 3000);
+  };
 
   const categories = [
     { value: 'all', label: 'All Categories' },
@@ -192,14 +210,16 @@ const Marketplace = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredLoans.map((loan, index) => (
-          <motion.div
-            key={loan.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.1 }}
-            className="card p-6 hover:shadow-medium transition-all duration-200"
-          >
+        {filteredLoans.map((loan, index) => {
+          console.log('Rendering loan:', loan);
+          return (
+            <motion.div
+              key={loan.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className="card p-6 hover:shadow-medium transition-all duration-200"
+            >
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
@@ -260,15 +280,25 @@ const Marketplace = () => {
             </div>
 
             <div className="flex space-x-3">
-              <button className="flex-1 btn-primary text-sm py-2">
-                Invest Now
-              </button>
-              <button className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                <Eye className="h-4 w-4" />
-              </button>
+              <Link
+                to={`/marketplace/pool/${loan.id}`}
+                className="flex-1 btn-primary text-sm py-2 flex items-center justify-center"
+              >
+                View Details
+              </Link>
+              {user?.userType === 'lender' && user?.id === loan.creatorId && (
+                <button
+                  onClick={() => handleDeleteClick(loan.id, loan.purpose)}
+                  className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center"
+                  title="Delete Pool"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
             </div>
           </motion.div>
-        ))}
+        );
+        })}
       </div>
 
       {filteredLoans.length === 0 && (
@@ -324,6 +354,76 @@ const Marketplace = () => {
           </p>
         </div>
       </div>
+
+      {/* Notification Toast */}
+      {notification.show && (
+        <motion.div
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -50 }}
+          className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg ${
+            notification.type === 'success' 
+              ? 'bg-green-500 text-white' 
+              : 'bg-red-500 text-white'
+          }`}
+        >
+          {notification.message}
+        </motion.div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={handleDeleteCancel}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Delete Pool
+              </h3>
+            </div>
+            
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Are you sure you want to delete <span className="font-semibold text-gray-900 dark:text-white">"{deleteModal.loanName}"</span>? 
+              This action cannot be undone and will permanently remove the pool.
+            </p>
+            
+            <div className="flex space-x-3">
+              <button
+                onClick={handleDeleteCancel}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg transition-colors flex items-center justify-center"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete Pool'
+                )}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

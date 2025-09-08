@@ -1343,13 +1343,6 @@ const KYCManagement = () => {
                         <div className="mt-6 space-y-4">
                           <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300">Document Images</h5>
                           
-                          {/* Debug Info */}
-                          <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-xs text-gray-600 dark:text-gray-400 mb-4">
-                            <p>Debug: KYC Documents structure</p>
-                            <p>Has kycDocuments: {selectedKYC.kycDocuments ? 'Yes' : 'No'}</p>
-                            <p>Has documents: {selectedKYC.kycDocuments?.documents ? 'Yes' : 'No'}</p>
-                            <p>Documents keys: {selectedKYC.kycDocuments?.documents ? Object.keys(selectedKYC.kycDocuments.documents).join(', ') : 'None'}</p>
-                          </div>
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             {selectedKYC.kycDocuments.documents?.idFront?.url && (

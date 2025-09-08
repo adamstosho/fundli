@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { X, Home, DollarSign, Users, FileText, BarChart3, Settings, UserCheck, Shield, TrendingUp, CreditCard, Calendar, Award } from 'lucide-react';
+import { X, Home, DollarSign, Users, FileText, BarChart3, Settings, UserCheck, Shield, TrendingUp, CreditCard, Calendar, Award, Search } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import clsx from 'clsx';
@@ -13,6 +13,7 @@ const Sidebar = ({ open, onClose }) => {
     borrower: [
       { name: 'Dashboard', href: '/dashboard/borrower', icon: Home },
       ...(userType !== 'admin' ? [{ name: 'KYC Verification', href: '/kyc-upload', icon: Shield }] : []),
+      { name: 'Browse Loans', href: '/borrower/browse-loans', icon: Search },
       { name: 'Apply for Loan', href: '/loans/apply', icon: DollarSign },
       { name: 'Loan Status', href: '/loans/status', icon: FileText },
       { name: 'Repayment Schedule', href: '/loans/repayment', icon: Calendar },

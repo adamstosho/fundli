@@ -605,4 +605,137 @@ router.post('/profile-picture', protect, async (req, res) => {
   }
 });
 
+// @route   GET /api/users/wallet
+// @desc    Get user wallet balance
+// @access  Private
+router.get('/wallet', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('walletBalance');
+    
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        balance: user.walletBalance || 0,
+        currency: 'NGN'
+      }
+    });
+
+  } catch (error) {
+    console.error('Get wallet balance error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to get wallet balance',
+      error: error.message
+    });
+  }
+});
+
+// @route   POST /api/users/wallet/fund
+// @desc    Fund user wallet
+// @access  Private
+router.post('/wallet/fund', [
+  protect,
+  body('amount')
+    .isFloat({ min: 100 })
+    .withMessage('Amount must be at least ₦100'),
+  body('paymentMethod')
+    .isIn(['bank_transfer', 'card_payment', 'mobile_money'])
+    .withMessage('Invalid payment method')
+], async (req, res) => {
+  try {
+    const { amount, paymentMethod } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ status: 'error', message: 'User not found' });
+    }
+
+    const PaystackService = require('../services/paystackService');
+    const init = await PaystackService.initializePayment({
+      type: 'wallet_funding',
+      amount,
+      currency: 'NGN',
+      paymentMethod,
+      description: 'Wallet funding',
+      relatedEntities: {}
+    }, user);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Payment initialized',
+      data: init
+    });
+
+  } catch (error) {
+    console.error('Fund wallet error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fund wallet',
+      error: error.message
+    });
+  }
+});
+
+// @route   POST /api/users/wallet/withdraw
+// @desc    Withdraw from user wallet
+// @access  Private
+router.post('/wallet/withdraw', [
+  protect,
+  body('amount')
+    .isFloat({ min: 100 })
+    .withMessage('Amount must be at least ₦100'),
+  body('bankDetails')
+    .isObject()
+    .withMessage('Bank details are required')
+], async (req, res) => {
+  try {
+    const { amount, bankDetails } = req.body;
+
+    const user = await User.findById(req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
+
+    // Check if user has sufficient balance
+    if ((user.walletBalance || 0) < amount) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Insufficient wallet balance'
+      });
+    }
+
+    // Update wallet balance
+    user.walletBalance = (user.walletBalance || 0) - amount;
+    await user.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Withdrawal processed successfully',
+      data: {
+        newBalance: user.walletBalance,
+        amountWithdrawn: amount,
+        bankDetails
+      }
+    });
+
+  } catch (error) {
+    console.error('Withdraw from wallet error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to process withdrawal',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router; 

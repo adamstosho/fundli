@@ -54,19 +54,13 @@ const KYCUpload = () => {
         } 
       });
     } else {
-      console.log('User is authenticated:', user);
-      console.log('User KYC status:', user?.kycStatus);
-      console.log('User type from user object:', user?.userType);
-      console.log('Location state:', location.state);
-      console.log('Final userType value:', userType);
+      // User is authenticated, proceed with KYC upload
     }
   }, [isAuthenticated, navigate, user, userType]);
 
   // Wait for user data to be properly loaded
   useEffect(() => {
     if (isAuthenticated && user && user.userType) {
-      console.log('User data fully loaded:', user);
-      console.log('Ready for KYC submission');
       setIsUserDataLoaded(true);
     } else {
       setIsUserDataLoaded(false);
@@ -78,24 +72,6 @@ const KYCUpload = () => {
     return null;
   }
 
-  // Debug section to help troubleshoot navigation
-  const debugNavigation = () => {
-    console.log('=== DEBUG NAVIGATION ===');
-    console.log('User object:', user);
-    console.log('User type from user object:', user?.userType);
-    console.log('Location state:', location.state);
-    console.log('Final userType value:', userType);
-    console.log('Is authenticated:', isAuthenticated);
-    
-    if (userType) {
-      const dashboardPath = `/dashboard/${userType}`;
-      console.log('Would navigate to:', dashboardPath);
-      // Test navigation
-      navigate(dashboardPath, { replace: true });
-    } else {
-      console.error('No userType found!');
-    }
-  };
 
   const idTypes = [
     { value: 'passport', label: 'Passport' },
@@ -205,16 +181,9 @@ const KYCUpload = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    console.log('KYC form submitted!');
-    console.log('Form data:', formData);
-    console.log('Documents:', documents);
-    
     if (!validateForm()) {
-      console.log('Form validation failed');
       return;
     }
-    
-    console.log('Form validation passed, starting KYC submission...');
     
     setIsLoading(true);
     setError('');
@@ -235,25 +204,19 @@ const KYCUpload = () => {
         });
       };
 
-      console.log('Converting files to base64...');
-
       // Convert all documents to base64
       const base64Documents = {};
       if (documents.idFront) {
         base64Documents.idFront = await convertFileToBase64(documents.idFront);
-        console.log('ID Front converted to base64');
       }
       if (documents.selfie) {
         base64Documents.selfie = await convertFileToBase64(documents.selfie);
-        console.log('Selfie converted to base64');
       }
       if (documents.idBack) {
         base64Documents.idBack = await convertFileToBase64(documents.idBack);
-        console.log('ID Back converted to base64');
       }
       if (documents.proofOfAddress) {
         base64Documents.proofOfAddress = await convertFileToBase64(documents.proofOfAddress);
-        console.log('Proof of Address converted to base64');
       }
 
       // Prepare KYC data
@@ -268,43 +231,28 @@ const KYCUpload = () => {
         ...base64Documents
       };
 
-      console.log('KYC data prepared:', kycData);
-      console.log('Calling submitKYC function...');
-
       // Submit KYC using the context function
       const result = await submitKYC(kycData);
 
-      console.log('KYC submission result:', result);
-
       if (result.success) {
         setSuccess(result.message);
-        console.log('KYC submitted successfully, navigating to dashboard for userType:', userType);
-        console.log('User object:', user);
-        console.log('Location state:', location.state);
         
         // Navigate to the appropriate dashboard based on userType
         if (userType) {
           const dashboardPath = `/dashboard/${userType}`;
-          console.log('Navigating to dashboard:', dashboardPath);
           
           // Add a delay to show success message and ensure user data is updated
           setTimeout(() => {
-            console.log('About to navigate to:', dashboardPath);
-            console.log('Current user object:', user);
-            console.log('Current userType:', userType);
             navigate(dashboardPath, { replace: true });
           }, 3000); // Increased delay to 3 seconds
         } else {
-          console.error('No userType found, cannot navigate to dashboard');
           setError('User type not found. Please contact support.');
         }
       } else {
-        console.log('KYC submission failed:', result.message);
         setError(result.message || 'Failed to submit KYC. Please try again.');
       }
       
     } catch (err) {
-      console.error('KYC submission error:', err);
       setError('Failed to submit KYC. Please try again.');
     } finally {
       setIsLoading(false);
@@ -645,14 +593,6 @@ const KYCUpload = () => {
                 )}
               </button>
               
-              {/* Debug Button - Remove after fixing */}
-              <button
-                type="button"
-                onClick={debugNavigation}
-                className="w-full mt-3 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
-              >
-                🐛 Debug Navigation (Click to test)
-              </button>
               
               <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-3">
                 By submitting this form, you agree to our verification process and confirm that all information provided is accurate.

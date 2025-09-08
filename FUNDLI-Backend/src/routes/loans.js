@@ -7,7 +7,11 @@ const {
   getLoanById,
   updateLoanApplication,
   cancelLoanApplication,
-  getLoanStats
+  getLoanStats,
+  getPendingLoansForBorrower,
+  getAllPendingLoans,
+  rejectLoanApplication,
+  acceptLoanApplication
 } = require('../controllers/loanController');
 
 // @route   POST /api/loans/apply
@@ -19,6 +23,21 @@ router.post('/apply', protect, applyForLoan);
 // @desc    Get user's loans
 // @access  Private
 router.get('/user', protect, getUserLoans);
+
+// @route   GET /api/loans/stats/user
+// @desc    Get user's loan statistics
+// @access  Private
+router.get('/stats/user', protect, getLoanStats);
+
+// @route   GET /api/loans/pending/borrower
+// @desc    Get borrower's pending loans
+// @access  Private (Borrowers only)
+router.get('/pending/borrower', protect, getPendingLoansForBorrower);
+
+// @route   GET /api/loans/pending/all
+// @desc    Get all pending loans (for lenders and admins)
+// @access  Private (Lenders and Admins only)
+router.get('/pending/all', protect, getAllPendingLoans);
 
 // @route   GET /api/loans/:loanId
 // @desc    Get loan by ID
@@ -35,9 +54,14 @@ router.put('/:loanId', protect, updateLoanApplication);
 // @access  Private
 router.delete('/:loanId', protect, cancelLoanApplication);
 
-// @route   GET /api/loans/stats/user
-// @desc    Get user's loan statistics
-// @access  Private
-router.get('/stats/user', protect, getLoanStats);
+// @route   POST /api/loans/:loanId/reject
+// @desc    Reject a loan application
+// @access  Private (Lenders only)
+router.post('/:loanId/reject', protect, rejectLoanApplication);
+
+// @route   POST /api/loans/:loanId/accept
+// @desc    Accept a loan application (after payment)
+// @access  Private (Lenders only)
+router.post('/:loanId/accept', protect, acceptLoanApplication);
 
 module.exports = router; 

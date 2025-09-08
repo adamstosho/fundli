@@ -63,6 +63,36 @@ const userSchema = new mongoose.Schema({
     default: 'pending'
   },
   
+  kycVerified: {
+    type: Boolean,
+    default: false
+  },
+  
+  kycData: {
+    bvn: {
+      number: String,
+      verified: Boolean,
+      verificationResult: Object,
+      verifiedAt: Date
+    },
+    bankAccount: {
+      accountNumber: String,
+      bankCode: String,
+      bankName: String,
+      accountName: String,
+      verified: Boolean,
+      verificationResult: Object,
+      verifiedAt: Date
+    },
+    submittedAt: Date,
+    reviewedAt: Date,
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    rejectionReason: String
+  },
+  
   kycDocuments: {
     idType: {
       type: String,

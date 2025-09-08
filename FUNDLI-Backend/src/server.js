@@ -15,9 +15,16 @@ const marketplaceRoutes = require('./routes/marketplace');
 const referralRoutes = require('./routes/referrals');
 const adminRoutes = require('./routes/admin');
 const notificationRoutes = require('./routes/notifications');
+const collateralRoutes = require('./routes/collateral');
+const borrowerRoutes = require('./routes/borrower');
+const lenderRoutes = require('./routes/lender');
+const transactionRoutes = require('./routes/transactions');
+const paymentRoutes = require('./routes/payments');
+const walletRoutes = require('./routes/wallet');
 
 const { errorHandler } = require('./middleware/errorHandler');
 const { connectDB } = require('./config/database');
+const { createRequestLogger } = require('./utils/logger');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -52,6 +59,9 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+// Custom request logger
+app.use(createRequestLogger());
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ 
@@ -67,10 +77,16 @@ app.use('/api/users', userRoutes);
 app.use('/api/loans', loanRoutes);
 app.use('/api/pools', poolRoutes);
 app.use('/api/investments', investmentRoutes);
-// app.use('/api/marketplace', marketplaceRoutes);
+app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/referrals', referralRoutes);
 app.use('/api/admin', adminRoutes);
-// app.use('/api/notifications', notificationRoutes);
+app.use('/api/collateral', collateralRoutes);
+app.use('/api/borrower', borrowerRoutes);
+app.use('/api/lender', lenderRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/wallet', walletRoutes);
 
 // 404 handler for undefined routes
 app.use('*', (req, res) => {

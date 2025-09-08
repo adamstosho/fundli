@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Eye, EyeOff, Mail, Lock, User, Phone, Building, AlertCircle, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, AlertCircle, CheckCircle, ArrowRight, Sparkles, Shield, Zap, TrendingUp, Users } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -12,13 +13,7 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     userType: 'borrower',
-    referralCode: '',
-    company: {
-      name: '',
-      registrationNumber: '',
-      industry: '',
-      website: ''
-    }
+    referralCode: ''
   });
   
   const [showPassword, setShowPassword] = useState(false);
@@ -33,21 +28,10 @@ const Register = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     
-    if (name.startsWith('company.')) {
-      const companyField = name.split('.')[1];
-      setFormData(prev => ({
-        ...prev,
-        company: {
-          ...prev.company,
-          [companyField]: value
-        }
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
     
     // Clear messages when user starts typing
     if (error) setError('');
@@ -96,11 +80,6 @@ const Register = () => {
       // Clean phone number format
       registrationData.phone = registrationData.phone.replace(/\s/g, '');
       
-      // Only include company data for lenders
-      if (registrationData.userType === 'borrower') {
-        delete registrationData.company;
-      }
-      
       console.log('Registration - Data being sent to API:', registrationData);
       console.log('Registration - userType being sent:', registrationData.userType);
       
@@ -128,385 +107,437 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.1%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
+      
+      {/* Floating Elements */}
+      <motion.div
+        className="absolute top-20 left-20 w-20 h-20 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-xl opacity-20"
+        animate={{
+          y: [0, -20, 0],
+          x: [0, 10, 0],
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      <motion.div
+        className="absolute bottom-20 right-20 w-32 h-32 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full blur-xl opacity-20"
+        animate={{
+          y: [0, 20, 0],
+          x: [0, -10, 0],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+
+      <div className="max-w-2xl mx-auto relative z-10">
         {/* Header */}
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Create your Fundli account
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-8"
+        >
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-2xl">
+                <Sparkles className="h-8 w-8 text-white" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
+                <Zap className="h-3 w-3 text-white" />
+              </div>
+            </div>
+          </div>
+          
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent mb-2">
+            Join Fundli
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Join thousands of users in the lending revolution
+          <p className="text-purple-200 text-lg">
+            Start your financial journey with us today
           </p>
-        </div>
+        </motion.div>
 
         {/* Registration Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            {/* Name Fields */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                  First Name
-                </label>
-                <div className="mt-1 relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
-                    required
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                    placeholder="First name"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                  Last Name
-                </label>
-                <div className="mt-1 relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
-                    required
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                    placeholder="Last name"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email Address
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Enter your email"
-                />
-              </div>
-            </div>
-
-            {/* Phone Field */}
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Phone Number
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Phone className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  required
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Enter your phone number"
-                />
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Format: +1234567890 or 1234567890 (numbers only)
-              </p>
-            </div>
-
-            {/* Referral Code Field */}
-            <div>
-              <label htmlFor="referralCode" className="block text-sm font-medium text-gray-700">
-                Referral Code (Optional)
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="referralCode"
-                  name="referralCode"
-                  type="text"
-                  value={formData.referralCode}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Enter referral code (optional)"
-                />
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Have a friend's referral code? Enter it here to earn rewards together
-              </p>
-            </div>
-
-            {/* User Type Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                I want to:
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="relative flex cursor-pointer rounded-lg border border-gray-300 bg-white p-4 shadow-sm focus:outline-none">
-                  <input
-                    type="radio"
-                    name="userType"
-                    value="borrower"
-                    checked={formData.userType === 'borrower'}
-                    onChange={handleChange}
-                    className="sr-only"
-                  />
-                  <span className="flex flex-1">
-                    <span className="flex flex-col">
-                      <span className="block text-sm font-medium text-gray-900">Borrow Money</span>
-                      <span className="mt-1 flex items-center text-sm text-gray-500">Get loans for your needs</span>
-                    </span>
-                  </span>
-                  <span className={`pointer-events-none absolute -inset-px rounded-lg border-2 ${
-                    formData.userType === 'borrower' ? 'border-blue-500' : 'border-transparent'
-                  }`} />
-                </label>
-                
-                <label className="relative flex cursor-pointer rounded-lg border border-gray-300 bg-white p-4 shadow-sm focus:outline-none">
-                  <input
-                    type="radio"
-                    name="userType"
-                    value="lender"
-                    checked={formData.userType === 'lender'}
-                    onChange={handleChange}
-                    className="sr-only"
-                  />
-                  <span className="flex flex-1">
-                    <span className="flex flex-col">
-                      <span className="block text-sm font-medium text-gray-900">Lend Money</span>
-                      <span className="mt-1 flex items-center text-sm text-gray-500">Earn returns on investments</span>
-                    </span>
-                  </span>
-                  <span className={`pointer-events-none absolute -inset-px rounded-lg border-2 ${
-                    formData.userType === 'lender' ? 'border-blue-500' : 'border-transparent'
-                  }`} />
-                </label>
-              </div>
-            </div>
-
-            {/* Company Fields (for lenders) */}
-            {formData.userType === 'lender' && (
-              <div className="space-y-4 border-t pt-4">
-                <h3 className="text-lg font-medium text-gray-900">Company Information</h3>
-                
-                <div>
-                  <label htmlFor="company.name" className="block text-sm font-medium text-gray-700">
-                    Company Name
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20"
+        >
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-5">
+              {/* Name Fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                >
+                  <label htmlFor="firstName" className="block text-sm font-semibold text-white mb-2">
+                    First Name
                   </label>
-                  <div className="mt-1 relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Building className="h-5 w-5 text-gray-400" />
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <User className="h-5 w-5 text-purple-300 group-focus-within:text-purple-400 transition-colors" />
                     </div>
                     <input
-                      id="company.name"
-                      name="company.name"
+                      id="firstName"
+                      name="firstName"
                       type="text"
-                      value={formData.company.name}
+                      required
+                      value={formData.firstName}
                       onChange={handleChange}
-                      className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                      placeholder="Company name"
+                      className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                      placeholder="First name"
                     />
                   </div>
-                </div>
-
-                <div>
-                  <label htmlFor="company.registrationNumber" className="block text-sm font-medium text-gray-700">
-                    Registration Number
+                </motion.div>
+                
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                >
+                  <label htmlFor="lastName" className="block text-sm font-semibold text-white mb-2">
+                    Last Name
                   </label>
-                  <input
-                    id="company.registrationNumber"
-                    name="company.registrationNumber"
-                    type="text"
-                    value={formData.company.registrationNumber}
-                    onChange={handleChange}
-                    className="mt-1 appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                    placeholder="Business registration number"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="company.industry" className="block text-sm font-medium text-gray-700">
-                    Industry
-                  </label>
-                  <input
-                    id="company.industry"
-                    name="company.industry"
-                    type="text"
-                    value={formData.company.industry}
-                    onChange={handleChange}
-                    className="mt-1 appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                    placeholder="e.g., Technology, Finance, Healthcare"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="company.website" className="block text-sm font-medium text-gray-700">
-                    Website (Optional)
-                  </label>
-                  <input
-                    id="company.website"
-                    name="company.website"
-                    type="url"
-                    value={formData.company.website}
-                    onChange={handleChange}
-                    className="mt-1 appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                    placeholder="https://yourcompany.com"
-                  />
-                </div>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <User className="h-5 w-5 text-purple-300 group-focus-within:text-purple-400 transition-colors" />
+                    </div>
+                    <input
+                      id="lastName"
+                      name="lastName"
+                      type="text"
+                      required
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                      placeholder="Last name"
+                    />
+                  </div>
+                </motion.div>
               </div>
+
+              {/* Email Field */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+              >
+                <label htmlFor="email" className="block text-sm font-semibold text-white mb-2">
+                  Email Address
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5 text-purple-300 group-focus-within:text-purple-400 transition-colors" />
+                  </div>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                    placeholder="Enter your email"
+                  />
+                </div>
+              </motion.div>
+
+              {/* Phone Field */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+              >
+                <label htmlFor="phone" className="block text-sm font-semibold text-white mb-2">
+                  Phone Number
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Phone className="h-5 w-5 text-purple-300 group-focus-within:text-purple-400 transition-colors" />
+                  </div>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    required
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+                <p className="mt-2 text-xs text-purple-300">
+                  Format: +1234567890 or 1234567890 (numbers only)
+                </p>
+              </motion.div>
+
+              {/* Referral Code Field */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.7 }}
+              >
+                <label htmlFor="referralCode" className="block text-sm font-semibold text-white mb-2">
+                  Referral Code (Optional)
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Users className="h-5 w-5 text-purple-300 group-focus-within:text-purple-400 transition-colors" />
+                  </div>
+                  <input
+                    id="referralCode"
+                    name="referralCode"
+                    type="text"
+                    value={formData.referralCode}
+                    onChange={handleChange}
+                    className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                    placeholder="Enter referral code (optional)"
+                  />
+                </div>
+                <p className="mt-2 text-xs text-purple-300">
+                  Have a friend's referral code? Enter it here to earn rewards together
+                </p>
+              </motion.div>
+
+              {/* User Type Selection */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.8 }}
+              >
+                <label className="block text-sm font-semibold text-white mb-3">
+                  I want to:
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <label className="relative flex cursor-pointer rounded-xl border border-white/20 bg-white/5 p-4 shadow-sm focus:outline-none hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
+                    <input
+                      type="radio"
+                      name="userType"
+                      value="borrower"
+                      checked={formData.userType === 'borrower'}
+                      onChange={handleChange}
+                      className="sr-only"
+                    />
+                    <span className="flex flex-1">
+                      <span className="flex flex-col">
+                        <span className="block text-sm font-semibold text-white">Borrow Money</span>
+                        <span className="mt-1 flex items-center text-sm text-purple-200">Get loans for your needs</span>
+                      </span>
+                    </span>
+                    <span className={`pointer-events-none absolute -inset-px rounded-xl border-2 transition-colors ${
+                      formData.userType === 'borrower' ? 'border-purple-500' : 'border-transparent'
+                    }`} />
+                  </label>
+                  
+                  <label className="relative flex cursor-pointer rounded-xl border border-white/20 bg-white/5 p-4 shadow-sm focus:outline-none hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
+                    <input
+                      type="radio"
+                      name="userType"
+                      value="lender"
+                      checked={formData.userType === 'lender'}
+                      onChange={handleChange}
+                      className="sr-only"
+                    />
+                    <span className="flex flex-1">
+                      <span className="flex flex-col">
+                        <span className="block text-sm font-semibold text-white">Lend Money</span>
+                        <span className="mt-1 flex items-center text-sm text-purple-200">Earn returns on investments</span>
+                      </span>
+                    </span>
+                    <span className={`pointer-events-none absolute -inset-px rounded-xl border-2 transition-colors ${
+                      formData.userType === 'lender' ? 'border-purple-500' : 'border-transparent'
+                    }`} />
+                  </label>
+                </div>
+              </motion.div>
+
+
+              {/* Password Fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.9 }}
+                >
+                  <label htmlFor="password" className="block text-sm font-semibold text-white mb-2">
+                    Password
+                  </label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-purple-300 group-focus-within:text-purple-400 transition-colors" />
+                    </div>
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="w-full pl-12 pr-12 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                      placeholder="Create a strong password"
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-white/10 rounded-r-xl transition-colors"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5 text-purple-300 hover:text-white transition-colors" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-purple-300 hover:text-white transition-colors" />
+                      )}
+                    </button>
+                  </div>
+                  <p className="mt-2 text-xs text-purple-300">
+                    Must be at least 8 characters with uppercase, lowercase, and number
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 1.0 }}
+                >
+                  <label htmlFor="confirmPassword" className="block text-sm font-semibold text-white mb-2">
+                    Confirm Password
+                  </label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-purple-300 group-focus-within:text-purple-400 transition-colors" />
+                    </div>
+                    <input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="w-full pl-12 pr-12 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                      placeholder="Confirm your password"
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-white/10 rounded-r-xl transition-colors"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-5 w-5 text-purple-300 hover:text-white transition-colors" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-purple-300 hover:text-white transition-colors" />
+                      )}
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-red-500/20 border border-red-500/30 rounded-xl p-4 backdrop-blur-sm"
+              >
+                <div className="flex items-center">
+                  <AlertCircle className="h-5 w-5 text-red-300 mr-3" />
+                  <p className="text-red-200 text-sm font-medium">{error}</p>
+                </div>
+              </motion.div>
             )}
 
-            {/* Password Fields */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full pl-10 pr-12 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Create a strong password"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Password must be at least 8 characters with uppercase, lowercase, and number
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full pl-10 pr-12 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Confirm your password"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <AlertCircle className="h-5 w-5 text-red-400" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">{error}</h3>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Success Message */}
-          {success && (
-            <div className="rounded-md bg-green-50 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <CheckCircle className="h-5 w-5 text-green-400" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-green-800">{success}</h3>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Submit Button */}
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-            >
-              {isLoading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creating account...
-                </div>
-              ) : (
-                'Create Account'
-              )}
-            </button>
-          </div>
-
-          {/* Sign In Link */}
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link
-                to="/login"
-                className="font-medium text-blue-600 hover:text-blue-500"
+            {/* Success Message */}
+            {success && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-green-500/20 border border-green-500/30 rounded-xl p-4 backdrop-blur-sm"
               >
-                Sign in here
-              </Link>
-            </p>
+                <div className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-300 mr-3" />
+                  <p className="text-green-200 text-sm font-medium">{success}</p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Submit Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.1 }}
+            >
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                    <span>Creating account...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Create Account</span>
+                    <ArrowRight className="h-5 w-5" />
+                  </>
+                )}
+              </button>
+            </motion.div>
+
+            {/* Sign In Link */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 1.2 }}
+              className="text-center"
+            >
+              <p className="text-purple-200 text-sm">
+                Already have an account?{' '}
+                <Link
+                  to="/login"
+                  className="font-semibold text-white hover:text-purple-200 transition-colors duration-300 hover:underline"
+                >
+                  Sign in here
+                </Link>
+              </p>
+            </motion.div>
+          </form>
+        </motion.div>
+
+        {/* Features */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1.3 }}
+          className="grid grid-cols-4 gap-4 text-center mt-8"
+        >
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+            <Shield className="h-6 w-6 text-purple-300 mx-auto mb-2" />
+            <p className="text-purple-200 text-xs font-medium">Secure</p>
           </div>
-        </form>
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+            <Zap className="h-6 w-6 text-purple-300 mx-auto mb-2" />
+            <p className="text-purple-200 text-xs font-medium">Fast</p>
+          </div>
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+            <TrendingUp className="h-6 w-6 text-purple-300 mx-auto mb-2" />
+            <p className="text-purple-200 text-xs font-medium">Profitable</p>
+          </div>
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+            <Sparkles className="h-6 w-6 text-purple-300 mx-auto mb-2" />
+            <p className="text-purple-200 text-xs font-medium">Smart</p>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

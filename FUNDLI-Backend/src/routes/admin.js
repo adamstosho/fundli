@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
 const User = require('../models/User');
+const Loan = require('../models/Loan');
 const ReferralService = require('../services/referralService');
 
 // Middleware to check if user is admin
@@ -785,6 +786,234 @@ router.put('/loans/:loanId/reject', protect, requireAdmin, async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to reject loan'
+    });
+  }
+});
+
+// @desc    Get all loan applications for admin review
+// @route   GET /api/admin/loan-applications
+// @access  Private (Admin only)
+router.get('/loan-applications', protect, requireAdmin, async (req, res) => {
+  try {
+    const { status, page = 1, limit = 10 } = req.query;
+    
+    // Build filter
+    const filter = {};
+    if (status && status !== 'all') {
+      filter.status = status;
+    }
+
+    // Calculate pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const loans = await Loan.find(filter)
+      .populate('borrower', 'firstName lastName email kycStatus kycVerified')
+      .populate('fundingProgress.investors.lender', 'firstName lastName email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Loan.countDocuments(filter);
+
+    // Format response
+    const loanApplications = loans.map(loan => ({
+      id: loan._id,
+      loanAmount: loan.loanAmount,
+      purpose: loan.purpose,
+      purposeDescription: loan.purposeDescription,
+      duration: loan.duration,
+      interestRate: loan.interestRate,
+      collateral: loan.collateral,
+      status: loan.status,
+      kycStatus: loan.kycStatus,
+      createdAt: loan.createdAt,
+      submittedAt: loan.submittedAt,
+      borrower: {
+        id: loan.borrower._id,
+        name: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+        email: loan.borrower.email,
+        kycStatus: loan.borrower.kycStatus,
+        kycVerified: loan.borrower.kycVerified
+      },
+      fundingProgress: {
+        fundedAmount: loan.fundingProgress?.fundedAmount || 0,
+        targetAmount: loan.fundingProgress?.targetAmount || loan.loanAmount,
+        investors: loan.fundingProgress?.investors || [],
+        fundingPercentage: loan.fundingProgress?.fundedAmount && loan.fundingProgress?.targetAmount ? 
+          Math.round((loan.fundingProgress.fundedAmount / loan.fundingProgress.targetAmount) * 100) : 0
+      }
+    }));
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        loanApplications,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(total / parseInt(limit)),
+          totalItems: total,
+          itemsPerPage: parseInt(limit)
+        },
+        summary: {
+          total: total,
+          pending: await Loan.countDocuments({ ...filter, status: 'pending' }),
+          approved: await Loan.countDocuments({ ...filter, status: 'approved' }),
+          funded: await Loan.countDocuments({ ...filter, status: 'funded' }),
+          rejected: await Loan.countDocuments({ ...filter, status: 'rejected' })
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Get admin loan applications error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to get loan applications',
+      error: error.message
+    });
+  }
+});
+
+// @desc    Approve or reject a loan application (Admin)
+// @route   POST /api/admin/loan/:id/approve
+// @access  Private (Admin only)
+router.post('/loan/:id/approve', protect, requireAdmin, async (req, res) => {
+  try {
+    const { action, rejectionReason, adminNotes } = req.body; // action: 'approve' or 'reject'
+
+    // Validate action
+    if (!['approve', 'reject'].includes(action)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Action must be either "approve" or "reject"'
+      });
+    }
+
+    // Validate rejection reason if rejecting
+    if (action === 'reject' && !rejectionReason) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Rejection reason is required when rejecting loan'
+      });
+    }
+
+    const loan = await Loan.findById(req.params.id).populate('borrower', 'firstName lastName email');
+    if (!loan) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Loan application not found'
+      });
+    }
+
+    // Update loan status
+    const updateData = {
+      status: action === 'approve' ? 'approved' : 'rejected',
+      reviewedAt: new Date(),
+      reviewedBy: req.user.id,
+      adminNotes: adminNotes || ''
+    };
+
+    if (action === 'reject') {
+      updateData.rejectionReason = rejectionReason;
+    }
+
+    const updatedLoan = await Loan.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+
+    res.status(200).json({
+      status: 'success',
+      message: `Loan application ${action}d successfully by admin`,
+      data: {
+        loan: {
+          id: updatedLoan._id,
+          status: updatedLoan.status,
+          reviewedAt: updatedLoan.reviewedAt,
+          adminNotes: updatedLoan.adminNotes
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Admin loan approval error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to process loan approval',
+      error: error.message
+    });
+  }
+});
+
+// @desc    Get loan application details for admin
+// @route   GET /api/admin/loan/:id
+// @access  Private (Admin only)
+router.get('/loan/:id', protect, requireAdmin, async (req, res) => {
+  try {
+    const loan = await Loan.findById(req.params.id)
+      .populate('borrower', 'firstName lastName email phone kycStatus kycVerified kycData')
+      .populate('fundingProgress.investors.lender', 'firstName lastName email')
+      .populate('reviewedBy', 'firstName lastName email');
+
+    if (!loan) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Loan application not found'
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        loan: {
+          id: loan._id,
+          loanAmount: loan.loanAmount,
+          purpose: loan.purpose,
+          purposeDescription: loan.purposeDescription,
+          duration: loan.duration,
+          interestRate: loan.interestRate,
+          monthlyPayment: loan.monthlyPayment,
+          totalRepayment: loan.totalRepayment,
+          totalInterest: loan.totalInterest,
+          collateral: loan.collateral,
+          status: loan.status,
+          kycStatus: loan.kycStatus,
+          createdAt: loan.createdAt,
+          submittedAt: loan.submittedAt,
+          reviewedAt: loan.reviewedAt,
+          rejectionReason: loan.rejectionReason,
+          adminNotes: loan.adminNotes,
+          borrower: {
+            id: loan.borrower._id,
+            name: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+            email: loan.borrower.email,
+            phone: loan.borrower.phone,
+            kycStatus: loan.borrower.kycStatus,
+            kycVerified: loan.borrower.kycVerified,
+            kycData: loan.borrower.kycData
+          },
+          fundingProgress: {
+            fundedAmount: loan.fundingProgress?.fundedAmount || 0,
+            targetAmount: loan.fundingProgress?.targetAmount || loan.loanAmount,
+            investors: loan.fundingProgress?.investors || [],
+            fundingPercentage: loan.fundingProgress?.fundedAmount && loan.fundingProgress?.targetAmount ? 
+              Math.round((loan.fundingProgress.fundedAmount / loan.fundingProgress.targetAmount) * 100) : 0
+          },
+          reviewedBy: loan.reviewedBy ? {
+            name: `${loan.reviewedBy.firstName} ${loan.reviewedBy.lastName}`,
+            email: loan.reviewedBy.email
+          } : null
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Get admin loan details error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to get loan details',
+      error: error.message
     });
   }
 });

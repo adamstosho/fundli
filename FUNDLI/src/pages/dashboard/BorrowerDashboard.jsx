@@ -13,9 +13,13 @@ import {
   FileText,
   CreditCard,
   ArrowRight,
-  BarChart3
+  BarChart3,
+  Search
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import PendingLoansSection from '../../components/common/PendingLoansSection';
+import InProgressLoansSection from '../../components/common/InProgressLoansSection';
+import WalletBalanceCard from '../../components/common/WalletBalanceCard';
 
 const BorrowerDashboard = () => {
   const { user, kycStatus } = useAuth();
@@ -36,32 +40,50 @@ const BorrowerDashboard = () => {
         setError('');
         setIsLoading(true);
         
+        console.log('🔍 Loading borrower dashboard data...');
+        console.log('👤 Current user:', user);
+        
         // Fetch real data from backend API
         const token = localStorage.getItem('accessToken');
         if (!token) {
           throw new Error('No authentication token found');
         }
+        
+        console.log('🔑 Token exists:', !!token);
+        console.log('🔑 Token preview:', token.substring(0, 20) + '...');
 
         // Fetch user's loan data
+        console.log('📡 Fetching loans from: http://localhost:5000/api/loans/user');
         const loansResponse = await fetch('http://localhost:5000/api/loans/user', {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
         });
 
+        console.log('📡 Loans response status:', loansResponse.status);
+        console.log('📡 Loans response ok:', loansResponse.ok);
+
         if (loansResponse.ok) {
           const loansData = await loansResponse.json();
-          console.log('Fetched loans data:', loansData);
+          console.log('✅ Fetched loans data:', loansData);
           
           // Process loans data
           const activeLoans = loansData.data?.loans?.filter(loan => loan.status === 'active') || [];
           const pendingLoans = loansData.data?.loans?.filter(loan => loan.status === 'pending') || [];
+          
+          console.log('📊 Active loans:', activeLoans.length);
+          console.log('📊 Pending loans:', pendingLoans.length);
+          console.log('📊 Total loans:', loansData.data?.loans?.length || 0);
           
           setRecentLoans(loansData.data?.loans || []);
           
           // Calculate stats from real data
           const totalBorrowed = loansData.data?.loans?.reduce((sum, loan) => sum + (loan.loanAmount || 0), 0) || 0;
           const totalRepaid = loansData.data?.loans?.reduce((sum, loan) => sum + (loan.amountPaid || 0), 0) || 0;
+          
+          console.log('💰 Total borrowed:', totalBorrowed);
+          console.log('💰 Total repaid:', totalRepaid);
           
           setStats({
             totalBorrowed,
@@ -81,12 +103,15 @@ const BorrowerDashboard = () => {
             }));
           
           setUpcomingPayments(payments);
+          console.log('📅 Upcoming payments:', payments.length);
         } else {
-          throw new Error('Failed to fetch loans data');
+          const errorData = await loansResponse.json().catch(() => ({ message: 'Unknown error' }));
+          console.error('❌ Failed to fetch loans data:', errorData);
+          throw new Error(`Failed to fetch loans data: ${errorData.message || 'Unknown error'}`);
         }
       } catch (error) {
-        console.error('Error loading dashboard data:', error);
-        setError('Failed to load dashboard data. Please try again later.');
+        console.error('❌ Error loading dashboard data:', error);
+        setError(`Failed to load dashboard data: ${error.message}`);
         
         // Set default values if API fails
         setStats({
@@ -104,6 +129,9 @@ const BorrowerDashboard = () => {
 
     if (user) {
       loadDashboardData();
+    } else {
+      console.log('⚠️ No user found, skipping dashboard data load');
+      setIsLoading(false);
     }
   }, [user]);
 
@@ -135,6 +163,13 @@ const BorrowerDashboard = () => {
       color: 'from-primary-500 to-primary-600'
     },
     {
+      title: 'Browse Loans',
+      description: 'Find available loans to apply for',
+      icon: Search,
+      href: '/borrower/browse-loans',
+      color: 'from-green-500 to-green-600'
+    },
+    {
       title: 'View Loans',
       description: 'Check your loan status and details',
       icon: Eye,
@@ -164,28 +199,13 @@ const BorrowerDashboard = () => {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Welcome back, {user?.name?.split(' ')[0]}! 👋
+            Welcome back, {user?.firstName || user?.name?.split(' ')[0] || 'Borrower'}! 👋
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
             Here's what's happening with your loans today
           </p>
         </div>
         
-        {kycStatus === 'pending' && user?.userType !== 'admin' && (
-          <div className="mt-4 lg:mt-0">
-            <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
-              <div className="flex items-center space-x-2">
-                <AlertCircle className="h-5 w-5 text-warning" />
-                <span className="text-sm text-warning font-medium">
-                  KYC verification pending
-                </span>
-              </div>
-              <p className="text-xs text-warning/80 mt-1">
-                Complete your KYC to access all features
-              </p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Error Message */}
@@ -195,9 +215,21 @@ const BorrowerDashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           className="card p-4 bg-red-50 border border-red-200"
         >
-          <div className="flex items-center">
-            <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
-            <p className="text-red-800">{error}</p>
+          <div className="flex items-start">
+            <AlertCircle className="h-5 w-5 text-red-400 mr-2 mt-0.5" />
+            <div>
+              <p className="text-red-800 font-medium mb-2">Dashboard Data Error</p>
+              <p className="text-red-700 text-sm">{error}</p>
+              <div className="mt-2 text-xs text-red-600">
+                <p>Possible solutions:</p>
+                <ul className="list-disc list-inside mt-1">
+                  <li>Check your internet connection</li>
+                  <li>Refresh the page</li>
+                  <li>Log out and log back in</li>
+                  <li>Contact support if the issue persists</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </motion.div>
       )}
@@ -287,6 +319,11 @@ const BorrowerDashboard = () => {
             </div>
           </div>
         </motion.div>
+      </div>
+
+      {/* Wallet Balance */}
+      <div className="mb-8">
+        <WalletBalanceCard userType="borrower" />
       </div>
 
       {/* Quick Actions */}
@@ -452,37 +489,13 @@ const BorrowerDashboard = () => {
         </motion.div>
       </div>
 
-      {/* KYC Status */}
-      {kycStatus === 'pending' && user?.userType !== 'admin' && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="card p-6 bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center">
-                <FileText className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Complete Your KYC Verification
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Verify your identity to unlock all platform features and apply for loans
-                </p>
-              </div>
-            </div>
-            <Link
-              to="/kyc-upload"
-              className="btn-primary"
-            >
-              Complete KYC
-            </Link>
-          </div>
-        </motion.div>
-      )}
+      {/* Pending Loans Section */}
+      <PendingLoansSection userType="borrower" title="My Pending Loans" />
+
+      {/* In Progress Loans Section */}
+      <InProgressLoansSection />
+
+      {/* KYC verification is now optional */}
     </div>
   );
 };

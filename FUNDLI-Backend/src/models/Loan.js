@@ -8,6 +8,11 @@ const loanSchema = new mongoose.Schema({
     required: true
   },
   
+  lendingPool: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'LendingPool'
+  },
+  
   loanAmount: {
     type: Number,
     required: [true, 'Loan amount is required'],
@@ -92,8 +97,14 @@ const loanSchema = new mongoose.Schema({
   // Loan Status and Progress
   status: {
     type: String,
-    enum: ['draft', 'pending', 'approved', 'funded', 'active', 'completed', 'defaulted', 'rejected'],
+    enum: ['draft', 'pending', 'kyc_pending', 'approved', 'funded', 'active', 'completed', 'defaulted', 'rejected'],
     default: 'draft'
+  },
+  
+  kycStatus: {
+    type: String,
+    enum: ['pending', 'verified', 'rejected'],
+    default: 'pending'
   },
   
   fundingProgress: {
@@ -139,6 +150,14 @@ const loanSchema = new mongoose.Schema({
   },
   
   approvedAt: Date,
+  
+  // Rejection Information
+  rejectedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  
+  rejectedAt: Date,
   
   rejectionReason: String,
   

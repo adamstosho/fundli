@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { DollarSign, Calendar, FileText, Upload, X, CheckCircle, AlertCircle, ArrowRight, Shield } from 'lucide-react';
+import { DollarSign, Calendar, FileText, CheckCircle, AlertCircle, ArrowRight, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import CollateralUpload from '../../components/loans/CollateralUpload';
 
 const LoanApplication = () => {
   const [formData, setFormData] = useState({
@@ -10,49 +11,17 @@ const LoanApplication = () => {
     purpose: '',
     duration: '',
     repaymentSchedule: 'monthly',
-    collateral: null,
+    collateral: [],
     description: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const fileInputRef = useRef();
   
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Check if user needs to complete KYC
-  if (user?.kycStatus !== 'approved' && user?.userType !== 'admin') {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 text-center">
-          <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Shield className="h-8 w-8 text-orange-600 dark:text-orange-400" />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            KYC Verification Required
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            You need to complete your KYC verification before you can apply for loans.
-          </p>
-          <div className="space-y-3">
-            <button
-              onClick={() => navigate('/kyc-upload')}
-              className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors"
-            >
-              Complete KYC Verification
-            </button>
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="w-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-            >
-              Back to Dashboard
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // KYC verification is now optional - all users can apply for loans
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -61,25 +30,6 @@ const LoanApplication = () => {
       [name]: value
     }));
     if (error) setError('');
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        setError('File size must be less than 10MB');
-        return;
-      }
-      setFormData(prev => ({ ...prev, collateral: file }));
-      setError('');
-    }
-  };
-
-  const removeFile = () => {
-    setFormData(prev => ({ ...prev, collateral: null }));
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -99,17 +49,9 @@ const LoanApplication = () => {
         purpose: formData.purpose,
         duration: parseInt(formData.duration),
         repaymentSchedule: formData.repaymentSchedule,
-        description: formData.description
+        description: formData.description,
+        collateral: formData.collateral
       };
-
-      // Add collateral if provided
-      if (formData.collateral) {
-        loanData.collateral = {
-          type: 'other', // Default type
-          description: formData.collateral.name || 'Uploaded document',
-          estimatedValue: 0
-        };
-      }
 
       const response = await fetch('http://localhost:5000/api/loans/apply', {
         method: 'POST',
@@ -306,59 +248,21 @@ const LoanApplication = () => {
                 />
               </div>
 
-              {/* Collateral Upload */}
-              <div>
-                <label className="form-label">
-                  Collateral Documentation
-                </label>
-                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary-400 transition-colors">
-                  {formData.collateral ? (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-center space-x-2 text-success">
-                        <CheckCircle className="h-5 w-5" />
-                        <span className="font-medium">File uploaded successfully</span>
-                      </div>
-                      <div className="flex items-center justify-center space-x-2">
-                        <FileText className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          {formData.collateral.name}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={removeFile}
-                          className="p-1 text-gray-400 hover:text-error transition-colors"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                      <div className="mt-4">
-                        <label htmlFor="collateral" className="cursor-pointer">
-                          <span className="text-primary-600 dark:text-primary-400 hover:text-primary-500 font-medium">
-                            Click to upload
-                          </span>
-                          <span className="text-gray-500"> or drag and drop</span>
-                        </label>
-                        <input
-                          id="collateral"
-                          name="collateral"
-                          type="file"
-                          ref={fileInputRef}
-                          onChange={handleFileChange}
-                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                          className="hidden"
-                        />
-                      </div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        PDF, DOC, DOCX, JPG, PNG up to 10MB
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
+              {/* Enhanced Collateral Section */}
+              <CollateralUpload 
+                onCollateralAdded={(collateral) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    collateral: [...prev.collateral, collateral]
+                  }));
+                }}
+                onCollateralRemoved={(collateralId) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    collateral: prev.collateral.filter(item => item.id !== collateralId)
+                  }));
+                }}
+              />
 
               {/* Terms and Conditions */}
               <div className="flex items-start space-x-3">

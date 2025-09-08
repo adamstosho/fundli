@@ -85,30 +85,8 @@ const authorize = (...roles) => {
 };
 
 const requireKYC = async (req, res, next) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'Not authorized to access this route'
-      });
-    }
-
-    // Admin users don't need KYC verification
-    if (req.user.userType === 'admin') {
-      return next();
-    }
-
-    if (req.user.kycStatus !== 'approved') {
-      return res.status(403).json({
-        status: 'error',
-        message: 'KYC verification required to access this feature'
-      });
-    }
-
-    next();
-  } catch (error) {
-    next(error);
-  }
+  // KYC verification is now optional - allow all authenticated users to proceed
+  next();
 };
 
 const optionalAuth = async (req, res, next) => {
