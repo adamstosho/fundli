@@ -51,10 +51,10 @@ const userRegistrationRules = {
 const loanApplicationRules = {
   loanAmount: {
     required: true,
-    min: 1000,
-    max: 10000000,
+    min: 10,
+    max: 100000,
     type: 'number',
-    message: 'Loan amount must be between ₦1,000 and ₦10,000,000'
+    message: 'Loan amount must be between $10 and $100,000'
   },
   purpose: {
     required: true,
@@ -117,10 +117,10 @@ const lendingPoolRules = {
   },
   poolSize: {
     required: true,
-    min: 10000,
-    max: 50000000,
+    min: 100,
+    max: 500000,
     type: 'number',
-    message: 'Pool size must be between ₦10,000 and ₦50,000,000'
+    message: 'Pool size must be between $100 and $500,000'
   },
   interestRate: {
     required: true,
@@ -154,10 +154,10 @@ const lendingPoolRules = {
 const investmentRules = {
   amount: {
     required: true,
-    min: 1000,
-    max: 10000000,
+    min: 10,
+    max: 100000,
     type: 'number',
-    message: 'Investment amount must be between ₦1,000 and ₦10,000,000'
+    message: 'Investment amount must be between $10 and $100,000'
   },
   lendingPoolId: {
     required: false,

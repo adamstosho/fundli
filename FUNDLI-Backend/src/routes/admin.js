@@ -3,6 +3,7 @@ const router = express.Router();
 const { protect } = require('../middleware/auth');
 const User = require('../models/User');
 const Loan = require('../models/Loan');
+const Wallet = require('../models/Wallet');
 const ReferralService = require('../services/referralService');
 
 // Middleware to check if user is admin
@@ -1014,6 +1015,90 @@ router.get('/loan/:id', protect, requireAdmin, async (req, res) => {
       status: 'error',
       message: 'Failed to get loan details',
       error: error.message
+    });
+  }
+});
+
+// ==================== WALLET ENDPOINTS ====================
+
+// @desc    Create wallet for admin
+// @route   POST /api/admin/wallet/create
+// @access  Private (Admin only)
+router.post('/wallet/create', protect, requireAdmin, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Check if wallet already exists
+    const existingWallet = await Wallet.findOne({ user: userId });
+    if (existingWallet) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Wallet already exists for this admin'
+      });
+    }
+
+    // Create new wallet with default admin balance
+    const wallet = await Wallet.create({
+      user: userId,
+      balance: 50000, // Default admin balance
+      currency: 'USD'
+    });
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Admin wallet created successfully',
+      data: {
+        wallet: {
+          id: wallet._id,
+          balance: wallet.balance,
+          currency: wallet.currency,
+          status: wallet.status
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error creating admin wallet:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to create admin wallet'
+    });
+  }
+});
+
+// @desc    Get admin wallet balance
+// @route   GET /api/admin/wallet/balance
+// @access  Private (Admin only)
+router.get('/wallet/balance', protect, requireAdmin, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const wallet = await Wallet.findOne({ user: userId })
+      .populate('user', 'firstName lastName email userType');
+
+    if (!wallet) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Admin wallet not found'
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        balance: wallet.balance,
+        currency: wallet.currency,
+        status: wallet.status,
+        limits: wallet.limits,
+        stats: wallet.stats
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching admin wallet:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch admin wallet details'
     });
   }
 });

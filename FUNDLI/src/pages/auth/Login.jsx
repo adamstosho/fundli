@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle, ArrowRight, Sparkles, Shield, Zap } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle, ArrowRight, Shield, Zap, TrendingUp, Users, Globe, Smartphone } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Login = () => {
@@ -150,13 +150,13 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-100 via-primary-50 to-secondary-100 dark:from-secondary-900 dark:via-primary-900 dark:to-secondary-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.1%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
       
       {/* Floating Elements */}
       <motion.div
-        className="absolute top-20 left-20 w-20 h-20 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-xl opacity-20"
+        className="absolute top-20 left-20 w-20 h-20 bg-gradient-to-r from-primary-400 to-accent-400 rounded-full blur-xl opacity-20"
         animate={{
           y: [0, -20, 0],
           x: [0, 10, 0],
@@ -168,7 +168,7 @@ const Login = () => {
         }}
       />
       <motion.div
-        className="absolute bottom-20 right-20 w-32 h-32 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full blur-xl opacity-20"
+        className="absolute bottom-20 right-20 w-32 h-32 bg-gradient-to-r from-accent-400 to-primary-400 rounded-full blur-xl opacity-20"
         animate={{
           y: [0, 20, 0],
           x: [0, -10, 0],
@@ -181,7 +181,7 @@ const Login = () => {
       />
 
       <div className="max-w-md w-full space-y-8 relative z-10">
-        {/* Header */}
+        {/* Header with Unique Logo */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -189,20 +189,41 @@ const Login = () => {
           className="text-center"
         >
           <div className="flex justify-center mb-6">
-            <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-2xl">
-                <Sparkles className="h-8 w-8 text-white" />
+            <div className="relative group">
+              {/* Main Logo Container */}
+              <div className="w-20 h-20 bg-gradient-to-br from-primary-500 via-accent-500 to-primary-600 rounded-3xl flex items-center justify-center shadow-2xl group-hover:shadow-glow-primary transition-all duration-300 group-hover:scale-105">
+                {/* Unique Logo Design - Stylized "F" with Financial Elements */}
+                <div className="relative">
+                  {/* Main F Letter */}
+                  <div className="w-8 h-8 relative">
+                    {/* Vertical line of F */}
+                    <div className="absolute left-0 top-0 w-1 h-8 bg-white rounded-full"></div>
+                    {/* Top horizontal line */}
+                    <div className="absolute left-0 top-0 w-6 h-1 bg-white rounded-full"></div>
+                    {/* Middle horizontal line */}
+                    <div className="absolute left-0 top-3 w-4 h-1 bg-white rounded-full"></div>
+                  </div>
+                  
+                  {/* Financial Elements */}
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-accent-400 rounded-full animate-pulse"></div>
+                  <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-primary-300 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                </div>
               </div>
-              <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
-                <Zap className="h-3 w-3 text-white" />
+              
+              {/* Floating Elements around Logo */}
+              <div className="absolute -top-2 -right-2 w-4 h-4 bg-gradient-to-r from-accent-400 to-primary-400 rounded-full flex items-center justify-center animate-bounce">
+                <TrendingUp className="h-2 w-2 text-white" />
+              </div>
+              <div className="absolute -bottom-2 -left-2 w-3 h-3 bg-gradient-to-r from-primary-400 to-accent-400 rounded-full flex items-center justify-center animate-bounce" style={{ animationDelay: '0.3s' }}>
+                <Shield className="h-1.5 w-1.5 text-white" />
               </div>
             </div>
           </div>
           
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent mb-2">
+          <h2 className="text-h1 text-gradient mb-2">
             Welcome Back
           </h2>
-          <p className="text-purple-200 text-lg">
+          <p className="text-neutral-600 dark:text-neutral-200 text-lg">
             Sign in to continue your financial journey
           </p>
         </motion.div>
@@ -212,7 +233,7 @@ const Login = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20"
+          className="card p-8 backdrop-blur-lg bg-white/80 dark:bg-white/10 border border-neutral-200/50 dark:border-white/20"
         >
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-5">
@@ -222,12 +243,12 @@ const Login = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
               >
-                <label htmlFor="email" className="block text-sm font-semibold text-white mb-2">
+                <label htmlFor="email" className="form-label text-neutral-700 dark:text-white">
                   Email Address
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-purple-300 group-focus-within:text-purple-400 transition-colors" />
+                    <Mail className="h-5 w-5 text-neutral-400 dark:text-neutral-300 group-focus-within:text-primary-500 dark:group-focus-within:text-primary-400 transition-colors" />
                   </div>
                   <input
                     id="email"
@@ -237,7 +258,7 @@ const Login = () => {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                    className="input-field pl-12 text-neutral-900 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-200 bg-white dark:bg-white/10 border-neutral-300 dark:border-white/20 backdrop-blur-sm"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -249,12 +270,12 @@ const Login = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                <label htmlFor="password" className="block text-sm font-semibold text-white mb-2">
+                <label htmlFor="password" className="form-label text-neutral-700 dark:text-white">
                   Password
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-purple-300 group-focus-within:text-purple-400 transition-colors" />
+                    <Lock className="h-5 w-5 text-neutral-400 dark:text-neutral-300 group-focus-within:text-primary-500 dark:group-focus-within:text-primary-400 transition-colors" />
                   </div>
                   <input
                     id="password"
@@ -264,18 +285,18 @@ const Login = () => {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full pl-12 pr-12 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                    className="input-field pl-12 pr-12 text-neutral-900 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-200 bg-white dark:bg-white/10 border-neutral-300 dark:border-white/20 backdrop-blur-sm"
                     placeholder="Enter your password"
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-white/10 rounded-r-xl transition-colors"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-neutral-100 dark:hover:bg-white/10 rounded-r-xl transition-colors"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-purple-300 hover:text-white transition-colors" />
+                      <EyeOff className="h-5 w-5 text-neutral-400 dark:text-neutral-300 hover:text-neutral-600 dark:hover:text-white transition-colors" />
                     ) : (
-                      <Eye className="h-5 w-5 text-purple-300 hover:text-white transition-colors" />
+                      <Eye className="h-5 w-5 text-neutral-400 dark:text-neutral-300 hover:text-neutral-600 dark:hover:text-white transition-colors" />
                     )}
                   </button>
                 </div>
@@ -287,11 +308,11 @@ const Login = () => {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-red-500/20 border border-red-500/30 rounded-xl p-4 backdrop-blur-sm"
+                className="bg-error/20 border border-error/30 rounded-xl p-4 backdrop-blur-sm"
               >
                 <div className="flex items-center">
-                  <AlertCircle className="h-5 w-5 text-red-300 mr-3" />
-                  <p className="text-red-200 text-sm font-medium">{error}</p>
+                  <AlertCircle className="h-5 w-5 text-error mr-3" />
+                  <p className="text-error text-sm font-medium">{error}</p>
                 </div>
               </motion.div>
             )}
@@ -301,11 +322,11 @@ const Login = () => {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-green-500/20 border border-green-500/30 rounded-xl p-4 backdrop-blur-sm"
+                className="bg-success/20 border border-success/30 rounded-xl p-4 backdrop-blur-sm"
               >
                 <div className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-300 mr-3" />
-                  <p className="text-green-200 text-sm font-medium">{success}</p>
+                  <CheckCircle className="h-5 w-5 text-success mr-3" />
+                  <p className="text-success text-sm font-medium">{success}</p>
                 </div>
               </motion.div>
             )}
@@ -319,7 +340,7 @@ const Login = () => {
             >
               <Link
                 to="/forgot-password"
-                className="text-purple-300 hover:text-white text-sm font-medium transition-colors duration-300 hover:underline"
+                className="text-neutral-600 dark:text-neutral-300 hover:text-primary-600 dark:hover:text-white text-sm font-medium transition-colors duration-300 hover:underline"
               >
                 Forgot your password?
               </Link>
@@ -334,7 +355,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
+                className="w-full btn-cta disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
               >
                 {isLoading ? (
                   <>
@@ -357,11 +378,11 @@ const Login = () => {
               transition={{ duration: 0.6, delay: 0.7 }}
               className="text-center"
             >
-              <p className="text-purple-200 text-sm">
+              <p className="text-neutral-600 dark:text-neutral-200 text-sm">
                 Don't have an account?{' '}
                 <Link
                   to="/register"
-                  className="font-semibold text-white hover:text-purple-200 transition-colors duration-300 hover:underline"
+                  className="font-semibold text-primary-600 dark:text-white hover:text-primary-700 dark:hover:text-primary-200 transition-colors duration-300 hover:underline"
                 >
                   Create one here
                 </Link>
@@ -370,24 +391,51 @@ const Login = () => {
           </form>
         </motion.div>
 
-        {/* Features */}
+        {/* Features Grid */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="grid grid-cols-3 gap-4 text-center"
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center"
         >
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-            <Shield className="h-6 w-6 text-purple-300 mx-auto mb-2" />
-            <p className="text-purple-200 text-xs font-medium">Secure</p>
+          <div className="card p-4 border-neutral-200/50 dark:border-white/10 group hover:border-primary-400/50 transition-all duration-300 bg-white/60 dark:bg-white/5">
+            <Shield className="h-6 w-6 text-neutral-500 dark:text-neutral-300 group-hover:text-primary-500 dark:group-hover:text-primary-400 mx-auto mb-2 transition-colors" />
+            <p className="text-neutral-600 dark:text-neutral-200 text-xs font-medium group-hover:text-neutral-800 dark:group-hover:text-white transition-colors">Secure</p>
           </div>
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-            <Zap className="h-6 w-6 text-purple-300 mx-auto mb-2" />
-            <p className="text-purple-200 text-xs font-medium">Fast</p>
+          <div className="card p-4 border-neutral-200/50 dark:border-white/10 group hover:border-primary-400/50 transition-all duration-300 bg-white/60 dark:bg-white/5">
+            <Zap className="h-6 w-6 text-neutral-500 dark:text-neutral-300 group-hover:text-primary-500 dark:group-hover:text-primary-400 mx-auto mb-2 transition-colors" />
+            <p className="text-neutral-600 dark:text-neutral-200 text-xs font-medium group-hover:text-neutral-800 dark:group-hover:text-white transition-colors">Fast</p>
           </div>
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-            <Sparkles className="h-6 w-6 text-purple-300 mx-auto mb-2" />
-            <p className="text-purple-200 text-xs font-medium">Smart</p>
+          <div className="card p-4 border-neutral-200/50 dark:border-white/10 group hover:border-primary-400/50 transition-all duration-300 bg-white/60 dark:bg-white/5">
+            <TrendingUp className="h-6 w-6 text-neutral-500 dark:text-neutral-300 group-hover:text-primary-500 dark:group-hover:text-primary-400 mx-auto mb-2 transition-colors" />
+            <p className="text-neutral-600 dark:text-neutral-200 text-xs font-medium group-hover:text-neutral-800 dark:group-hover:text-white transition-colors">Smart</p>
+          </div>
+          <div className="card p-4 border-neutral-200/50 dark:border-white/10 group hover:border-primary-400/50 transition-all duration-300 bg-white/60 dark:bg-white/5">
+            <Globe className="h-6 w-6 text-neutral-500 dark:text-neutral-300 group-hover:text-primary-500 dark:group-hover:text-primary-400 mx-auto mb-2 transition-colors" />
+            <p className="text-neutral-600 dark:text-neutral-200 text-xs font-medium group-hover:text-neutral-800 dark:group-hover:text-white transition-colors">Global</p>
+          </div>
+        </motion.div>
+
+        {/* Trust Indicators */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 1.0 }}
+          className="text-center"
+        >
+          <div className="flex items-center justify-center space-x-6 text-neutral-500 dark:text-neutral-400 text-sm">
+            <div className="flex items-center space-x-2">
+              <Shield className="h-4 w-4" />
+              <span>Bank-level Security</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Smartphone className="h-4 w-4" />
+              <span>Mobile Optimized</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Users className="h-4 w-4" />
+              <span>Trusted by 10K+</span>
+            </div>
           </div>
         </motion.div>
       </div>
@@ -395,4 +443,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default Login;

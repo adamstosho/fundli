@@ -56,6 +56,10 @@ const createWallet = async (req, res) => {
 const getWallet = async (req, res) => {
   try {
     const userId = req.user.id;
+    
+    console.log('🔍 General wallet endpoint - User ID:', userId);
+    console.log('🔍 General wallet endpoint - User email:', req.user.email);
+    console.log('🔍 General wallet endpoint - User type:', req.user.userType);
 
     const wallet = await Wallet.findOne({ user: userId })
       .populate('user', 'firstName lastName email userType');
@@ -66,6 +70,8 @@ const getWallet = async (req, res) => {
         message: 'Wallet not found'
       });
     }
+
+    console.log('🔍 General wallet endpoint - Wallet balance:', wallet.balance);
 
     res.status(200).json({
       status: 'success',

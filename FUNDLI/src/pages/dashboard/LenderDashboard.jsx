@@ -16,8 +16,15 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import LoanApplications from '../../components/lender/LoanApplications';
+import LenderLoanManagement from '../../components/lender/LenderLoanManagement';
 import PendingLoansSection from '../../components/common/PendingLoansSection';
 import WalletBalanceCard from '../../components/common/WalletBalanceCard';
+import { 
+  InvestmentGrowthChart, 
+  PortfolioBreakdownChart, 
+  MonthlyPerformanceChart,
+  RiskAssessmentChart 
+} from '../../components/charts/DashboardCharts';
 
 const LenderDashboard = () => {
   const { user } = useAuth();
@@ -33,6 +40,12 @@ const LenderDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
+  const [chartData, setChartData] = useState({
+    investmentGrowth: null,
+    portfolioBreakdown: null,
+    monthlyPerformance: null,
+    riskAssessment: null
+  });
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -46,42 +59,43 @@ const LenderDashboard = () => {
           throw new Error('No authentication token found');
         }
 
-        // Fetch lender's investment data
-        const investmentsResponse = await fetch('http://localhost:5000/api/investments/lender', {
+        // Fetch lender's funded loans data
+        const fundedLoansResponse = await fetch('http://localhost:5000/api/lender/funded-loans', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
 
-        if (investmentsResponse.ok) {
-          const investmentsData = await investmentsResponse.json();
-          console.log('Fetched investments data:', investmentsData);
+        if (fundedLoansResponse.ok) {
+          const fundedLoansData = await fundedLoansResponse.json();
+          console.log('Fetched funded loans data:', fundedLoansData);
           
-          // Process investments data
-          const activeInvestments = investmentsData.data?.investments?.filter(inv => inv.status === 'active') || [];
-          const totalInvested = investmentsData.data?.investments?.reduce((sum, inv) => sum + (inv.amount || 0), 0) || 0;
-          const totalReturns = investmentsData.data?.investments?.reduce((sum, inv) => sum + (inv.returns || 0), 0) || 0;
-          const averageROI = activeInvestments.length > 0 
-            ? activeInvestments.reduce((sum, inv) => sum + (inv.roi || 0), 0) / activeInvestments.length 
+          // Process funded loans data
+          const fundedLoans = fundedLoansData.data?.fundedLoans || [];
+          const activeLoans = fundedLoans.filter(loan => loan.status === 'active') || [];
+          const totalInvested = fundedLoans.reduce((sum, loan) => sum + (loan.fundedAmount || 0), 0);
+          const totalReturns = fundedLoans.reduce((sum, loan) => sum + (loan.amountPaid || 0), 0);
+          const averageROI = activeLoans.length > 0 
+            ? activeLoans.reduce((sum, loan) => sum + (loan.interestRate || 0), 0) / activeLoans.length 
             : 0;
           
           setStats({
             totalInvested,
-            activeInvestments: activeInvestments.length,
+            activeInvestments: activeLoans.length,
             totalReturns,
             averageROI: parseFloat(averageROI.toFixed(1))
           });
 
-          setRecentInvestments(investmentsData.data?.investments || []);
+          setRecentInvestments(fundedLoans);
           
           // Calculate portfolio breakdown
           const breakdown = {};
-          investmentsData.data?.investments?.forEach(inv => {
-            const category = inv.loanPurpose || 'Other';
+          fundedLoans.forEach(loan => {
+            const category = loan.purpose || 'Other';
             if (!breakdown[category]) {
               breakdown[category] = { amount: 0, count: 0 };
             }
-            breakdown[category].amount += inv.amount || 0;
+            breakdown[category].amount += loan.fundedAmount || 0;
             breakdown[category].count += 1;
           });
           
@@ -187,23 +201,23 @@ const LenderDashboard = () => {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-h1 text-neutral-900 dark:text-white">
           Welcome back, {user?.name?.split(' ')[0]}! 👋
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
+        <p className="text-neutral-600 dark:text-neutral-400 mt-2">
           Here's your investment portfolio overview
         </p>
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
+      <div className="border-b border-neutral-200 dark:border-neutral-700">
         <nav className="-mb-px flex space-x-8">
           <button
             onClick={() => setActiveTab('overview')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'overview'
                 ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
             }`}
           >
             Portfolio Overview
@@ -213,10 +227,20 @@ const LenderDashboard = () => {
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'applications'
                 ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
             }`}
           >
             Loan Applications
+          </button>
+          <button
+            onClick={() => setActiveTab('management')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'management'
+                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
+            }`}
+          >
+            Loan Management
           </button>
         </nav>
       </div>
@@ -234,10 +258,10 @@ const LenderDashboard = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Total Invested
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-2xl font-bold text-neutral-900 dark:text-white">
                 ${stats.totalInvested.toLocaleString()}
               </p>
             </div>
@@ -255,10 +279,10 @@ const LenderDashboard = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Active Investments
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-2xl font-bold text-neutral-900 dark:text-white">
                 {stats.activeInvestments}
               </p>
             </div>
@@ -276,10 +300,10 @@ const LenderDashboard = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Total Returns
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-2xl font-bold text-neutral-900 dark:text-white">
                 ${stats.totalReturns.toLocaleString()}
               </p>
             </div>
@@ -297,10 +321,10 @@ const LenderDashboard = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Average ROI
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-2xl font-bold text-neutral-900 dark:text-white">
                 {stats.averageROI}%
               </p>
             </div>
@@ -318,7 +342,7 @@ const LenderDashboard = () => {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+        <h2 className="text-h3 text-neutral-900 dark:text-white mb-4">
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -336,10 +360,10 @@ const LenderDashboard = () => {
                 <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
                   <action.icon className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-h3 text-neutral-900 dark:text-white mb-2">
                   {action.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-4">
                   {action.description}
                 </p>
                 <div className="flex items-center text-primary-600 dark:text-primary-400 font-medium text-sm group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
@@ -572,48 +596,58 @@ const LenderDashboard = () => {
       {/* Pending Loans Section */}
       <PendingLoansSection userType="lender" title="Available Loan Applications" />
 
-      {/* Performance Chart Placeholder */}
+      {/* Analytics Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Investment Growth Chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1.0 }}
+        >
+          <InvestmentGrowthChart data={chartData.investmentGrowth} />
+        </motion.div>
+
+        {/* Portfolio Breakdown Chart */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.8 }}
-        className="card p-6"
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Performance Overview
-          </h3>
-          <div className="flex space-x-2">
-            <button className="px-3 py-1 text-xs bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-lg">
-              1M
-            </button>
-            <button className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg">
-              3M
-            </button>
-            <button className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg">
-              1Y
-            </button>
-          </div>
+          transition={{ duration: 0.6, delay: 1.1 }}
+        >
+          <PortfolioBreakdownChart data={chartData.portfolioBreakdown} />
+        </motion.div>
         </div>
         
-        <div className="h-64 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-          <div className="text-center">
-            <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-            <p className="text-gray-500 dark:text-gray-400">
-              Performance chart will be displayed here
-            </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              Integration with Chart.js coming soon
-            </p>
-          </div>
+      {/* Monthly Performance and Risk Assessment Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Monthly Performance Chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1.2 }}
+        >
+          <MonthlyPerformanceChart data={chartData.monthlyPerformance} />
+        </motion.div>
+
+        {/* Risk Assessment Chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1.3 }}
+        >
+          <RiskAssessmentChart data={chartData.riskAssessment} />
+        </motion.div>
         </div>
-      </motion.div>
         </>
       )}
 
       {/* Loan Applications Tab */}
       {activeTab === 'applications' && (
         <LoanApplications />
+      )}
+
+      {/* Loan Management Tab */}
+      {activeTab === 'management' && (
+        <LenderLoanManagement />
       )}
     </div>
   );

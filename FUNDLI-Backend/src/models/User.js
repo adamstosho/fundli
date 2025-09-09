@@ -220,6 +220,10 @@ const userSchema = new mongoose.Schema({
   },
   
   twoFactorSecret: String,
+  tempTwoFactorSecret: String,
+  twoFactorBackupCodes: [String],
+  twoFactorEnabledAt: Date,
+  twoFactorDisabledAt: Date,
   
   // Email Verification
   emailVerificationToken: String,

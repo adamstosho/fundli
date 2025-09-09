@@ -235,7 +235,7 @@ const TransferPage = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 dark:text-gray-400 text-sm">₦</span>
+                    <span className="text-gray-500 dark:text-gray-400 text-sm">$</span>
                   </div>
                   <input
                     type="number"
@@ -243,8 +243,8 @@ const TransferPage = () => {
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="Enter amount"
                     className="block w-full pl-12 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    min="100"
-                    step="100"
+                    min="10"
+                    step="10"
                   />
                 </div>
               </div>

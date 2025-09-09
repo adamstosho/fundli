@@ -1,3 +1,4 @@
+// Service Worker for Push Notifications
 const CACHE_NAME = 'fundli-v1';
 const urlsToCache = [
   '/',
@@ -10,7 +11,9 @@ const urlsToCache = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
+      .then((cache) => {
+        return cache.addAll(urlsToCache);
+      })
   );
 });
 
@@ -25,17 +28,93 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Activate event
-self.addEventListener('activate', (event) => {
+// Push event
+self.addEventListener('push', (event) => {
+  console.log('Push event received:', event);
+
+  const options = {
+    body: 'You have a new notification from FUNDLI',
+    icon: '/icon-192x192.png',
+    badge: '/badge-72x72.png',
+    vibrate: [100, 50, 100],
+    data: {
+      dateOfArrival: Date.now(),
+      primaryKey: 1
+    },
+    actions: [
+      {
+        action: 'explore',
+        title: 'View Details',
+        icon: '/icon-192x192.png'
+      },
+      {
+        action: 'close',
+        title: 'Close',
+        icon: '/icon-192x192.png'
+      }
+    ]
+  };
+
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      options.body = data.body || options.body;
+      options.title = data.title || 'FUNDLI Notification';
+      options.data = { ...options.data, ...data };
+    } catch (error) {
+      console.error('Error parsing push data:', error);
+    }
+  }
+
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    self.registration.showNotification('FUNDLI', options)
   );
-}); 
+});
+
+// Notification click event
+self.addEventListener('notificationclick', (event) => {
+  console.log('Notification click received:', event);
+
+  event.notification.close();
+
+  if (event.action === 'explore') {
+    // Open the app
+    event.waitUntil(
+      clients.openWindow('/')
+    );
+  } else if (event.action === 'close') {
+    // Just close the notification
+    return;
+  } else {
+    // Default action - open the app
+    event.waitUntil(
+      clients.openWindow('/')
+    );
+  }
+});
+
+// Background sync
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'background-sync') {
+    event.waitUntil(
+      // Perform background sync operations
+      doBackgroundSync()
+    );
+  }
+});
+
+async function doBackgroundSync() {
+  try {
+    // Check for pending notifications or updates
+    console.log('Performing background sync');
+  } catch (error) {
+    console.error('Background sync failed:', error);
+  }
+}
+
+// Message event (for communication with main thread)
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});

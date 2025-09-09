@@ -21,10 +21,17 @@ const lenderRoutes = require('./routes/lender');
 const transactionRoutes = require('./routes/transactions');
 const paymentRoutes = require('./routes/payments');
 const walletRoutes = require('./routes/wallet');
+const escrowRoutes = require('./routes/escrow');
+const creditScoreRoutes = require('./routes/creditScore');
+const repaymentRoutes = require('./routes/repayments');
+const twoFactorRoutes = require('./routes/twoFactor');
+const matchingRoutes = require('./routes/matching');
+const pushNotificationRoutes = require('./routes/pushNotifications');
 
 const { errorHandler } = require('./middleware/errorHandler');
 const { connectDB } = require('./config/database');
 const { createRequestLogger } = require('./utils/logger');
+const cronService = require('./services/cronService');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -87,6 +94,12 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/wallet', walletRoutes);
+app.use('/api/escrow', escrowRoutes);
+app.use('/api/credit-score', creditScoreRoutes);
+app.use('/api/repayments', repaymentRoutes);
+app.use('/api/2fa', twoFactorRoutes);
+app.use('/api/matching', matchingRoutes);
+app.use('/api/notifications', pushNotificationRoutes);
 
 // 404 handler for undefined routes
 app.use('*', (req, res) => {
@@ -109,6 +122,10 @@ const startServer = async () => {
       console.log(`🚀 Fundli Backend Server running on port ${PORT}`);
       console.log(`📱 Environment: ${process.env.NODE_ENV}`);
       console.log(`🔗 Health Check: http://localhost:${PORT}/health`);
+      
+      // Start cron jobs
+      cronService.start();
+      console.log('⏰ Cron jobs started');
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

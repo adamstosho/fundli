@@ -9,7 +9,7 @@ const Layout = () => {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-neutral-100 dark:bg-secondary-900">
       <Navbar onMenuClick={() => setSidebarOpen(true)} />
       
       <div className="flex">
@@ -18,7 +18,7 @@ const Layout = () => {
         )}
         
         <main className={`flex-1 ${isAuthenticated ? 'lg:ml-64' : ''} pt-16`}>
-          <div className="p-4 lg:p-8">
+          <div className="container-responsive py-6">
             <Outlet />
           </div>
         </main>

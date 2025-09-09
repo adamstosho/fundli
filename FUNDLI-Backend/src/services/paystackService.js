@@ -33,7 +33,7 @@ class PaystackService {
       const transaction = new Transaction({
         type: paymentData.type,
         amount: paymentData.amount,
-        currency: paymentData.currency || 'NGN',
+        currency: paymentData.currency || 'USD',
         sender: user._id,
         recipient: paymentData.recipient || user._id,
         paymentMethod: paymentData.paymentMethod || 'card',
@@ -48,10 +48,11 @@ class PaystackService {
       await transaction.save();
 
       // Prepare payload for Paystack
-      const amountInKobo = Math.round(paymentData.amount * 100);
+      const amountInCents = Math.round(paymentData.amount * 100);
       const payload = {
         email: user.email,
-        amount: amountInKobo,
+        amount: amountInCents,
+        currency: paymentData.currency || 'USD',
         callback_url: `${process.env.FRONTEND_URL}/payment/callback`,
         metadata: {
           transactionId: transaction._id.toString(),

@@ -19,7 +19,7 @@ const walletSchema = new mongoose.Schema({
   // Currency
   currency: {
     type: String,
-    default: 'NGN',
+    default: 'USD',
     enum: ['NGN', 'USD', 'GHS', 'ZAR']
   },
 
@@ -43,7 +43,7 @@ const walletSchema = new mongoose.Schema({
     },
     currency: {
       type: String,
-      default: 'NGN'
+      default: 'USD'
     },
     description: {
       type: String,
@@ -90,23 +90,23 @@ const walletSchema = new mongoose.Schema({
   limits: {
     dailyDepositLimit: {
       type: Number,
-      default: 1000000 // 1M NGN
+      default: 10000 // $10,000
     },
     dailyWithdrawalLimit: {
       type: Number,
-      default: 500000 // 500K NGN
+      default: 5000 // $5,000
     },
     dailyTransferLimit: {
       type: Number,
-      default: 200000 // 200K NGN
+      default: 2000 // $2,000
     },
     monthlyDepositLimit: {
       type: Number,
-      default: 10000000 // 10M NGN
+      default: 100000 // $100,000
     },
     monthlyWithdrawalLimit: {
       type: Number,
-      default: 5000000 // 5M NGN
+      default: 50000 // $50,000
     }
   },
 
@@ -244,41 +244,10 @@ walletSchema.methods.checkLimits = function(transactionType, amount) {
   return { allowed: true };
 };
 
-// Method to add transaction
+// Simple method to add transaction (no balance changes)
 walletSchema.methods.addTransaction = function(transactionData) {
   this.transactions.push(transactionData);
   this.stats.transactionCount += 1;
-  
-  // Update usage tracking
-  switch (transactionData.type) {
-    case 'deposit':
-      this.dailyUsage.depositAmount += transactionData.amount;
-      this.monthlyUsage.depositAmount += transactionData.amount;
-      this.stats.totalDeposits += transactionData.amount;
-      break;
-    case 'withdrawal':
-      this.dailyUsage.withdrawalAmount += transactionData.amount;
-      this.monthlyUsage.withdrawalAmount += transactionData.amount;
-      this.stats.totalWithdrawals += transactionData.amount;
-      break;
-    case 'transfer_in':
-    case 'transfer_out':
-      this.dailyUsage.transferAmount += transactionData.amount;
-      this.stats.totalTransfers += transactionData.amount;
-      break;
-  }
-};
-
-// Method to update balance
-walletSchema.methods.updateBalance = function(amount, operation = 'add') {
-  if (operation === 'add') {
-    this.balance += amount;
-  } else if (operation === 'subtract') {
-    if (this.balance < amount) {
-      throw new Error('Insufficient balance');
-    }
-    this.balance -= amount;
-  }
 };
 
 // Pre-save middleware to ensure balance is not negative

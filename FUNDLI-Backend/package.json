@@ -28,10 +28,16 @@
     "express-validator": "^7.2.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "ml-matrix": "^6.12.1",
     "mongoose": "^8.17.1",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
-    "nodemailer": "^7.0.5"
+    "node-cron": "^3.0.3",
+    "nodemailer": "^7.0.5",
+    "qrcode": "^1.5.4",
+    "simple-statistics": "^7.8.8",
+    "speakeasy": "^2.0.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

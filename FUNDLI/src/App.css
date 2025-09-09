@@ -1,21 +1,26 @@
+/* App-specific styles - Design System Implementation */
+
+/* Root container adjustments */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Logo animations */
 .logo {
   height: 6em;
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em rgba(46, 204, 113, 0.4));
 }
+
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 2em rgba(46, 204, 113, 0.4));
 }
 
 @keyframes logo-spin {
@@ -33,10 +38,45 @@
   }
 }
 
+/* Card enhancements */
 .card {
   padding: 2em;
 }
 
+/* Documentation styles */
 .read-the-docs {
-  color: #888;
+  color: theme('colors.neutral.500');
+}
+
+/* Custom scrollbar for better UX */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: theme('colors.neutral.100');
+}
+
+::-webkit-scrollbar-thumb {
+  background: theme('colors.neutral.300');
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.neutral.400');
+}
+
+/* Dark mode scrollbar */
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: theme('colors.secondary.800');
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: theme('colors.secondary.600');
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: theme('colors.secondary.500');
+  }
 }

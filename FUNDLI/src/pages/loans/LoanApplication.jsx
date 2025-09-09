@@ -88,10 +88,10 @@ const LoanApplication = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-h1 text-neutral-900 dark:text-white mb-2">
           Apply for a Loan
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-neutral-600 dark:text-neutral-400">
           Complete the form below to submit your loan application
         </p>
       </div>
@@ -105,14 +105,14 @@ const LoanApplication = () => {
           <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="h-8 w-8 text-success" />
           </div>
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-h2 text-neutral-900 dark:text-white mb-2">
             Application Submitted!
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-neutral-600 dark:text-neutral-400 mb-4">
             Your loan application has been submitted successfully. We'll review it and get back to you within 24-48 hours.
           </p>
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="text-sm text-gray-500 mt-2">Redirecting to loan status...</p>
+          <p className="text-sm text-neutral-500 mt-2">Redirecting to loan status...</p>
         </motion.div>
       ) : (
         <motion.div
@@ -140,7 +140,7 @@ const LoanApplication = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSign className="h-5 w-5 text-gray-400" />
+                    <DollarSign className="h-5 w-5 text-neutral-400" />
                   </div>
                   <input
                     id="amount"
@@ -155,7 +155,7 @@ const LoanApplication = () => {
                     placeholder="Enter loan amount (min: $100, max: $50,000)"
                   />
                 </div>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-neutral-500 mt-1">
                   Minimum: $100 | Maximum: $50,000
                 </p>
               </div>
@@ -193,7 +193,7 @@ const LoanApplication = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Calendar className="h-5 w-5 text-gray-400" />
+                    <Calendar className="h-5 w-5 text-neutral-400" />
                   </div>
                   <input
                     id="duration"
@@ -208,7 +208,7 @@ const LoanApplication = () => {
                     placeholder="Enter duration in months (3-60 months)"
                   />
                 </div>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-neutral-500 mt-1">
                   Minimum: 3 months | Maximum: 60 months
                 </p>
               </div>
@@ -273,7 +273,7 @@ const LoanApplication = () => {
                   required
                   className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded mt-1"
                 />
-                <label htmlFor="terms" className="text-sm text-gray-700 dark:text-gray-300">
+                <label htmlFor="terms" className="text-sm text-neutral-700 dark:text-neutral-300">
                   I agree to the{' '}
                   <a href="#" className="text-primary-600 dark:text-primary-400 hover:underline">
                     Terms and Conditions

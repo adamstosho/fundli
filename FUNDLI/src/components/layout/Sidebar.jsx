@@ -45,7 +45,7 @@ const Sidebar = ({ open, onClose }) => {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between h-16 px-6 border-b border-neutral-200 dark:border-secondary-700">
         <Link to="/" className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-lg">F</span>
@@ -54,7 +54,7 @@ const Sidebar = ({ open, onClose }) => {
         </Link>
         <button
           onClick={onClose}
-          className="lg:hidden p-1 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          className="lg:hidden p-1 rounded-md text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
         >
           <X className="h-6 w-6" />
         </button>
@@ -70,10 +70,8 @@ const Sidebar = ({ open, onClose }) => {
               to={item.href}
               onClick={onClose}
               className={clsx(
-                'flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors',
-                isActive
-                  ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+                'nav-item',
+                isActive && 'active'
               )}
             >
               <item.icon className="h-5 w-5 mr-3" />
@@ -84,19 +82,19 @@ const Sidebar = ({ open, onClose }) => {
       </nav>
 
       {/* Bottom section */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="p-4 border-t border-neutral-200 dark:border-secondary-700">
         <div className="bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20 rounded-lg p-4">
           <div className="flex items-center space-x-2 mb-2">
             <Award className="h-5 w-5 text-primary-600 dark:text-primary-400" />
-            <span className="text-sm font-medium text-gray-900 dark:text-white">Referral Program</span>
+            <span className="text-sm font-medium text-secondary-900 dark:text-secondary-100">Referral Program</span>
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
+          <p className="text-xs text-neutral-600 dark:text-neutral-400 mb-3">
             Invite friends and earn rewards
           </p>
           <Link
             to="/referral"
             onClick={onClose}
-            className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
+            className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors"
           >
             Learn More →
           </Link>
@@ -119,7 +117,7 @@ const Sidebar = ({ open, onClose }) => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-75" />
+            <div className="fixed inset-0 bg-secondary-900/75" />
           </Transition.Child>
 
           <div className="fixed inset-0 flex">
@@ -132,7 +130,7 @@ const Sidebar = ({ open, onClose }) => {
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-white dark:bg-gray-800">
+              <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-white dark:bg-secondary-800">
                 <SidebarContent />
               </Dialog.Panel>
             </Transition.Child>
@@ -142,7 +140,7 @@ const Sidebar = ({ open, onClose }) => {
 
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-col flex-grow bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col flex-grow bg-white dark:bg-secondary-800 border-r border-neutral-200 dark:border-secondary-700">
           <SidebarContent />
         </div>
       </div>

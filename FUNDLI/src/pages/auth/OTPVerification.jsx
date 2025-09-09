@@ -141,7 +141,7 @@ const OTPVerification = () => {
   const isOtpComplete = otp.every(digit => digit !== '');
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-neutral-100 dark:bg-secondary-900 py-12 px-4 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -161,10 +161,10 @@ const OTPVerification = () => {
             <Mail className="h-8 w-8 text-primary-600 dark:text-primary-400" />
           </div>
           
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-h1 text-neutral-900 dark:text-white">
             Verify your email
           </h2>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-neutral-600 dark:text-neutral-400">
             We've sent a 6-digit code to
           </p>
           <p className="text-primary-600 dark:text-primary-400 font-medium">
@@ -202,7 +202,7 @@ const OTPVerification = () => {
                     value={digit}
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className="w-12 h-12 text-center text-lg font-semibold border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-all"
+                    className="w-12 h-12 text-center text-lg font-semibold border-2 border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 transition-all"
                     placeholder="0"
                   />
                 ))}
@@ -212,7 +212,7 @@ const OTPVerification = () => {
             {/* Timer and Resend */}
             <div className="text-center">
               {!canResend ? (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   Resend code in {formatTime(timeLeft)}
                 </p>
               ) : (
@@ -246,7 +246,7 @@ const OTPVerification = () => {
 
           {/* Help Text */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">
               Didn't receive the code? Check your spam folder or{' '}
               <button
                 type="button"
@@ -264,7 +264,7 @@ const OTPVerification = () => {
         <div className="text-center">
           <Link
             to="/register"
-            className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            className="inline-flex items-center text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to registration

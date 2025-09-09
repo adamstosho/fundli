@@ -21,7 +21,7 @@ import {
 const DepositPage = () => {
   const navigate = useNavigate();
   const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState('NGN');
+  const [currency, setCurrency] = useState('USD');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -31,7 +31,7 @@ const DepositPage = () => {
   const [copiedItem, setCopiedItem] = useState('');
 
   // Predefined amounts
-  const quickAmounts = [5000, 10000, 25000, 50000, 100000, 250000];
+  const quickAmounts = [50, 100, 250, 500, 1000, 2500];
 
   useEffect(() => {
     loadWalletData();

@@ -16,8 +16,14 @@ const loanSchema = new mongoose.Schema({
   loanAmount: {
     type: Number,
     required: [true, 'Loan amount is required'],
-    min: [100, 'Minimum loan amount is $100'],
-    max: [1000000, 'Maximum loan amount is $1,000,000']
+    min: [10, 'Minimum loan amount is $10'],
+    max: [100000, 'Maximum loan amount is $100,000']
+  },
+  
+  currency: {
+    type: String,
+    default: 'USD',
+    enum: ['USD', 'NGN', 'EUR', 'GBP']
   },
   
   purpose: {

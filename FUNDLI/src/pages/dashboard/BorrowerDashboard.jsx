@@ -20,6 +20,11 @@ import { useAuth } from '../../context/AuthContext';
 import PendingLoansSection from '../../components/common/PendingLoansSection';
 import InProgressLoansSection from '../../components/common/InProgressLoansSection';
 import WalletBalanceCard from '../../components/common/WalletBalanceCard';
+import { 
+  LoanTrendsChart, 
+  RepaymentStatusChart, 
+  CreditScoreDistributionChart 
+} from '../../components/charts/DashboardCharts';
 
 const BorrowerDashboard = () => {
   const { user, kycStatus } = useAuth();
@@ -33,6 +38,11 @@ const BorrowerDashboard = () => {
   const [upcomingPayments, setUpcomingPayments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [chartData, setChartData] = useState({
+    loanTrends: null,
+    repaymentStatus: null,
+    creditScoreDistribution: null
+  });
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -78,8 +88,11 @@ const BorrowerDashboard = () => {
           
           setRecentLoans(loansData.data?.loans || []);
           
-          // Calculate stats from real data
-          const totalBorrowed = loansData.data?.loans?.reduce((sum, loan) => sum + (loan.loanAmount || 0), 0) || 0;
+          // Calculate stats from real data - only count funded loans for total borrowed
+          const fundedLoans = loansData.data?.loans?.filter(loan => 
+            ['funded', 'active', 'completed'].includes(loan.status)
+          ) || [];
+          const totalBorrowed = fundedLoans.reduce((sum, loan) => sum + (loan.loanAmount || 0), 0);
           const totalRepaid = loansData.data?.loans?.reduce((sum, loan) => sum + (loan.amountPaid || 0), 0) || 0;
           
           console.log('💰 Total borrowed:', totalBorrowed);
@@ -134,6 +147,78 @@ const BorrowerDashboard = () => {
       setIsLoading(false);
     }
   }, [user]);
+
+  // Fetch chart data
+  const fetchChartData = async (token) => {
+    try {
+      // Fetch loan trends data
+      const trendsResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/loans/trends`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (trendsResponse.ok) {
+        const trendsData = await trendsResponse.json();
+        setChartData(prev => ({
+          ...prev,
+          loanTrends: trendsData.data
+        }));
+      }
+
+      // Fetch repayment status data
+      const repaymentResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/repayments/user/${user.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (repaymentResponse.ok) {
+        const repaymentData = await repaymentResponse.json();
+        // Process repayment data for chart
+        const statusCounts = {
+          onTime: 0,
+          late: 0,
+          overdue: 0,
+          paid: 0
+        };
+        
+        repaymentData.data?.repaymentHistory?.forEach(payment => {
+          if (payment.status === 'paid') {
+            if (payment.paidAt && payment.dueDate && new Date(payment.paidAt) <= new Date(payment.dueDate)) {
+              statusCounts.onTime++;
+            } else {
+              statusCounts.late++;
+            }
+          } else if (payment.status === 'overdue') {
+            statusCounts.overdue++;
+          }
+        });
+
+        setChartData(prev => ({
+          ...prev,
+          repaymentStatus: {
+            labels: ['On Time', 'Late', 'Overdue', 'Paid'],
+            values: [statusCounts.onTime, statusCounts.late, statusCounts.overdue, statusCounts.paid]
+          }
+        }));
+      }
+
+      // Fetch credit score distribution (mock data for now)
+      setChartData(prev => ({
+        ...prev,
+        creditScoreDistribution: {
+          labels: ['Excellent (750+)', 'Good (700-749)', 'Fair (650-699)', 'Poor (600-649)', 'Very Poor (<600)'],
+          values: [25, 35, 20, 15, 5]
+        }
+      }));
+
+    } catch (error) {
+      console.error('Error fetching chart data:', error);
+    }
+  };
 
   const getStatusBadge = (status) => {
     const statusConfig = {
@@ -198,10 +283,10 @@ const BorrowerDashboard = () => {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-h1 font-bold text-secondary-900 dark:text-secondary-100">
             Welcome back, {user?.firstName || user?.name?.split(' ')[0] || 'Borrower'}! 👋
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <p className="text-body text-neutral-600 dark:text-neutral-400 mt-2">
             Here's what's happening with your loans today
           </p>
         </div>
@@ -213,14 +298,14 @@ const BorrowerDashboard = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card p-4 bg-red-50 border border-red-200"
+          className="card p-4 bg-error/5 border border-error/20"
         >
           <div className="flex items-start">
-            <AlertCircle className="h-5 w-5 text-red-400 mr-2 mt-0.5" />
+            <AlertCircle className="h-5 w-5 text-error mr-2 mt-0.5" />
             <div>
-              <p className="text-red-800 font-medium mb-2">Dashboard Data Error</p>
-              <p className="text-red-700 text-sm">{error}</p>
-              <div className="mt-2 text-xs text-red-600">
+              <p className="text-error font-medium mb-2">Dashboard Data Error</p>
+              <p className="text-error/80 text-sm">{error}</p>
+              <div className="mt-2 text-xs text-error/70">
                 <p>Possible solutions:</p>
                 <ul className="list-disc list-inside mt-1">
                   <li>Check your internet connection</li>
@@ -244,10 +329,10 @@ const BorrowerDashboard = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Total Borrowed
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-2xl font-bold text-secondary-900 dark:text-secondary-100">
                 ${stats.totalBorrowed.toLocaleString()}
               </p>
             </div>
@@ -265,10 +350,10 @@ const BorrowerDashboard = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Active Loans
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-2xl font-bold text-secondary-900 dark:text-secondary-100">
                 {stats.activeLoans}
               </p>
             </div>
@@ -286,10 +371,10 @@ const BorrowerDashboard = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Total Repaid
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-2xl font-bold text-secondary-900 dark:text-secondary-100">
                 ${stats.totalRepaid.toLocaleString()}
               </p>
             </div>
@@ -307,10 +392,10 @@ const BorrowerDashboard = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Credit Score
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-2xl font-bold text-secondary-900 dark:text-secondary-100">
                 {stats.creditScore}
               </p>
             </div>
@@ -328,7 +413,7 @@ const BorrowerDashboard = () => {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+        <h2 className="text-h3 font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -341,15 +426,15 @@ const BorrowerDashboard = () => {
             >
               <Link
                 to={action.href}
-                className="block card p-6 hover:shadow-medium transition-all duration-200 group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
+                className="block loan-card p-6 hover:shadow-medium transition-all duration-200 group"
               >
                 <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
                   <action.icon className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-2">
                   {action.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-4">
                   {action.description}
                 </p>
                 <div className="flex items-center text-primary-600 dark:text-primary-400 font-medium text-sm group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
@@ -488,6 +573,37 @@ const BorrowerDashboard = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Analytics Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Loan Trends Chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+        >
+          <LoanTrendsChart data={chartData.loanTrends} />
+        </motion.div>
+
+        {/* Repayment Status Chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.9 }}
+        >
+          <RepaymentStatusChart data={chartData.repaymentStatus} />
+        </motion.div>
+      </div>
+
+      {/* Credit Score Distribution Chart */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 1.0 }}
+        className="mb-8"
+      >
+        <CreditScoreDistributionChart data={chartData.creditScoreDistribution} />
+      </motion.div>
 
       {/* Pending Loans Section */}
       <PendingLoansSection userType="borrower" title="My Pending Loans" />

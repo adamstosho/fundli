@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const Loan = require('../models/Loan');
 const LendingPool = require('../models/LendingPool');
+const Wallet = require('../models/Wallet');
 const { protect } = require('../middleware/auth');
 const PaystackService = require('../services/paystackService');
 
@@ -647,6 +648,112 @@ router.get('/test-paystack', protect, async (req, res) => {
       status: 'error',
       message: 'Failed to test Paystack connection',
       error: error.message
+    });
+  }
+});
+
+// ==================== WALLET ENDPOINTS ====================
+
+// @desc    Create wallet for borrower
+// @route   POST /api/borrower/wallet/create
+// @access  Private (Borrowers only)
+router.post('/wallet/create', protect, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Check if user is a borrower
+    if (req.user.userType !== 'borrower') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Only borrowers can create borrower wallets'
+      });
+    }
+
+    // Check if wallet already exists
+    const existingWallet = await Wallet.findOne({ user: userId });
+    if (existingWallet) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Wallet already exists for this borrower'
+      });
+    }
+
+    // Create new wallet with default borrower balance
+    const wallet = await Wallet.create({
+      user: userId,
+      balance: 1000, // Default borrower balance
+      currency: 'USD'
+    });
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Borrower wallet created successfully',
+      data: {
+        wallet: {
+          id: wallet._id,
+          balance: wallet.balance,
+          currency: wallet.currency,
+          status: wallet.status
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error creating borrower wallet:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to create borrower wallet'
+    });
+  }
+});
+
+// @desc    Get borrower wallet balance
+// @route   GET /api/borrower/wallet/balance
+// @access  Private (Borrowers only)
+router.get('/wallet/balance', protect, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    console.log('🔍 Borrower wallet endpoint - User ID:', userId);
+    console.log('🔍 Borrower wallet endpoint - User email:', req.user.email);
+    console.log('🔍 Borrower wallet endpoint - User type:', req.user.userType);
+
+    // Check if user is a borrower
+    if (req.user.userType !== 'borrower') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Only borrowers can access borrower wallet'
+      });
+    }
+
+    const wallet = await Wallet.findOne({ user: userId })
+      .populate('user', 'firstName lastName email userType');
+
+    if (!wallet) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Borrower wallet not found'
+      });
+    }
+
+    console.log('🔍 Borrower wallet balance for user', userId, ':', wallet.balance);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        balance: wallet.balance,
+        currency: wallet.currency,
+        status: wallet.status,
+        limits: wallet.limits,
+        stats: wallet.stats
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching borrower wallet:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch borrower wallet details'
     });
   }
 });

@@ -169,10 +169,10 @@ const Marketplace = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-h1 text-neutral-900 dark:text-white">
           Loan Marketplace
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
+        <p className="text-neutral-600 dark:text-neutral-400 mt-2">
           Browse and invest in verified loan opportunities
         </p>
       </div>
@@ -181,23 +181,23 @@ const Marketplace = () => {
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400" />
               <input
                 type="text"
                 placeholder="Search loans by purpose or borrower..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full pl-10 pr-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100"
               />
             </div>
           </div>
           
           <div className="flex items-center space-x-2">
-            <Filter className="h-5 w-5 text-gray-400" />
+            <Filter className="h-5 w-5 text-neutral-400" />
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100"
             >
               {categories.map(category => (
                 <option key={category.value} value={category.value}>
@@ -222,10 +222,10 @@ const Marketplace = () => {
             >
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                <h3 className="text-h3 text-neutral-900 dark:text-white mb-1">
                   {loan.purpose || 'Lending Pool'}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   by {loan.borrower || 'Lender'}
                 </p>
               </div>
@@ -236,29 +236,29 @@ const Marketplace = () => {
 
             <div className="space-y-3 mb-6">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Amount</span>
-                <span className="text-lg font-bold text-gray-900 dark:text-white">
+                <span className="text-sm text-neutral-600 dark:text-neutral-400">Amount</span>
+                <span className="text-lg font-bold text-neutral-900 dark:text-white">
                   ${(loan.amount || 0).toLocaleString()}
                 </span>
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">ROI</span>
+                <span className="text-sm text-neutral-600 dark:text-neutral-400">ROI</span>
                 <span className="text-lg font-bold text-success">
                   {loan.roi || 0}%
                 </span>
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Duration</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                <span className="text-sm text-neutral-600 dark:text-neutral-400">Duration</span>
+                <span className="text-sm font-medium text-neutral-900 dark:text-white">
                   {loan.duration || 12} months
                 </span>
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Collateral</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                <span className="text-sm text-neutral-600 dark:text-neutral-400">Collateral</span>
+                <span className="text-sm font-medium text-neutral-900 dark:text-white">
                   {loan.collateral || 'Pool Assets'}
                 </span>
               </div>
@@ -266,12 +266,12 @@ const Marketplace = () => {
 
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Funding Progress</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                <span className="text-sm text-neutral-600 dark:text-neutral-400">Funding Progress</span>
+                <span className="text-sm font-medium text-neutral-900 dark:text-white">
                   {loan.funded || 0}%
                 </span>
               </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
                 <div
                   className="bg-primary-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${loan.funded || 0}%` }}
@@ -307,11 +307,11 @@ const Marketplace = () => {
           animate={{ opacity: 1 }}
           className="text-center py-12"
         >
-          <DollarSign className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          <DollarSign className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
+          <h3 className="text-h3 text-neutral-900 dark:text-white mb-2">
             No loans found
           </h3>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-neutral-600 dark:text-neutral-400">
             Try adjusting your search criteria or check back later for new opportunities.
           </p>
         </motion.div>
@@ -322,10 +322,10 @@ const Marketplace = () => {
           <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center mx-auto mb-4">
             <DollarSign className="h-6 w-6 text-primary-600 dark:text-primary-400" />
           </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <p className="text-2xl font-bold text-neutral-900 dark:text-white">
             ${loans.reduce((sum, loan) => sum + (loan.amount || 0), 0).toLocaleString()}
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
             Total Available
           </p>
         </div>
@@ -334,10 +334,10 @@ const Marketplace = () => {
           <div className="w-12 h-12 bg-secondary-100 dark:bg-secondary-900/20 rounded-lg flex items-center justify-center mx-auto mb-4">
             <TrendingUp className="h-6 w-6 text-secondary-600 dark:text-secondary-400" />
           </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <p className="text-2xl font-bold text-neutral-900 dark:text-white">
             {loans.length}
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
             Active Loans
           </p>
         </div>
@@ -346,10 +346,10 @@ const Marketplace = () => {
           <div className="w-12 h-12 bg-success/10 rounded-lg flex items-center justify-center mx-auto mb-4">
             <Shield className="h-6 w-6 text-success" />
           </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <p className="text-2xl font-bold text-neutral-900 dark:text-white">
             {loans.filter(loan => loan.riskScore === 'A').length}
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
             Low Risk Loans
           </p>
         </div>
@@ -381,20 +381,20 @@ const Marketplace = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
+            className="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
                 <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
                 Delete Pool
               </h3>
             </div>
             
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Are you sure you want to delete <span className="font-semibold text-gray-900 dark:text-white">"{deleteModal.loanName}"</span>? 
+            <p className="text-neutral-600 dark:text-neutral-400 mb-6">
+              Are you sure you want to delete <span className="font-semibold text-neutral-900 dark:text-white">"{deleteModal.loanName}"</span>? 
               This action cannot be undone and will permanently remove the pool.
             </p>
             
@@ -402,7 +402,7 @@ const Marketplace = () => {
               <button
                 onClick={handleDeleteCancel}
                 disabled={isDeleting}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Cancel
               </button>
