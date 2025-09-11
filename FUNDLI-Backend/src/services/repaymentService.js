@@ -204,6 +204,21 @@ class RepaymentService {
           $inc: { walletBalance: -amount }
         });
 
+        // Add to lender's wallet
+        const lender = await User.findById(loan.lenderId);
+        if (lender) {
+          await User.findByIdAndUpdate(lender._id, {
+            $inc: { walletBalance: amount }
+          });
+          
+          logger.info('Repayment amount added to lender wallet', {
+            lenderId: lender._id,
+            lenderEmail: lender.email,
+            amount: amount,
+            loanId: loan._id
+          });
+        }
+
         // Create transaction record
         await this.createRepaymentTransaction(
           loan,
@@ -545,7 +560,7 @@ class RepaymentService {
       const transaction = new Transaction({
         type: 'loan_repayment',
         amount: amount,
-        currency: 'NGN',
+        currency: 'USD',
         sender: borrower._id,
         recipient: loan.lenderId,
         paymentMethod: 'wallet',

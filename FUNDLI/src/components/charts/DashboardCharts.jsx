@@ -3,32 +3,69 @@ import ChartComponent, { chartOptions, colorPalettes } from './ChartComponent';
 
 // Loan Trends Chart
 export const LoanTrendsChart = ({ data }) => {
+  // Handle empty data state
+  if (!data || !data.labels || data.labels.length === 0) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+        <div className="h-[500px] w-full flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/20 dark:to-blue-800/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">No Loan Data</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-lg">Your loan trends will appear here once you apply for loans</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const chartData = {
-    labels: data?.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    labels: data.labels,
     datasets: [
       {
         label: 'Loans Applied',
-        data: data?.applied || [12, 19, 3, 5, 2, 3],
-        borderColor: colorPalettes.primary[0],
-        backgroundColor: colorPalettes.primary[0] + '20',
+        data: data.applied || [],
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
         tension: 0.4,
-        fill: true
+        fill: true,
+        pointRadius: 8,
+        pointHoverRadius: 12,
+        pointBackgroundColor: '#3b82f6',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 3,
+        borderWidth: 4
       },
       {
         label: 'Loans Approved',
-        data: data?.approved || [8, 15, 2, 4, 1, 2],
-        borderColor: colorPalettes.success[0],
-        backgroundColor: colorPalettes.success[0] + '20',
+        data: data.approved || [],
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
         tension: 0.4,
-        fill: true
+        fill: true,
+        pointRadius: 8,
+        pointHoverRadius: 12,
+        pointBackgroundColor: '#10b981',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 3,
+        borderWidth: 4
       },
       {
         label: 'Loans Funded',
-        data: data?.funded || [6, 12, 1, 3, 1, 1],
-        borderColor: colorPalettes.warning[0],
-        backgroundColor: colorPalettes.warning[0] + '20',
+        data: data.funded || [],
+        borderColor: '#f59e0b',
+        backgroundColor: 'rgba(245, 158, 11, 0.1)',
         tension: 0.4,
-        fill: true
+        fill: true,
+        pointRadius: 8,
+        pointHoverRadius: 12,
+        pointBackgroundColor: '#f59e0b',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 3,
+        borderWidth: 4
       }
     ]
   };
@@ -45,126 +82,9 @@ export const LoanTrendsChart = ({ data }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <div className="h-80">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+      <div className="h-[500px] w-full">
         <ChartComponent type="line" data={chartData} options={options} />
-      </div>
-    </div>
-  );
-};
-
-// Portfolio Breakdown Chart
-export const PortfolioBreakdownChart = ({ data }) => {
-  const chartData = {
-    labels: data?.labels || ['Active Loans', 'Completed Loans', 'Pending Loans', 'Defaulted Loans'],
-    datasets: [
-      {
-        data: data?.values || [45, 30, 15, 10],
-        backgroundColor: colorPalettes.gradient,
-        borderWidth: 2,
-        borderColor: '#ffffff',
-        hoverOffset: 4
-      }
-    ]
-  };
-
-  const options = {
-    ...chartOptions,
-    plugins: {
-      ...chartOptions.plugins,
-      title: {
-        ...chartOptions.plugins.title,
-        text: 'Portfolio Breakdown'
-      }
-    }
-  };
-
-  return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <div className="h-80">
-        <ChartComponent type="doughnut" data={chartData} options={options} />
-      </div>
-    </div>
-  );
-};
-
-// Monthly Performance Chart
-export const MonthlyPerformanceChart = ({ data }) => {
-  const chartData = {
-    labels: data?.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'Revenue',
-        data: data?.revenue || [5000, 7500, 6200, 8900, 11000, 9500],
-        backgroundColor: colorPalettes.success[0] + '80',
-        borderColor: colorPalettes.success[0],
-        borderWidth: 2
-      },
-      {
-        label: 'Expenses',
-        data: data?.expenses || [2000, 3000, 2500, 3500, 4000, 3800],
-        backgroundColor: colorPalettes.danger[0] + '80',
-        borderColor: colorPalettes.danger[0],
-        borderWidth: 2
-      }
-    ]
-  };
-
-  const options = {
-    ...chartOptions,
-    plugins: {
-      ...chartOptions.plugins,
-      title: {
-        ...chartOptions.plugins.title,
-        text: 'Monthly Performance'
-      }
-    }
-  };
-
-  return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <div className="h-80">
-        <ChartComponent type="bar" data={chartData} options={options} />
-      </div>
-    </div>
-  );
-};
-
-// Credit Score Distribution Chart
-export const CreditScoreDistributionChart = ({ data }) => {
-  const chartData = {
-    labels: data?.labels || ['Excellent (750+)', 'Good (700-749)', 'Fair (650-699)', 'Poor (600-649)', 'Very Poor (<600)'],
-    datasets: [
-      {
-        data: data?.values || [25, 35, 20, 15, 5],
-        backgroundColor: [
-          colorPalettes.success[0],
-          colorPalettes.primary[0],
-          colorPalettes.warning[0],
-          colorPalettes.danger[0],
-          colorPalettes.purple[0]
-        ],
-        borderWidth: 2,
-        borderColor: '#ffffff'
-      }
-    ]
-  };
-
-  const options = {
-    ...chartOptions,
-    plugins: {
-      ...chartOptions.plugins,
-      title: {
-        ...chartOptions.plugins.title,
-        text: 'Credit Score Distribution'
-      }
-    }
-  };
-
-  return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <div className="h-80">
-        <ChartComponent type="pie" data={chartData} options={options} />
       </div>
     </div>
   );
@@ -172,19 +92,40 @@ export const CreditScoreDistributionChart = ({ data }) => {
 
 // Repayment Status Chart
 export const RepaymentStatusChart = ({ data }) => {
+  // Handle empty data state
+  if (!data || !data.labels || data.labels.length === 0) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+        <div className="h-[500px] w-full flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/20 dark:to-green-800/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">No Repayment Data</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-lg">Repayment status will appear here once you have active loans</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const chartData = {
-    labels: data?.labels || ['On Time', 'Late', 'Overdue', 'Paid'],
+    labels: data.labels,
     datasets: [
       {
-        data: data?.values || [70, 15, 10, 5],
+        data: data.values || [],
         backgroundColor: [
-          colorPalettes.success[0],
-          colorPalettes.warning[0],
-          colorPalettes.danger[0],
-          colorPalettes.primary[0]
+          '#10b981', // On Time
+          '#f59e0b', // Late
+          '#ef4444', // Overdue
+          '#3b82f6'  // Paid
         ],
-        borderWidth: 2,
-        borderColor: '#ffffff'
+        borderWidth: 4,
+        borderColor: '#ffffff',
+        hoverOffset: 12,
+        hoverBorderWidth: 6
       }
     ]
   };
@@ -201,9 +142,70 @@ export const RepaymentStatusChart = ({ data }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <div className="h-80">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+      <div className="h-[500px] w-full">
         <ChartComponent type="doughnut" data={chartData} options={options} />
+      </div>
+    </div>
+  );
+};
+
+// Credit Score Distribution Chart
+export const CreditScoreDistributionChart = ({ data }) => {
+  // Handle empty data state
+  if (!data || !data.labels || data.labels.length === 0) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+        <div className="h-[500px] w-full flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/20 dark:to-purple-800/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">No Credit Score Data</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-lg">Credit score distribution will appear here once you have credit data</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const chartData = {
+    labels: data.labels,
+    datasets: [
+      {
+        data: data.values || [],
+        backgroundColor: [
+          '#10b981', // Excellent
+          '#3b82f6', // Good
+          '#f59e0b', // Fair
+          '#ef4444', // Poor
+          '#8b5cf6'  // Very Poor
+        ],
+        borderWidth: 4,
+        borderColor: '#ffffff',
+        hoverOffset: 12,
+        hoverBorderWidth: 6
+      }
+    ]
+  };
+
+  const options = {
+    ...chartOptions,
+    plugins: {
+      ...chartOptions.plugins,
+      title: {
+        ...chartOptions.plugins.title,
+        text: 'Credit Score Distribution'
+      }
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+      <div className="h-[500px] w-full">
+        <ChartComponent type="pie" data={chartData} options={options} />
       </div>
     </div>
   );
@@ -211,24 +213,55 @@ export const RepaymentStatusChart = ({ data }) => {
 
 // Investment Growth Chart
 export const InvestmentGrowthChart = ({ data }) => {
+  // Handle empty data state
+  if (!data || !data.labels || data.labels.length === 0) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+        <div className="h-[500px] w-full flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/20 dark:to-blue-800/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">No Investment Data</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-lg">Start investing to see your growth over time</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const chartData = {
-    labels: data?.labels || ['Q1', 'Q2', 'Q3', 'Q4'],
+    labels: data.labels,
     datasets: [
       {
         label: 'Total Investment',
-        data: data?.investment || [10000, 15000, 22000, 30000],
-        borderColor: colorPalettes.primary[0],
-        backgroundColor: colorPalettes.primary[0] + '20',
+        data: data.investment || [],
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
         tension: 0.4,
-        fill: true
+        fill: true,
+        pointRadius: 8,
+        pointHoverRadius: 12,
+        pointBackgroundColor: '#3b82f6',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 3,
+        borderWidth: 4
       },
       {
         label: 'Returns Earned',
-        data: data?.returns || [500, 1200, 2000, 3200],
-        borderColor: colorPalettes.success[0],
-        backgroundColor: colorPalettes.success[0] + '20',
+        data: data.returns || [],
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
         tension: 0.4,
-        fill: true
+        fill: true,
+        pointRadius: 8,
+        pointHoverRadius: 12,
+        pointBackgroundColor: '#10b981',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 3,
+        borderWidth: 4
       }
     ]
   };
@@ -245,9 +278,134 @@ export const InvestmentGrowthChart = ({ data }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <div className="h-80">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+      <div className="h-[500px] w-full">
         <ChartComponent type="line" data={chartData} options={options} />
+      </div>
+    </div>
+  );
+};
+
+// Portfolio Breakdown Chart
+export const PortfolioBreakdownChart = ({ data }) => {
+  // Handle empty data state
+  if (!data || !data.labels || data.labels.length === 0) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+        <div className="h-[500px] w-full flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/20 dark:to-green-800/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">No Portfolio Data</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-lg">Your portfolio breakdown will appear here once you start investing</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const chartData = {
+    labels: data.labels,
+    datasets: [
+      {
+        data: data.values || [],
+        backgroundColor: colorPalettes.gradient,
+        borderWidth: 4,
+        borderColor: '#ffffff',
+        hoverOffset: 12,
+        hoverBorderWidth: 6
+      }
+    ]
+  };
+
+  const options = {
+    ...chartOptions,
+    plugins: {
+      ...chartOptions.plugins,
+      title: {
+        ...chartOptions.plugins.title,
+        text: 'Portfolio Breakdown by Category'
+      }
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+      <div className="h-[500px] w-full">
+        <ChartComponent type="doughnut" data={chartData} options={options} />
+      </div>
+    </div>
+  );
+};
+
+// Monthly Performance Chart
+export const MonthlyPerformanceChart = ({ data }) => {
+  // Handle empty data state
+  if (!data || !data.labels || data.labels.length === 0) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+        <div className="h-[500px] w-full flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-20 h-20 bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/20 dark:to-orange-800/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">No Performance Data</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-lg">Performance metrics will appear here once you have investments</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const chartData = {
+    labels: data.labels,
+    datasets: [
+      {
+        label: 'Revenue',
+        data: data.revenue || [],
+        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+        borderColor: '#10b981',
+        borderWidth: 3,
+        borderRadius: 12,
+        borderSkipped: false,
+        hoverBackgroundColor: 'rgba(16, 185, 129, 0.9)',
+        hoverBorderWidth: 5
+      },
+      {
+        label: 'Expenses',
+        data: data.expenses || [],
+        backgroundColor: 'rgba(239, 68, 68, 0.8)',
+        borderColor: '#ef4444',
+        borderWidth: 3,
+        borderRadius: 12,
+        borderSkipped: false,
+        hoverBackgroundColor: 'rgba(239, 68, 68, 0.9)',
+        hoverBorderWidth: 5
+      }
+    ]
+  };
+
+  const options = {
+    ...chartOptions,
+    plugins: {
+      ...chartOptions.plugins,
+      title: {
+        ...chartOptions.plugins.title,
+        text: 'Monthly Performance Analysis'
+      }
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+      <div className="h-[500px] w-full">
+        <ChartComponent type="bar" data={chartData} options={options} />
       </div>
     </div>
   );
@@ -255,18 +413,39 @@ export const InvestmentGrowthChart = ({ data }) => {
 
 // Risk Assessment Chart
 export const RiskAssessmentChart = ({ data }) => {
+  // Handle empty data state
+  if (!data || !data.labels || data.labels.length === 0) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+        <div className="h-[500px] w-full flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/20 dark:to-red-800/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">No Risk Assessment Data</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-lg">Risk analysis will appear here once you have active investments</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const chartData = {
-    labels: data?.labels || ['Low Risk', 'Medium Risk', 'High Risk'],
+    labels: data.labels,
     datasets: [
       {
-        data: data?.values || [60, 30, 10],
+        data: data.values || [],
         backgroundColor: [
-          colorPalettes.success[0],
-          colorPalettes.warning[0],
-          colorPalettes.danger[0]
+          '#10b981', // Green for Low Risk
+          '#f59e0b', // Orange for Medium Risk
+          '#ef4444'  // Red for High Risk
         ],
-        borderWidth: 2,
-        borderColor: '#ffffff'
+        borderWidth: 4,
+        borderColor: '#ffffff',
+        hoverOffset: 12,
+        hoverBorderWidth: 6
       }
     ]
   };
@@ -283,8 +462,8 @@ export const RiskAssessmentChart = ({ data }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <div className="h-80">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+      <div className="h-[500px] w-full">
         <ChartComponent type="pie" data={chartData} options={options} />
       </div>
     </div>

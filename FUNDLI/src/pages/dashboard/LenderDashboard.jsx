@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -19,6 +19,7 @@ import LoanApplications from '../../components/lender/LoanApplications';
 import LenderLoanManagement from '../../components/lender/LenderLoanManagement';
 import PendingLoansSection from '../../components/common/PendingLoansSection';
 import WalletBalanceCard from '../../components/common/WalletBalanceCard';
+import CollateralVerificationStatus from '../../components/common/CollateralVerificationStatus';
 import { 
   InvestmentGrowthChart, 
   PortfolioBreakdownChart, 
@@ -47,40 +48,72 @@ const LenderDashboard = () => {
     riskAssessment: null
   });
 
-  useEffect(() => {
-    const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
       try {
         setError('');
         setIsLoading(true);
         
         // Fetch real data from backend API
         const token = localStorage.getItem('accessToken');
+        console.log('🔑 Token found:', token ? 'Yes' : 'No');
+        console.log('👤 User:', user);
+        
         if (!token) {
           throw new Error('No authentication token found');
         }
 
-        // Fetch lender's funded loans data
-        const fundedLoansResponse = await fetch('http://localhost:5000/api/lender/funded-loans', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        console.log('🚀 Starting API calls...');
 
+        // Fetch all dashboard data in parallel
+        const [
+          investmentStatsResponse,
+          fundedLoansResponse,
+          poolsResponse,
+          chartDataResponse
+        ] = await Promise.all([
+          fetch('http://localhost:5000/api/lender/investment-stats', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }),
+          fetch('http://localhost:5000/api/lender/funded-loans', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }),
+          fetch('http://localhost:5000/api/pools/my-pools', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }),
+          fetch('http://localhost:5000/api/lender/dashboard-charts', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+        ]);
+
+        console.log('📊 API Response Statuses:');
+        console.log('  - Investment Stats:', investmentStatsResponse.status);
+        console.log('  - Funded Loans:', fundedLoansResponse.status);
+        console.log('  - Pools:', poolsResponse.status);
+        console.log('  - Chart Data:', chartDataResponse.status);
+
+        // Process investment statistics
+        let investmentStats = { totalInvested: 0, totalLoansFunded: 0, averageInvestmentAmount: 0 };
+        if (investmentStatsResponse.ok) {
+          const investmentStatsData = await investmentStatsResponse.json();
+          investmentStats = investmentStatsData.data?.investmentStats || investmentStats;
+        }
+
+        // Process funded loans data
+        let fundedLoans = [];
         if (fundedLoansResponse.ok) {
           const fundedLoansData = await fundedLoansResponse.json();
-          console.log('Fetched funded loans data:', fundedLoansData);
+          fundedLoans = fundedLoansData.data?.fundedLoans || [];
+        }
           
-          // Process funded loans data
-          const fundedLoans = fundedLoansData.data?.fundedLoans || [];
-          const activeLoans = fundedLoans.filter(loan => loan.status === 'active') || [];
-          const totalInvested = fundedLoans.reduce((sum, loan) => sum + (loan.fundedAmount || 0), 0);
+        // Calculate stats from real data
+        const activeLoans = fundedLoans.filter(loan => loan.status === 'active');
           const totalReturns = fundedLoans.reduce((sum, loan) => sum + (loan.amountPaid || 0), 0);
           const averageROI = activeLoans.length > 0 
             ? activeLoans.reduce((sum, loan) => sum + (loan.interestRate || 0), 0) / activeLoans.length 
             : 0;
           
           setStats({
-            totalInvested,
+          totalInvested: investmentStats.totalInvested,
             activeInvestments: activeLoans.length,
             totalReturns,
             averageROI: parseFloat(averageROI.toFixed(1))
@@ -88,7 +121,7 @@ const LenderDashboard = () => {
 
           setRecentInvestments(fundedLoans);
           
-          // Calculate portfolio breakdown
+        // Calculate portfolio breakdown from real data
           const breakdown = {};
           fundedLoans.forEach(loan => {
             const category = loan.purpose || 'Other';
@@ -102,45 +135,41 @@ const LenderDashboard = () => {
           const portfolioData = Object.entries(breakdown).map(([category, data]) => ({
             category,
             amount: data.amount,
-            percentage: totalInvested > 0 ? Math.round((data.amount / totalInvested) * 100) : 0,
+          percentage: investmentStats.totalInvested > 0 ? Math.round((data.amount / investmentStats.totalInvested) * 100) : 0,
             color: 'bg-primary-500'
           }));
           
           setPortfolioBreakdown(portfolioData);
-        } else {
-          console.warn('Failed to fetch investments data:', investmentsResponse.status);
-          // Set default values for investments but don't throw error
-          setStats({
-            totalInvested: 0,
-            activeInvestments: 0,
-            totalReturns: 0,
-            averageROI: 0
-          });
-          setRecentInvestments([]);
-          setPortfolioBreakdown([]);
-        }
 
-        // Fetch user's created pools
-        console.log('Fetching user pools...');
-        const poolsResponse = await fetch('http://localhost:5000/api/pools/my-pools', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        console.log('Pools response status:', poolsResponse.status);
-        console.log('Pools response ok:', poolsResponse.ok);
-
+        // Process pools data
         if (poolsResponse.ok) {
           const poolsData = await poolsResponse.json();
-          console.log('Fetched pools data:', poolsData);
-          console.log('Pools array:', poolsData.data?.pools);
           setMyPools(poolsData.data?.pools || []);
         } else {
-          const errorText = await poolsResponse.text();
-          console.warn('Failed to fetch pools data:', poolsResponse.status, errorText);
           setMyPools([]);
         }
+
+        // Process chart data
+        if (chartDataResponse.ok) {
+          const chartDataResult = await chartDataResponse.json();
+          console.log('📈 Chart data received:', chartDataResult.data);
+          console.log('📈 Investment Growth:', chartDataResult.data.investmentGrowth);
+          console.log('📈 Portfolio Breakdown:', chartDataResult.data.portfolioBreakdown);
+          console.log('📈 Monthly Performance:', chartDataResult.data.monthlyPerformance);
+          console.log('📈 Risk Assessment:', chartDataResult.data.riskAssessment);
+          setChartData(chartDataResult.data);
+        } else {
+          const errorText = await chartDataResponse.text();
+          console.warn('❌ Chart data API failed:', chartDataResponse.status, errorText);
+          // Set empty chart data if API fails
+          setChartData({
+            investmentGrowth: null,
+            portfolioBreakdown: null,
+            monthlyPerformance: null,
+            riskAssessment: null
+          });
+        }
+
       } catch (error) {
         console.error('Error loading dashboard data:', error);
         setError('Some dashboard data failed to load. Please try again later.');
@@ -154,16 +183,31 @@ const LenderDashboard = () => {
         });
         setRecentInvestments([]);
         setPortfolioBreakdown([]);
-        setMyPools([]); // Also set empty pools array
+        setMyPools([]);
+        setChartData({
+          investmentGrowth: null,
+          portfolioBreakdown: null,
+          monthlyPerformance: null,
+          riskAssessment: null
+        });
       } finally {
         setIsLoading(false);
       }
-    };
+    }, [user]);
 
+  useEffect(() => {
     if (user) {
       loadDashboardData();
     }
-  }, [user]);
+  }, [user, loadDashboardData]);
+
+  // Expose refresh function globally for real-time updates
+  useEffect(() => {
+    window.refreshLenderDashboard = loadDashboardData;
+    return () => {
+      delete window.refreshLenderDashboard;
+    };
+  }, [loadDashboardData]);
 
   const quickActions = [
     {
@@ -338,6 +382,11 @@ const LenderDashboard = () => {
       {/* Wallet Balance */}
       <div className="mb-8">
         <WalletBalanceCard userType="lender" />
+      </div>
+
+      {/* Collateral Verification Status */}
+      <div className="mb-8">
+        <CollateralVerificationStatus userId={user?.id} userType="lender" />
       </div>
 
       {/* Quick Actions */}
@@ -596,9 +645,31 @@ const LenderDashboard = () => {
       {/* Pending Loans Section */}
       <PendingLoansSection userType="lender" title="Available Loan Applications" />
 
+      {/* API Test Component - Temporary for debugging */}
+      {/* <APITestComponent /> */}
+
       {/* Analytics Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Investment Growth Chart */}
+      <div className="space-y-8">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Investment Analytics
+          </h2>
+        </div>
+        
+        {isLoading ? (
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+                <div className="h-[500px] w-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* First Row - Investment Growth and Portfolio Breakdown */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -607,7 +678,6 @@ const LenderDashboard = () => {
           <InvestmentGrowthChart data={chartData.investmentGrowth} />
         </motion.div>
 
-        {/* Portfolio Breakdown Chart */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -617,9 +687,8 @@ const LenderDashboard = () => {
         </motion.div>
         </div>
         
-      {/* Monthly Performance and Risk Assessment Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Monthly Performance Chart */}
+            {/* Second Row - Monthly Performance and Risk Assessment */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -628,7 +697,6 @@ const LenderDashboard = () => {
           <MonthlyPerformanceChart data={chartData.monthlyPerformance} />
         </motion.div>
 
-        {/* Risk Assessment Chart */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -636,6 +704,9 @@ const LenderDashboard = () => {
         >
           <RiskAssessmentChart data={chartData.riskAssessment} />
         </motion.div>
+            </div>
+          </>
+        )}
         </div>
         </>
       )}
@@ -653,4 +724,4 @@ const LenderDashboard = () => {
   );
 };
 
-export default LenderDashboard; 
+export default LenderDashboard;

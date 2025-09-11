@@ -24,6 +24,8 @@ const TransferPage = () => {
   const [wallet, setWallet] = useState(null);
   const [recipient, setRecipient] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [transferData, setTransferData] = useState(null);
 
   useEffect(() => {
     loadWalletData();
@@ -46,7 +48,17 @@ const TransferPage = () => {
   };
 
   const searchRecipient = async () => {
-    if (!recipientEmail) return;
+    if (!recipientEmail) {
+      setError('Please enter an email address');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(recipientEmail)) {
+      setError('Please enter a valid email address');
+      return;
+    }
 
     try {
       setIsSearching(true);
@@ -54,48 +66,70 @@ const TransferPage = () => {
       setRecipient(null);
 
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:5000/api/users/search?email=${recipientEmail}`, {
+      const response = await fetch(`http://localhost:5000/api/users/search?email=${encodeURIComponent(recipientEmail)}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
-        if (data.data.user) {
+        console.log('Search response:', data);
+        if (data.data && data.data.user) {
+          console.log('Setting recipient:', data.data.user);
           setRecipient(data.data.user);
         } else {
+          console.log('No user found in response');
           setError('User not found');
         }
       } else {
-        setError('User not found');
+        console.log('Search failed:', data);
+        setError(data.message || 'User not found');
       }
     } catch (error) {
       console.error('Error searching user:', error);
-      setError('Failed to search user');
+      setError('Failed to search user. Please try again.');
     } finally {
       setIsSearching(false);
     }
   };
 
   const handleTransfer = async () => {
+    if (!recipient) {
+      setError('Please search and select a recipient');
+      return;
+    }
+
+    if (!amount || amount <= 0) {
+      setError('Please enter a valid amount');
+      return;
+    }
+
+    const transferAmount = parseFloat(amount);
+    if (isNaN(transferAmount) || transferAmount < 10) {
+      setError('Minimum transfer amount is $10');
+      return;
+    }
+
+    if (wallet && wallet.balance < transferAmount) {
+      setError(`Insufficient balance. Available: $${wallet.balance.toFixed(2)}`);
+      return;
+    }
+
+    // Show confirmation modal
+    setTransferData({
+      recipient,
+      amount: transferAmount,
+      description
+    });
+    setShowConfirmModal(true);
+  };
+
+  const confirmTransfer = async () => {
     try {
       setIsLoading(true);
       setError('');
       setSuccess('');
-
-      if (!recipient) {
-        setError('Please search and select a recipient');
-        return;
-      }
-
-      if (!amount || amount <= 0) {
-        setError('Please enter a valid amount');
-        return;
-      }
-
-      if (wallet && wallet.balance < parseFloat(amount)) {
-        setError('Insufficient balance');
-        return;
-      }
+      setShowConfirmModal(false);
 
       const token = localStorage.getItem('accessToken');
       const response = await fetch('http://localhost:5000/api/wallet/transfer', {
@@ -105,20 +139,21 @@ const TransferPage = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          toUserId: recipient._id,
-          amount: parseFloat(amount),
-          description: description
+          toUserId: transferData.recipient._id,
+          amount: transferData.amount,
+          description: transferData.description
         })
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess(`Transfer successful! ₦${amount} sent to ${recipient.firstName} ${recipient.lastName}.`);
+        setSuccess(`Transfer successful! $${transferData.amount.toFixed(2)} sent to ${transferData.recipient.firstName} ${transferData.recipient.lastName}.`);
         setAmount('');
         setDescription('');
         setRecipient(null);
         setRecipientEmail('');
+        setTransferData(null);
         
         // Refresh wallet data
         await loadWalletData();
@@ -139,10 +174,10 @@ const TransferPage = () => {
   };
 
   const formatAmount = (amount) => {
-    return new Intl.NumberFormat('en-NG', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'NGN',
-      minimumFractionDigits: 0
+      currency: 'USD',
+      minimumFractionDigits: 2
     }).format(amount);
   };
 
@@ -290,16 +325,63 @@ const TransferPage = () => {
                 </motion.div>
               )}
 
+              {/* Debug Info - Remove in production */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mb-4 p-2 bg-gray-100 dark:bg-gray-700 rounded text-xs">
+                  <div>Recipient: {recipient ? 'Found' : 'Not found'}</div>
+                  <div>Amount: {amount || 'Empty'}</div>
+                  <div>Amount Valid: {amount && parseFloat(amount) >= 10 ? 'Yes' : 'No'}</div>
+                  <div>Loading: {isLoading ? 'Yes' : 'No'}</div>
+                  <div>Button Disabled: {isLoading || !recipient || !amount || parseFloat(amount) < 10 ? 'Yes' : 'No'}</div>
+                  <button 
+                    onClick={() => {
+                      console.log('Test button clicked');
+                      console.log('Current state:', { recipient, amount, isLoading });
+                    }}
+                    className="mt-2 px-2 py-1 bg-blue-500 text-white text-xs rounded"
+                  >
+                    Test Button (Always Clickable)
+                  </button>
+                  <button 
+                    onClick={() => {
+                      console.log('Testing user search...');
+                      setRecipientEmail('test@example.com');
+                      setTimeout(() => {
+                        searchRecipient();
+                      }, 100);
+                    }}
+                    className="mt-2 ml-2 px-2 py-1 bg-green-500 text-white text-xs rounded"
+                  >
+                    Test Search
+                  </button>
+                </div>
+              )}
+
               {/* Transfer Button */}
               <button
                 onClick={handleTransfer}
-                disabled={isLoading || !recipient || !amount}
+                disabled={isLoading || !recipient || !amount || parseFloat(amount) < 10}
                 className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center"
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                     Processing Transfer...
+                  </>
+                ) : !recipient ? (
+                  <>
+                    <ArrowUpDown className="h-5 w-5 mr-2" />
+                    Select Recipient First
+                  </>
+                ) : !amount ? (
+                  <>
+                    <ArrowUpDown className="h-5 w-5 mr-2" />
+                    Enter Amount
+                  </>
+                ) : parseFloat(amount) < 10 ? (
+                  <>
+                    <ArrowUpDown className="h-5 w-5 mr-2" />
+                    Minimum $10 Required
                   </>
                 ) : (
                   <>
@@ -324,10 +406,10 @@ const TransferPage = () => {
                 Available Balance
               </h3>
               <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                ₦{wallet?.balance?.toLocaleString() || '0'}
+                ${wallet?.balance?.toLocaleString() || '0.00'}
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {wallet?.currency || 'NGN'}
+                {wallet?.currency || 'USD'}
               </p>
             </motion.div>
 
@@ -345,7 +427,7 @@ const TransferPage = () => {
                 <div>
                   <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
                     <span>Daily Limit</span>
-                    <span>₦{wallet?.limits?.dailyTransferLimit?.toLocaleString() || '0'}</span>
+                    <span>${wallet?.limits?.dailyTransferLimit?.toLocaleString() || '0'}</span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
                     <div
@@ -362,7 +444,7 @@ const TransferPage = () => {
                 <div>
                   <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
                     <span>Used Today</span>
-                    <span>₦{wallet?.dailyUsage?.transferAmount?.toLocaleString() || '0'}</span>
+                    <span>${wallet?.dailyUsage?.transferAmount?.toLocaleString() || '0'}</span>
                   </div>
                 </div>
               </div>
@@ -400,6 +482,73 @@ const TransferPage = () => {
             </motion.div>
           </div>
         </div>
+
+        {/* Confirmation Modal */}
+        {showConfirmModal && transferData && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Confirm Transfer
+              </h3>
+              
+              <div className="space-y-4 mb-6">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Recipient:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {transferData.recipient.firstName} {transferData.recipient.lastName}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Email:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {transferData.recipient.email}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Amount:</span>
+                  <span className="font-bold text-lg text-gray-900 dark:text-white">
+                    ${transferData.amount.toFixed(2)}
+                  </span>
+                </div>
+                {transferData.description && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Description:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {transferData.description}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmTransfer}
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    'Confirm Transfer'
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </div>
     </div>
   );

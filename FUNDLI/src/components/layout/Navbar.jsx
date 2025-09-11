@@ -3,11 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Sun, Moon, User, LogOut, Settings, Bell } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import NotificationDropdown from '../common/NotificationDropdown';
 
 const Navbar = ({ onMenuClick }) => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [notificationOpen, setNotificationOpen] = useState(false);
   const { user, isAuthenticated, logout, userType } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -83,20 +81,13 @@ const Navbar = ({ onMenuClick }) => {
             {isAuthenticated ? (
               <>
                 {/* Notifications */}
-                <div className="relative">
-                  <button 
-                    onClick={() => setNotificationOpen(!notificationOpen)}
-                    className="p-2 rounded-lg text-neutral-600 dark:text-neutral-300 hover:text-secondary-900 dark:hover:text-secondary-100 hover:bg-neutral-100 dark:hover:bg-secondary-700 transition-colors relative"
-                  >
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-                  </button>
-                  
-                  <NotificationDropdown 
-                    isOpen={notificationOpen} 
-                    onClose={() => setNotificationOpen(false)} 
-                  />
-                </div>
+                <Link
+                  to="/notifications"
+                  className="p-2 rounded-lg text-neutral-600 dark:text-neutral-300 hover:text-secondary-900 dark:hover:text-secondary-100 hover:bg-neutral-100 dark:hover:bg-secondary-700 transition-colors relative"
+                >
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                </Link>
 
                 {/* User Menu */}
                 <div className="relative">

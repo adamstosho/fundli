@@ -11,10 +11,13 @@ import {
   CheckCircle,
   Clock,
   ArrowRight,
-  BarChart3
+  BarChart3,
+  Plus,
+  RefreshCw
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import AdminLoanManagement from '../../components/admin/AdminLoanManagement';
+import AdminCollateralReview from '../../components/admin/AdminCollateralReview';
 import PendingLoansSection from '../../components/common/PendingLoansSection';
 import WalletBalanceCard from '../../components/common/WalletBalanceCard';
 
@@ -29,6 +32,7 @@ const AdminDashboard = () => {
   const [recentActivities, setRecentActivities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [creatingTestData, setCreatingTestData] = useState(false);
 
   useEffect(() => {
     // Load real admin dashboard data
@@ -200,6 +204,16 @@ const AdminDashboard = () => {
             }`}
           >
             Loan Applications
+          </button>
+          <button
+            onClick={() => setActiveTab('collateral')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'collateral'
+                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            Collateral Verification
           </button>
         </nav>
       </div>
@@ -412,6 +426,11 @@ const AdminDashboard = () => {
       {/* Loan Applications Tab */}
       {activeTab === 'loans' && (
         <AdminLoanManagement />
+      )}
+
+      {/* Collateral Verification Tab */}
+      {activeTab === 'collateral' && (
+        <AdminCollateralReview />
       )}
     </div>
   );

@@ -162,6 +162,46 @@ const userSchema = new mongoose.Schema({
     default: 0,
     min: 0
   },
+
+  // Investment tracking for lenders
+  investmentStats: {
+    totalInvested: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    totalLoansFunded: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    averageInvestmentAmount: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    lastInvestmentDate: Date,
+    investmentHistory: [{
+      loanId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Loan'
+      },
+      amount: {
+        type: Number,
+        required: true
+      },
+      borrowerName: String,
+      investmentDate: {
+        type: Date,
+        default: Date.now
+      },
+      status: {
+        type: String,
+        enum: ['active', 'completed', 'defaulted'],
+        default: 'active'
+      }
+    }]
+  },
   
   // Referral Information
   referralCode: {
@@ -353,6 +393,42 @@ userSchema.methods.resetLoginAttempts = function() {
   return this.updateOne({
     $unset: { loginAttempts: 1, lockUntil: 1 }
   });
+};
+
+// Method to update investment statistics
+userSchema.methods.updateInvestmentStats = function(loanId, amount, borrowerName) {
+  // Initialize investmentStats if it doesn't exist
+  if (!this.investmentStats) {
+    this.investmentStats = {
+      totalInvested: 0,
+      totalLoansFunded: 0,
+      averageInvestmentAmount: 0,
+      investmentHistory: []
+    };
+  }
+
+  // Update total invested
+  this.investmentStats.totalInvested += amount;
+  
+  // Update total loans funded
+  this.investmentStats.totalLoansFunded += 1;
+  
+  // Update average investment amount
+  this.investmentStats.averageInvestmentAmount = this.investmentStats.totalInvested / this.investmentStats.totalLoansFunded;
+  
+  // Update last investment date
+  this.investmentStats.lastInvestmentDate = new Date();
+  
+  // Add to investment history
+  this.investmentStats.investmentHistory.push({
+    loanId: loanId,
+    amount: amount,
+    borrowerName: borrowerName,
+    investmentDate: new Date(),
+    status: 'active'
+  });
+
+  return this.save();
 };
 
 // Static methods

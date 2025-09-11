@@ -9,10 +9,13 @@ import {
   FileText,
   Clock,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  Shield,
+  AlertCircle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import KYCForm from '../../components/kyc/KYCForm';
+import ManualCollateralVerification from '../../components/collateral/ManualCollateralVerification';
 
 const BrowseLoans = () => {
   const { user } = useAuth();
@@ -21,11 +24,34 @@ const BrowseLoans = () => {
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [showKYCModal, setShowKYCModal] = useState(false);
   const [showLoanApplicationModal, setShowLoanApplicationModal] = useState(false);
+  const [showCollateralModal, setShowCollateralModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [collateralStatus, setCollateralStatus] = useState(null);
 
   useEffect(() => {
     loadAvailableLoans();
+    checkCollateralStatus();
   }, []);
+
+  const checkCollateralStatus = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return;
+
+      const response = await fetch('http://localhost:5000/api/collateral/status', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCollateralStatus(data.data.collateral);
+      }
+    } catch (error) {
+      console.error('Error checking collateral status:', error);
+    }
+  };
 
   const loadAvailableLoans = async () => {
     try {
@@ -195,10 +221,133 @@ const BrowseLoans = () => {
     }
   };
 
+  const handleCollateralSubmit = async (formData, collateralDocuments, bankStatement) => {
+    setIsSubmitting(true);
+
+    try {
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required - please log in again');
+      }
+
+      // Prepare data for JSON submission
+      const submitData = {
+        collateralType: formData.collateralType,
+        description: formData.description,
+        estimatedValue: formData.estimatedValue,
+        bvn: formData.bvn,
+        documentTypes: formData.documentTypes,
+        collateralDocuments: collateralDocuments.map(doc => ({
+          name: doc.name,
+          base64: doc.base64,
+          size: doc.size,
+          type: doc.file?.type || 'application/octet-stream'
+        })),
+        bankStatement: bankStatement ? {
+          name: bankStatement.name,
+          base64: bankStatement.base64,
+          size: bankStatement.size,
+          type: bankStatement.file?.type || 'application/octet-stream'
+        } : null
+      };
+
+      const response = await fetch('http://localhost:5000/api/collateral/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(submitData)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to submit collateral verification');
+      }
+
+      // Close collateral modal and refresh status
+      setShowCollateralModal(false);
+      await checkCollateralStatus();
+      alert('Collateral verification submitted successfully! You can now proceed with your loan application.');
+      
+      // If there's a pending application, proceed with it
+      if (selectedLoan?.pendingApplication) {
+        // Submit the pending loan application
+        await submitPendingLoanApplication(selectedLoan.pendingApplication);
+        // Clear the pending application
+        setSelectedLoan(prev => ({
+          ...prev,
+          pendingApplication: null
+        }));
+      } else {
+        // Show loan application modal if no pending application
+        setShowLoanApplicationModal(true);
+      }
+    } catch (err) {
+      alert(err.message || 'Failed to submit collateral verification. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const submitPendingLoanApplication = async (applicationData) => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      
+      console.log('📝 Submitting pending loan application for pool:', selectedLoan.id);
+      console.log('📝 Application data:', applicationData);
+      
+      // Apply to lending pool using the borrower loan application endpoint
+      const response = await fetch(`http://localhost:5000/api/borrower/loan/${selectedLoan.id}/apply`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...applicationData,
+          lendingPoolId: selectedLoan.id
+        })
+      });
+
+      console.log('📡 Application response status:', response.status);
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Loan application successful:', result);
+        alert(`Loan application submitted successfully! ${result.message}`);
+        setShowLoanApplicationModal(false);
+        setSelectedLoan(null);
+        // Refresh loans list
+        await loadAvailableLoans();
+      } else {
+        const errorData = await response.json();
+        console.error('❌ Loan application failed:', errorData);
+        alert(`Loan application failed: ${errorData.message}`);
+      }
+    } catch (error) {
+      console.error('❌ Error submitting loan application:', error);
+      alert('Failed to submit loan application. Please try again.');
+    }
+  };
+
   const handleLoanApplication = async (applicationData) => {
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem('accessToken');
+      
+      // Check collateral verification status first
+      if (!collateralStatus || collateralStatus.verificationStatus !== 'approved') {
+        // Store the application data temporarily and show collateral verification
+        setSelectedLoan(prev => ({
+          ...prev,
+          pendingApplication: applicationData
+        }));
+        setShowLoanApplicationModal(false);
+        setShowCollateralModal(true);
+        return;
+      }
       
       console.log('📝 Submitting loan application for pool:', selectedLoan.id);
       console.log('📝 Application data:', applicationData);
@@ -277,6 +426,42 @@ const BrowseLoans = () => {
         </p>
       </div>
 
+      {/* Collateral Status Banner */}
+      {collateralStatus && (
+        <div className={`p-4 rounded-lg border ${
+          collateralStatus.verificationStatus === 'approved' 
+            ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
+            : collateralStatus.verificationStatus === 'rejected'
+            ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
+            : 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              {collateralStatus.verificationStatus === 'approved' && <CheckCircle className="h-5 w-5 text-green-600" />}
+              {collateralStatus.verificationStatus === 'rejected' && <AlertCircle className="h-5 w-5 text-red-600" />}
+              {(collateralStatus.verificationStatus === 'submitted' || collateralStatus.verificationStatus === 'under_review') && <Clock className="h-5 w-5 text-yellow-600" />}
+              <p className={`text-sm font-medium ${
+                collateralStatus.verificationStatus === 'approved' ? 'text-green-800 dark:text-green-200' :
+                collateralStatus.verificationStatus === 'rejected' ? 'text-red-800 dark:text-red-200' :
+                'text-yellow-800 dark:text-yellow-200'
+              }`}>
+                {collateralStatus.verificationStatus === 'approved' && 'Collateral verification approved! You can apply for loans.'}
+                {collateralStatus.verificationStatus === 'rejected' && `Collateral verification rejected: ${collateralStatus.adminReview?.rejectionReason || 'Please contact support'}`}
+                {(collateralStatus.verificationStatus === 'submitted' || collateralStatus.verificationStatus === 'under_review') && 'Collateral verification is being reviewed by our team.'}
+              </p>
+            </div>
+            {collateralStatus.verificationStatus !== 'approved' && (
+              <button
+                onClick={() => setShowCollateralModal(true)}
+                className="text-sm px-3 py-1 rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                {collateralStatus.verificationStatus === 'rejected' ? 'Resubmit Verification' : 'Complete Verification'}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* KYC verification is now optional */}
 
       {/* Loans Grid */}
@@ -317,21 +502,21 @@ const BrowseLoans = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Loan Amount</span>
                   <span className="text-lg font-bold text-gray-900 dark:text-white">
-                    ₦{loan.loanAmount?.toLocaleString() || 'N/A'}
+                    ${loan.loanAmount?.toLocaleString() || 'N/A'}
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Monthly Payment</span>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    ₦{loan.monthlyPayment?.toLocaleString() || 'N/A'}
+                    ${loan.monthlyPayment?.toLocaleString() || 'N/A'}
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Total Repayment</span>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    ₦{loan.totalRepayment?.toLocaleString() || 'N/A'}
+                    ${loan.totalRepayment?.toLocaleString() || 'N/A'}
                   </span>
                 </div>
               </div>
@@ -367,15 +552,7 @@ const BrowseLoans = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="p-6 pt-0 space-y-3">
-              <button
-                onClick={() => handleViewDetails(loan)}
-                className="w-full px-4 py-2 border border-primary-600 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors flex items-center justify-center space-x-2"
-              >
-                <Eye className="h-4 w-4" />
-                <span>View Details</span>
-              </button>
-              
+            <div className="p-6 pt-0">
               <button
                 onClick={() => handleViewDetails(loan)}
                 className="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
@@ -436,6 +613,45 @@ const BrowseLoans = () => {
         </div>
       )}
 
+      {/* Collateral Verification Modal */}
+      {showCollateralModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Collateral Verification Required
+              </h3>
+              <button
+                onClick={() => setShowCollateralModal(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                ×
+              </button>
+            </div>
+            
+            {selectedLoan?.pendingApplication && (
+              <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                  <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                    You have a pending loan application for {selectedLoan.name}. Complete collateral verification to proceed.
+                  </p>
+                </div>
+                <div className="mt-2 text-xs text-blue-600 dark:text-blue-300">
+                  Requested Amount: ${selectedLoan.pendingApplication.requestedAmount?.toLocaleString()}
+                </div>
+              </div>
+            )}
+            
+            <ManualCollateralVerification
+              onSubmit={handleCollateralSubmit}
+              onCancel={() => setShowCollateralModal(false)}
+              isSubmitting={isSubmitting}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Loan Application Modal */}
       {showLoanApplicationModal && selectedLoan && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -471,8 +687,7 @@ const LoanApplicationForm = ({ loan, onSubmit, onCancel, isSubmitting, user }) =
   const [formData, setFormData] = useState({
     requestedAmount: '',
     purpose: '',
-    duration: '',
-    collateral: ''
+    duration: ''
   });
 
   const handleSubmit = (e) => {
@@ -496,7 +711,7 @@ const LoanApplicationForm = ({ loan, onSubmit, onCancel, isSubmitting, user }) =
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-gray-600 dark:text-gray-400">Pool Size:</span>
-            <p className="font-medium text-gray-900 dark:text-white">₦{loan.poolSize?.toLocaleString()}</p>
+            <p className="font-medium text-gray-900 dark:text-white">${loan.poolSize?.toLocaleString()}</p>
           </div>
           <div>
             <span className="text-gray-600 dark:text-gray-400">Interest Rate:</span>
@@ -516,7 +731,7 @@ const LoanApplicationForm = ({ loan, onSubmit, onCancel, isSubmitting, user }) =
           </div>
           <div>
             <span className="text-gray-600 dark:text-gray-400">Min Investment:</span>
-            <p className="font-medium text-gray-900 dark:text-white">₦{loan.minInvestment?.toLocaleString()}</p>
+            <p className="font-medium text-gray-900 dark:text-white">${loan.minInvestment?.toLocaleString()}</p>
           </div>
         </div>
       </div>
@@ -525,7 +740,7 @@ const LoanApplicationForm = ({ loan, onSubmit, onCancel, isSubmitting, user }) =
       <div className="space-y-4">
         <div>
           <label htmlFor="requestedAmount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Requested Amount (₦)
+            Requested Amount ($)
           </label>
           <input
             type="number"
@@ -540,7 +755,7 @@ const LoanApplicationForm = ({ loan, onSubmit, onCancel, isSubmitting, user }) =
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           />
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Maximum available: ₦{loan.poolSize?.toLocaleString()}
+            Maximum available: ${loan.poolSize?.toLocaleString()}
           </p>
         </div>
 
@@ -590,37 +805,42 @@ const LoanApplicationForm = ({ loan, onSubmit, onCancel, isSubmitting, user }) =
           </p>
         </div>
 
-        <div>
-          <label htmlFor="collateral" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Collateral Description (Optional)
-          </label>
-          <textarea
-            id="collateral"
-            name="collateral"
-            value={formData.collateral}
-            onChange={handleInputChange}
-            placeholder="Describe any collateral you can provide..."
-            rows="3"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          />
+        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            <p className="text-sm font-medium text-green-800 dark:text-green-200">
+              Collateral verification completed and approved
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex space-x-4 pt-4">
+      <div className="space-y-3 pt-4">
+        {/* Continue to Collateral Verification Button */}
         <button
           type="button"
-          onClick={onCancel}
-          disabled={isSubmitting}
-          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          onClick={() => {
+            // Store the form data and show collateral verification
+            const applicationData = {
+              requestedAmount: formData.requestedAmount,
+              purpose: formData.purpose,
+              duration: formData.duration
+            };
+            onSubmit(applicationData);
+          }}
+          disabled={isSubmitting || !formData.requestedAmount || !formData.purpose || !formData.duration}
+          className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
         >
-          Cancel
+          <Shield className="h-4 w-4" />
+          <span>Continue to Collateral Verification</span>
         </button>
         
+        {/* Submit Application Button */}
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center"
+          className="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center"
         >
           {isSubmitting ? (
             <>
@@ -630,6 +850,16 @@ const LoanApplicationForm = ({ loan, onSubmit, onCancel, isSubmitting, user }) =
           ) : (
             'Submit Application'
           )}
+        </button>
+        
+        {/* Cancel Button */}
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={isSubmitting}
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          Cancel
         </button>
       </div>
     </form>

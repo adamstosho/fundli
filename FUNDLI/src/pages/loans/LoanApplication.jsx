@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { DollarSign, Calendar, FileText, CheckCircle, AlertCircle, ArrowRight, Shield } from 'lucide-react';
+import { DollarSign, Calendar, FileText, CheckCircle, AlertCircle, ArrowRight, Shield, Upload } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import CollateralUpload from '../../components/loans/CollateralUpload';
+import ManualCollateralVerification from '../../components/collateral/ManualCollateralVerification';
 
 const LoanApplication = () => {
   const [formData, setFormData] = useState({
@@ -11,17 +11,41 @@ const LoanApplication = () => {
     purpose: '',
     duration: '',
     repaymentSchedule: 'monthly',
-    collateral: [],
     description: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [currentStep, setCurrentStep] = useState('loan-form'); // 'loan-form', 'collateral-verification', 'success'
+  const [collateralStatus, setCollateralStatus] = useState(null);
   
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // KYC verification is now optional - all users can apply for loans
+  // Check collateral verification status on component mount
+  useEffect(() => {
+    checkCollateralStatus();
+  }, []);
+
+  const checkCollateralStatus = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return;
+
+      const response = await fetch('http://localhost:5000/api/collateral/status', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCollateralStatus(data.data.collateral);
+      }
+    } catch (error) {
+      console.error('Error checking collateral status:', error);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,8 +56,20 @@ const LoanApplication = () => {
     if (error) setError('');
   };
 
-  const handleSubmit = async (e) => {
+  const handleLoanFormSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check if collateral verification is required
+    if (!collateralStatus || collateralStatus.verificationStatus !== 'approved') {
+      setCurrentStep('collateral-verification');
+      return;
+    }
+
+    // Proceed with loan application if collateral is approved
+    await submitLoanApplication();
+  };
+
+  const submitLoanApplication = async () => {
     setIsLoading(true);
     setError('');
 
@@ -49,8 +85,7 @@ const LoanApplication = () => {
         purpose: formData.purpose,
         duration: parseInt(formData.duration),
         repaymentSchedule: formData.repaymentSchedule,
-        description: formData.description,
-        collateral: formData.collateral
+        description: formData.description
       };
 
       const response = await fetch('http://localhost:5000/api/loans/apply', {
@@ -68,7 +103,7 @@ const LoanApplication = () => {
         throw new Error(result.message || 'Failed to submit loan application');
       }
 
-      setSuccess(true);
+      setCurrentStep('success');
       setError('');
       
       // Show success message and redirect
@@ -77,13 +112,129 @@ const LoanApplication = () => {
       }, 2000);
     } catch (err) {
       setError(err.message || 'Failed to submit loan application. Please try again.');
-      setSuccess(false);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleCollateralSubmit = async (formData, collateralDocuments, bankStatement) => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // Debug: Check what tokens are available
+      console.log('Available localStorage keys:', Object.keys(localStorage));
+      console.log('accessToken:', localStorage.getItem('accessToken'));
+      console.log('token:', localStorage.getItem('token'));
+      
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required - please log in again');
+      }
+
+      // Prepare data for JSON submission
+      const submitData = {
+        collateralType: formData.collateralType,
+        description: formData.description,
+        estimatedValue: formData.estimatedValue,
+        bvn: formData.bvn,
+        documentTypes: formData.documentTypes,
+        collateralDocuments: collateralDocuments.map(doc => ({
+          name: doc.name,
+          base64: doc.base64,
+          size: doc.size,
+          type: doc.file?.type || 'application/octet-stream'
+        })),
+        bankStatement: bankStatement ? {
+          name: bankStatement.name,
+          base64: bankStatement.base64,
+          size: bankStatement.size,
+          type: bankStatement.file?.type || 'application/octet-stream'
+        } : null
+      };
+
+      const response = await fetch('http://localhost:5000/api/collateral/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(submitData)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to submit collateral verification');
+      }
+
+      // Go back to loan form
+      setCurrentStep('loan-form');
+      await checkCollateralStatus();
+      alert('Collateral verification submitted successfully! You can now proceed with your loan application.');
+    } catch (err) {
+      setError(err.message || 'Failed to submit collateral verification. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCollateralCancel = () => {
+    setCurrentStep('loan-form');
+  };
+
   const isFormValid = formData.amount && formData.purpose && formData.duration && formData.description;
+
+  const getCollateralStatusMessage = () => {
+    if (!collateralStatus) {
+      return {
+        message: "Collateral verification required before applying for a loan",
+        type: "warning",
+        action: "Complete Verification"
+      };
+    }
+
+    switch (collateralStatus.verificationStatus) {
+      case 'pending':
+        return {
+          message: "Collateral verification not yet submitted",
+          type: "warning",
+          action: "Complete Verification"
+        };
+      case 'submitted':
+        return {
+          message: "Collateral verification submitted and under review",
+          type: "info",
+          action: "View Status"
+        };
+      case 'under_review':
+        return {
+          message: "Collateral verification is being reviewed by our team",
+          type: "info",
+          action: "View Status"
+        };
+      case 'approved':
+        return {
+          message: "Collateral verification approved! You can proceed with loan application",
+          type: "success",
+          action: "Proceed"
+        };
+      case 'rejected':
+        return {
+          message: `Collateral verification rejected: ${collateralStatus.adminReview?.rejectionReason || 'Please contact support'}`,
+          type: "error",
+          action: "Resubmit Verification"
+        };
+      default:
+        return {
+          message: "Collateral verification required",
+          type: "warning",
+          action: "Complete Verification"
+        };
+    }
+  };
+
+  const statusInfo = getCollateralStatusMessage();
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -96,7 +247,42 @@ const LoanApplication = () => {
         </p>
       </div>
 
-      {success ? (
+      {/* Collateral Status Banner */}
+      {currentStep === 'loan-form' && (
+        <div className={`mb-6 p-4 rounded-lg border ${
+          statusInfo.type === 'success' ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' :
+          statusInfo.type === 'warning' ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800' :
+          statusInfo.type === 'error' ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800' :
+          'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              {statusInfo.type === 'success' && <CheckCircle className="h-5 w-5 text-green-600" />}
+              {statusInfo.type === 'warning' && <AlertCircle className="h-5 w-5 text-yellow-600" />}
+              {statusInfo.type === 'error' && <AlertCircle className="h-5 w-5 text-red-600" />}
+              {statusInfo.type === 'info' && <FileText className="h-5 w-5 text-blue-600" />}
+              <p className={`text-sm font-medium ${
+                statusInfo.type === 'success' ? 'text-green-800 dark:text-green-200' :
+                statusInfo.type === 'warning' ? 'text-yellow-800 dark:text-yellow-200' :
+                statusInfo.type === 'error' ? 'text-red-800 dark:text-red-200' :
+                'text-blue-800 dark:text-blue-200'
+              }`}>
+                {statusInfo.message}
+              </p>
+            </div>
+            {statusInfo.type !== 'success' && (
+              <button
+                onClick={() => setCurrentStep('collateral-verification')}
+                className="text-sm px-3 py-1 rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                {statusInfo.action}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {currentStep === 'success' && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -114,14 +300,24 @@ const LoanApplication = () => {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
           <p className="text-sm text-neutral-500 mt-2">Redirecting to loan status...</p>
         </motion.div>
-      ) : (
+      )}
+
+      {currentStep === 'collateral-verification' && (
+        <ManualCollateralVerification
+          onSubmit={handleCollateralSubmit}
+          onCancel={handleCollateralCancel}
+          isSubmitting={isLoading}
+        />
+      )}
+
+      {currentStep === 'loan-form' && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
           <div className="card p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleLoanFormSubmit} className="space-y-6">
               {error && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -248,21 +444,7 @@ const LoanApplication = () => {
                 />
               </div>
 
-              {/* Enhanced Collateral Section */}
-              <CollateralUpload 
-                onCollateralAdded={(collateral) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    collateral: [...prev.collateral, collateral]
-                  }));
-                }}
-                onCollateralRemoved={(collateralId) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    collateral: prev.collateral.filter(item => item.id !== collateralId)
-                  }));
-                }}
-              />
+              {/* Collateral verification is now handled separately */}
 
               {/* Terms and Conditions */}
               <div className="flex items-start space-x-3">
@@ -298,7 +480,7 @@ const LoanApplication = () => {
                   </div>
                 ) : (
                   <div className="flex items-center justify-center">
-                    Submit Application
+                    {statusInfo.type === 'success' ? 'Submit Application' : 'Continue to Collateral Verification'}
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </div>
                 )}

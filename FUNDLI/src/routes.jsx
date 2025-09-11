@@ -28,6 +28,7 @@ import PaymentPage from './pages/PaymentPage';
 import WalletPage from './pages/WalletPage';
 import DepositPage from './pages/DepositPage';
 import TransferPage from './pages/TransferPage';
+import NotificationsPage from './pages/NotificationsPage';
 
 // 404 Error Component
 const NotFound = () => (
@@ -188,6 +189,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <TransferPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: 'notifications',
+        element: (
+          <ProtectedRoute>
+            <NotificationsPage />
           </ProtectedRoute>
         )
       },

@@ -19,6 +19,19 @@ const LoanManagement = () => {
   const [isProcessing, setIsProcessing] = useState(null);
   const [success, setSuccess] = useState('');
 
+  // Format date helper function
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   useEffect(() => {
     const loadLoans = async () => {
       try {
@@ -55,9 +68,15 @@ const LoanManagement = () => {
   }, [currentPage, loansPerPage]);
 
   const filteredLoans = loans.filter(loan => {
-    const matchesSearch = loan.borrower.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         loan.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         loan.purpose.toLowerCase().includes(searchTerm.toLowerCase());
+    // Handle borrower as an object with firstName, lastName, email
+    const borrowerName = loan.borrower ? 
+      `${loan.borrower.firstName || ''} ${loan.borrower.lastName || ''}`.toLowerCase() : '';
+    const borrowerEmail = loan.borrower?.email?.toLowerCase() || '';
+    
+    const matchesSearch = borrowerName.includes(searchTerm.toLowerCase()) ||
+                         borrowerEmail.includes(searchTerm.toLowerCase()) ||
+                         loan.purpose?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         loan.purposeDescription?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || loan.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -180,7 +199,7 @@ const LoanManagement = () => {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -191,7 +210,7 @@ const LoanManagement = () => {
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Loans</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {pagination.totalItems}
+                {pagination.totalItems || loans.length}
               </p>
             </div>
             <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center">
@@ -229,7 +248,7 @@ const LoanManagement = () => {
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Amount</p>
               <p className="text-2xl font-bold text-success">
-                ${loans.reduce((sum, loan) => sum + loan.amount, 0).toLocaleString()}
+                ${loans.reduce((sum, loan) => sum + (loan.loanAmount || 0), 0).toLocaleString()}
               </p>
             </div>
             <div className="w-12 h-12 bg-success-100 dark:bg-success-900 rounded-lg flex items-center justify-center">
@@ -253,6 +272,25 @@ const LoanManagement = () => {
             </div>
             <div className="w-12 h-12 bg-success-100 dark:bg-success-900 rounded-lg flex items-center justify-center">
               <CheckCircle className="h-6 w-6 text-success-600 dark:text-success-400" />
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="card p-6"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Rejected</p>
+              <p className="text-2xl font-bold text-error">
+                {loans.filter(l => l.status === 'rejected').length}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-error-100 dark:bg-error-900 rounded-lg flex items-center justify-center">
+              <XCircle className="h-6 w-6 text-error-600 dark:text-error-400" />
             </div>
           </div>
         </motion.div>

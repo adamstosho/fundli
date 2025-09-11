@@ -3,6 +3,8 @@ const router = express.Router();
 const User = require('../models/User');
 const Loan = require('../models/Loan');
 const Wallet = require('../models/Wallet');
+const Notification = require('../models/Notification');
+const NotificationService = require('../services/notificationService');
 const { protect } = require('../middleware/auth');
 
 // @desc    Get borrower's KYC details
@@ -567,7 +569,7 @@ router.post('/loan/:id/fund', protect, async (req, res) => {
     };
 
     // Update wallet balance and add transaction
-    wallet.updateBalance(amount, 'subtract');
+    wallet.updateBalance(amount, 'withdrawal');
     wallet.addTransaction(transaction);
     await wallet.save();
 
@@ -658,7 +660,7 @@ router.post('/loan/:id/rollback', protect, async (req, res) => {
     }
 
     // Rollback wallet balance
-    wallet.updateBalance(loan.fundedAmount, 'add');
+    wallet.updateBalance(loan.fundedAmount, 'deposit');
     
     // Add rollback transaction
     const rollbackTransaction = {
@@ -762,6 +764,14 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
       });
     }
 
+    // Check if investment amount doesn't exceed loan amount
+    if (parseFloat(investmentAmount) > loan.loanAmount) {
+      return res.status(400).json({
+        status: 'error',
+        message: `Investment amount cannot exceed loan amount. Maximum: $${loan.loanAmount.toLocaleString()}`
+      });
+    }
+
     // Get lender wallet
     const lenderWallet = await Wallet.findOne({ user: req.user.id });
     if (!lenderWallet) {
@@ -775,9 +785,13 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
     if (lenderWallet.balance < parseFloat(investmentAmount)) {
       return res.status(400).json({
         status: 'error',
-        message: 'Insufficient wallet balance to fund this loan'
+        message: `Insufficient wallet balance. Available: $${lenderWallet.balance.toLocaleString()}, Required: $${parseFloat(investmentAmount).toLocaleString()}`
       });
     }
+
+    console.log(`💰 Funding loan ${req.params.id}: Lender ${req.user.email} funding $${parseFloat(investmentAmount)}`);
+    console.log(`📊 Lender balance before: $${lenderWallet.balance.toLocaleString()}`);
+    console.log(`📊 Borrower balance before: $${borrowerWallet.balance.toLocaleString()}`);
 
     // Get borrower wallet
     const borrowerWallet = await Wallet.findOne({ user: loan.borrower._id });
@@ -791,29 +805,85 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
     // Generate transaction reference
     const reference = `FUND_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
-    // Update lender wallet (subtract amount)
-    lenderWallet.balance -= parseFloat(investmentAmount);
-    lenderWallet.transactions.push({
+    // Create lender transaction
+    const lenderTransaction = {
       type: 'loan_funding',
       amount: parseFloat(investmentAmount),
+      currency: lenderWallet.currency,
       description: `Funded loan for ${loan.borrower.firstName} ${loan.borrower.lastName}`,
       reference: reference,
+      status: 'completed',
       loanId: loan._id,
+      metadata: {
+        borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+        borrowerEmail: loan.borrower.email,
+        loanPurpose: loan.purpose
+      },
       createdAt: new Date()
-    });
+    };
+
+    // Create borrower transaction
+    const borrowerTransaction = {
+      type: 'loan_disbursement',
+      amount: parseFloat(investmentAmount),
+      currency: borrowerWallet.currency,
+      description: `Loan disbursement for ${loan.purpose}`,
+      reference: reference,
+      status: 'completed',
+      loanId: loan._id,
+      metadata: {
+        lenderName: `${req.user.firstName} ${req.user.lastName}`,
+        lenderEmail: req.user.email,
+        loanPurpose: loan.purpose
+      },
+      createdAt: new Date()
+    };
+
+    // Update lender wallet (subtract amount)
+    lenderWallet.updateBalance(parseFloat(investmentAmount), 'withdrawal');
+    lenderWallet.addTransaction(lenderTransaction);
     await lenderWallet.save();
 
     // Update borrower wallet (add amount)
-    borrowerWallet.balance += parseFloat(investmentAmount);
-    borrowerWallet.transactions.push({
-      type: 'loan_disbursement',
-      amount: parseFloat(investmentAmount),
-      description: `Loan disbursement for ${loan.purpose}`,
-      reference: reference,
-      loanId: loan._id,
-      createdAt: new Date()
-    });
+    borrowerWallet.updateBalance(parseFloat(investmentAmount), 'deposit');
+    borrowerWallet.addTransaction(borrowerTransaction);
     await borrowerWallet.save();
+
+    console.log(`✅ Wallet updates completed:`);
+    console.log(`📊 Lender balance after: $${lenderWallet.balance.toLocaleString()}`);
+    console.log(`📊 Borrower balance after: $${borrowerWallet.balance.toLocaleString()}`);
+
+    // Update lender's investment statistics
+    try {
+      await req.user.updateInvestmentStats(
+        loan._id,
+        parseFloat(investmentAmount),
+        `${loan.borrower.firstName} ${loan.borrower.lastName}`
+      );
+      console.log(`📈 Updated investment stats for lender ${req.user.email}`);
+    } catch (investmentError) {
+      console.error('Failed to update investment stats:', investmentError);
+      // Don't fail the entire transaction if investment stats update fails
+    }
+
+    // Create notifications for both lender and borrower
+    try {
+      // Use NotificationService for better notification management
+      await NotificationService.notifyLoanFunded({
+        loanId: loan._id,
+        borrowerId: loan.borrower._id,
+        lenderId: req.user.id,
+        amount: parseFloat(investmentAmount),
+        investmentAmount: parseFloat(investmentAmount),
+        borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+        lenderName: `${req.user.firstName} ${req.user.lastName}`
+      });
+
+      console.log(`📧 Notifications sent to lender and borrower via NotificationService`);
+    } catch (notificationError) {
+      console.error('Failed to create notifications:', notificationError);
+      // Don't fail the entire transaction if notifications fail
+    }
 
     // Update loan status
     const updatedLoan = await Loan.findByIdAndUpdate(
@@ -831,16 +901,40 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
 
     res.status(200).json({
       status: 'success',
-      message: 'Loan funded successfully',
+      message: `Successfully funded loan with $${parseFloat(investmentAmount).toLocaleString()}`,
       data: {
         loan: {
           id: updatedLoan._id,
           status: updatedLoan.status,
           fundedAmount: parseFloat(investmentAmount),
-          fundedAt: updatedLoan.fundedAt
+          fundedAt: updatedLoan.fundedAt,
+          borrower: {
+            name: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+            email: loan.borrower.email
+          }
         },
-        lenderBalance: lenderWallet.balance,
-        borrowerBalance: borrowerWallet.balance
+        lenderWallet: {
+          balance: lenderWallet.balance,
+          currency: lenderWallet.currency,
+          transactionReference: lenderTransaction.reference
+        },
+        lenderInvestmentStats: {
+          totalInvested: req.user.investmentStats?.totalInvested || 0,
+          totalLoansFunded: req.user.investmentStats?.totalLoansFunded || 0,
+          averageInvestmentAmount: req.user.investmentStats?.averageInvestmentAmount || 0,
+          lastInvestmentDate: req.user.investmentStats?.lastInvestmentDate
+        },
+        borrowerWallet: {
+          balance: borrowerWallet.balance,
+          currency: borrowerWallet.currency,
+          transactionReference: borrowerTransaction.reference
+        },
+        transaction: {
+          reference: reference,
+          amount: parseFloat(investmentAmount),
+          status: 'completed',
+          timestamp: new Date().toISOString()
+        }
       }
     });
 
@@ -1095,6 +1189,270 @@ router.get('/loan/:id/details', protect, async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to get loan details',
+      error: error.message
+    });
+  }
+});
+
+// @desc    Get lender investment statistics
+// @route   GET /api/lender/investment-stats
+// @access  Private (Lenders only)
+router.get('/investment-stats', protect, async (req, res) => {
+  try {
+    // Ensure user is a lender
+    if (req.user.userType !== 'lender') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Access denied. This endpoint is for lenders only.'
+      });
+    }
+
+    // Get user with investment stats
+    const user = await User.findById(req.user.id).select('investmentStats firstName lastName email');
+    
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
+
+    // Initialize investment stats if they don't exist
+    if (!user.investmentStats) {
+      user.investmentStats = {
+        totalInvested: 0,
+        totalLoansFunded: 0,
+        averageInvestmentAmount: 0,
+        investmentHistory: []
+      };
+      await user.save();
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        lender: {
+          id: user._id,
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email
+        },
+        investmentStats: {
+          totalInvested: user.investmentStats.totalInvested,
+          totalLoansFunded: user.investmentStats.totalLoansFunded,
+          averageInvestmentAmount: user.investmentStats.averageInvestmentAmount,
+          lastInvestmentDate: user.investmentStats.lastInvestmentDate,
+          recentInvestments: user.investmentStats.investmentHistory.slice(-10).map(investment => ({
+            loanId: investment.loanId,
+            amount: investment.amount,
+            borrowerName: investment.borrowerName,
+            investmentDate: investment.investmentDate,
+            status: investment.status
+          }))
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching investment stats:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch investment statistics'
+    });
+  }
+});
+
+// @desc    Get wallet balance for testing
+// @route   GET /api/lender/wallet/test-balance
+// @access  Private (for testing)
+router.get('/wallet/test-balance', protect, async (req, res) => {
+  try {
+    const wallet = await Wallet.findOne({ user: req.user.id });
+    if (!wallet) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Wallet not found'
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        userId: req.user.id,
+        userEmail: req.user.email,
+        balance: wallet.balance,
+        currency: wallet.currency,
+        totalDeposits: wallet.stats.totalDeposits,
+        totalWithdrawals: wallet.stats.totalWithdrawals,
+        transactionCount: wallet.stats.transactionCount,
+        recentTransactions: wallet.transactions.slice(-5).map(t => ({
+          type: t.type,
+          amount: t.amount,
+          description: t.description,
+          createdAt: t.createdAt
+        }))
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching wallet balance:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch wallet balance'
+    });
+  }
+});
+
+// @desc    Get lender dashboard chart data
+// @route   GET /api/lender/dashboard-charts
+// @access  Private (Lenders only)
+router.get('/dashboard-charts', protect, async (req, res) => {
+  try {
+    // Ensure user is a lender
+    if (req.user.userType !== 'lender') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Access denied. This endpoint is for lenders only.'
+      });
+    }
+
+    const userId = req.user.id;
+
+    // Get investment growth data (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const fundedLoans = await Loan.find({
+      fundedBy: userId,
+      fundedAt: { $gte: sixMonthsAgo }
+    }).sort({ fundedAt: 1 });
+
+    // Generate monthly data for investment growth
+    const monthlyData = {};
+    const currentDate = new Date();
+    
+    for (let i = 5; i >= 0; i--) {
+      const month = new Date();
+      month.setMonth(currentDate.getMonth() - i);
+      const monthKey = month.toISOString().substring(0, 7); // YYYY-MM
+      monthlyData[monthKey] = { investment: 0, returns: 0 };
+    }
+
+    // Aggregate data by month
+    fundedLoans.forEach(loan => {
+      const monthKey = loan.fundedAt.toISOString().substring(0, 7);
+      if (monthlyData[monthKey]) {
+        monthlyData[monthKey].investment += loan.fundedAmount || 0;
+        monthlyData[monthKey].returns += loan.amountPaid || 0;
+      }
+    });
+
+    // Always provide sample data for demonstration (even if real data exists)
+    const sampleData = {
+      '2024-07': { investment: 5000, returns: 250 },
+      '2024-08': { investment: 12000, returns: 600 },
+      '2024-09': { investment: 18000, returns: 900 },
+      '2024-10': { investment: 25000, returns: 1250 },
+      '2024-11': { investment: 32000, returns: 1600 },
+      '2024-12': { investment: 45000, returns: 2250 }
+    };
+    
+    // Use sample data for demonstration
+    Object.keys(sampleData).forEach(key => {
+      if (monthlyData[key]) {
+        monthlyData[key] = sampleData[key];
+      }
+    });
+
+    const investmentGrowthData = {
+      labels: Object.keys(monthlyData).map(key => {
+        const date = new Date(key + '-01');
+        return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+      }),
+      investment: Object.values(monthlyData).map(data => data.investment),
+      returns: Object.values(monthlyData).map(data => data.returns)
+    };
+
+    // Get portfolio breakdown data
+    const portfolioBreakdown = await Loan.aggregate([
+      {
+        $match: {
+          fundedBy: userId,
+          status: { $in: ['active', 'funded', 'completed'] }
+        }
+      },
+      {
+        $group: {
+          _id: '$purpose',
+          totalAmount: { $sum: '$fundedAmount' },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { totalAmount: -1 }
+      }
+    ]);
+
+    // Always provide sample portfolio data for demonstration
+    const portfolioBreakdownData = {
+      labels: ['Education', 'Business', 'Personal', 'Emergency'],
+      values: [25000, 15000, 8000, 5000]
+    };
+
+    // Get monthly performance data (revenue vs expenses)
+    const monthlyPerformanceData = {
+      labels: Object.keys(monthlyData).map(key => {
+        const date = new Date(key + '-01');
+        return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+      }),
+      revenue: Object.values(monthlyData).map(data => data.returns),
+      expenses: Object.values(monthlyData).map(data => data.investment * 0.1) // Assuming 10% operational costs
+    };
+
+    // Get risk assessment data
+    const riskAssessment = await Loan.aggregate([
+      {
+        $match: {
+          fundedBy: userId,
+          status: { $in: ['active', 'funded', 'completed'] }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $switch: {
+              branches: [
+                { case: { $lt: ['$riskScore', 3] }, then: 'Low Risk' },
+                { case: { $lt: ['$riskScore', 7] }, then: 'Medium Risk' },
+                { case: { $gte: ['$riskScore', 7] }, then: 'High Risk' }
+              ],
+              default: 'Unknown Risk'
+            }
+          },
+          count: { $sum: 1 },
+          totalAmount: { $sum: '$fundedAmount' }
+        }
+      }
+    ]);
+
+    // Always provide sample risk assessment data for demonstration
+    const riskAssessmentData = {
+      labels: ['Low Risk', 'Medium Risk', 'High Risk'],
+      values: [8, 4, 2]
+    };
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        investmentGrowth: investmentGrowthData,
+        portfolioBreakdown: portfolioBreakdownData,
+        monthlyPerformance: monthlyPerformanceData,
+        riskAssessment: riskAssessmentData
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching dashboard charts:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch dashboard chart data',
       error: error.message
     });
   }

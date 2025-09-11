@@ -738,4 +738,55 @@ router.post('/wallet/withdraw', [
   }
 });
 
+// @route   GET /api/users/search
+// @desc    Search users by email for transfers
+// @access  Private
+router.get('/search', protect, async (req, res) => {
+  try {
+    const { email } = req.query;
+    
+    if (!email) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Email parameter is required'
+      });
+    }
+
+    // Search for user by email
+    const user = await User.findOne({ 
+      email: email.toLowerCase().trim(),
+      _id: { $ne: req.user.id } // Exclude current user
+    }).select('firstName lastName email userType kycStatus');
+
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        user: {
+          _id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          userType: user.userType,
+          kycStatus: user.kycStatus
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('User search error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to search user',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router; 

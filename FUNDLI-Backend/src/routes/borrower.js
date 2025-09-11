@@ -758,4 +758,117 @@ router.get('/wallet/balance', protect, async (req, res) => {
   }
 });
 
+// @desc    Make a manual loan repayment
+// @route   POST /api/borrower/repay-loan/:loanId
+// @access  Private (Borrowers only)
+router.post('/repay-loan/:loanId', protect, async (req, res) => {
+  try {
+    const loanId = req.params.loanId;
+    const { installmentNumber } = req.body;
+
+    // Check if user is a borrower
+    if (req.user.userType !== 'borrower') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Only borrowers can make loan repayments'
+      });
+    }
+
+    // Find the loan
+    const loan = await Loan.findById(loanId)
+      .populate('borrowerId', 'email firstName lastName walletBalance')
+      .populate('lenderId', 'email firstName lastName');
+
+    if (!loan) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Loan not found'
+      });
+    }
+
+    // Check if the borrower owns this loan
+    if (loan.borrowerId._id.toString() !== req.user.id) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'You can only repay your own loans'
+      });
+    }
+
+    // Check if loan is active
+    if (loan.status !== 'active') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'This loan is not active and cannot be repaid'
+      });
+    }
+
+    // Find the specific installment to repay
+    let repayment;
+    if (installmentNumber) {
+      repayment = loan.repayments.find(r => r.installmentNumber === installmentNumber && r.status === 'pending');
+    } else {
+      // Find the next due payment
+      repayment = loan.repayments.find(r => r.status === 'pending');
+    }
+
+    if (!repayment) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'No pending repayment found for this loan'
+      });
+    }
+
+    // Check if payment is overdue
+    const isOverdue = repayment.dueDate < new Date();
+    const daysOverdue = isOverdue ? 
+      Math.floor((new Date() - repayment.dueDate) / (1000 * 60 * 60 * 24)) : 0;
+
+    // Calculate late fee if applicable
+    const repaymentService = require('../services/repaymentService');
+    const lateFee = repaymentService.calculateLateFee(repayment.amount, daysOverdue);
+    const totalAmount = repayment.amount + lateFee;
+
+    // Check borrower's wallet balance
+    const borrower = loan.borrowerId;
+    if (borrower.walletBalance < totalAmount) {
+      return res.status(400).json({
+        status: 'error',
+        message: `Insufficient funds. Required: $${totalAmount.toFixed(2)}, Available: $${borrower.walletBalance.toFixed(2)}`
+      });
+    }
+
+    // Process the repayment
+    const result = await repaymentService.processLoanPayment(loan);
+
+    if (result.success) {
+      res.status(200).json({
+        status: 'success',
+        message: 'Loan repayment processed successfully',
+        data: {
+          amount: result.amount,
+          lateFee: result.lateFee,
+          installmentNumber: repayment.installmentNumber,
+          paymentId: result.paymentId,
+          lender: {
+            name: `${loan.lenderId.firstName} ${loan.lenderId.lastName}`,
+            email: loan.lenderId.email
+          }
+        }
+      });
+    } else {
+      res.status(400).json({
+        status: 'error',
+        message: result.error || 'Failed to process repayment'
+      });
+    }
+
+  } catch (error) {
+    console.error('Error processing loan repayment:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to process loan repayment'
+    });
+  }
+});
+
 module.exports = router;

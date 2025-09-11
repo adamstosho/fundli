@@ -146,6 +146,11 @@ const LoanApplications = () => {
         
         // Refresh loan applications
         await loadLoanApplications();
+        
+        // Refresh lender dashboard to update Total Invested card
+        if (window.refreshLenderDashboard) {
+          window.refreshLenderDashboard();
+        }
       } else {
         const errorData = await response.json();
         alert(`Failed to fund loan: ${errorData.message}`);

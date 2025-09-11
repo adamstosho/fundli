@@ -135,7 +135,6 @@ escrowSchema.virtual('isReadyToRelease').get(function() {
 });
 
 // Indexes
-escrowSchema.index({ loanId: 1 });
 escrowSchema.index({ lenderId: 1 });
 escrowSchema.index({ borrowerId: 1 });
 escrowSchema.index({ status: 1 });

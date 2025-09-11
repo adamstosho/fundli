@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Bell, 
@@ -24,6 +25,11 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const dropdownRef = useRef(null);
+
+  // Stable function to close modal
+  const closeModal = useCallback(() => {
+    setShowDetailsModal(false);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -451,13 +457,24 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
         )}
       </motion.div>
 
-      {/* Notification Details Modal */}
-      {showDetailsModal && selectedNotification && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      {/* Notification Details Modal - Rendered via Portal */}
+      {showDetailsModal && selectedNotification && createPortal(
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]"
+          onClick={(e) => {
+            // Only close if clicking the backdrop, not the modal content
+            if (e.target === e.currentTarget) {
+              e.preventDefault();
+              e.stopPropagation();
+              closeModal();
+            }
+          }}
+        >
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()} // Prevent event bubbling
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
@@ -465,7 +482,11 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
                 <span className="ml-2">Notification Details</span>
               </h3>
               <button
-                onClick={() => setShowDetailsModal(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  closeModal();
+                }}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <X className="h-5 w-5" />
@@ -509,7 +530,11 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
                 </span>
                 <div className="flex space-x-3">
                   <button
-                    onClick={() => setShowDetailsModal(false)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      closeModal();
+                    }}
                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
                   >
                     Close
@@ -518,7 +543,8 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
               </div>
             </div>
           </motion.div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

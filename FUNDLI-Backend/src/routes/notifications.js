@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Notification = require('../models/Notification');
 const User = require('../models/User');
+const NotificationService = require('../services/notificationService');
 const { protect } = require('../middleware/auth');
 
 // @desc    Get user notifications
@@ -11,10 +12,10 @@ router.get('/', protect, async (req, res) => {
   try {
     const { page = 1, limit = 20, unreadOnly = false } = req.query;
 
-    // Build filter
-    const filter = { user: req.user.id };
+    // Build filter - using recipient field as per Notification model
+    const filter = { recipient: req.user.id };
     if (unreadOnly === 'true') {
-      filter.read = false;
+      filter.status = 'unread';
     }
 
     // Calculate pagination
@@ -29,14 +30,28 @@ router.get('/', protect, async (req, res) => {
     // Get total count
     const total = await Notification.countDocuments(filter);
     const unreadCount = await Notification.countDocuments({ 
-      user: req.user.id, 
-      read: false 
+      recipient: req.user.id, 
+      status: 'unread' 
     });
+
+    // Transform notifications to match frontend expectations
+    const transformedNotifications = notifications.map(notif => ({
+      _id: notif._id,
+      title: notif.title,
+      message: notif.message,
+      type: notif.type,
+      isRead: notif.status === 'read',
+      createdAt: notif.createdAt,
+      priority: notif.priority,
+      actionRequired: notif.actionRequired,
+      action: notif.action,
+      metadata: notif.metadata
+    }));
 
     res.status(200).json({
       status: 'success',
       data: {
-        notifications,
+        notifications: transformedNotifications,
         pagination: {
           currentPage: parseInt(page),
           totalPages: Math.ceil(total / parseInt(limit)),
@@ -58,13 +73,13 @@ router.get('/', protect, async (req, res) => {
 });
 
 // @desc    Mark notification as read
-// @route   PUT /api/notifications/:id/read
+// @route   PATCH /api/notifications/:id/read
 // @access  Private
-router.put('/:id/read', protect, async (req, res) => {
+router.patch('/:id/read', protect, async (req, res) => {
   try {
     const notification = await Notification.findOneAndUpdate(
-      { _id: req.params.id, user: req.user.id },
-      { read: true, readAt: new Date() },
+      { _id: req.params.id, recipient: req.user.id },
+      { status: 'read', readAt: new Date() },
       { new: true }
     );
 
@@ -79,7 +94,14 @@ router.put('/:id/read', protect, async (req, res) => {
       status: 'success',
       message: 'Notification marked as read',
       data: {
-        notification
+        notification: {
+          _id: notification._id,
+          title: notification.title,
+          message: notification.message,
+          type: notification.type,
+          isRead: notification.status === 'read',
+          createdAt: notification.createdAt
+        }
       }
     });
 
@@ -93,14 +115,85 @@ router.put('/:id/read', protect, async (req, res) => {
   }
 });
 
+// @desc    Mark notification as unread
+// @route   PATCH /api/notifications/:id/unread
+// @access  Private
+router.patch('/:id/unread', protect, async (req, res) => {
+  try {
+    const notification = await Notification.findOneAndUpdate(
+      { _id: req.params.id, recipient: req.user.id },
+      { status: 'unread', readAt: null },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Notification not found'
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Notification marked as unread',
+      data: {
+        notification: {
+          _id: notification._id,
+          title: notification.title,
+          message: notification.message,
+          type: notification.type,
+          isRead: notification.status === 'read',
+          createdAt: notification.createdAt
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Mark notification as unread error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to mark notification as unread',
+      error: error.message
+    });
+  }
+});
+
 // @desc    Mark all notifications as read
+// @route   PATCH /api/notifications/mark-all-read
+// @access  Private
+router.patch('/mark-all-read', protect, async (req, res) => {
+  try {
+    const result = await Notification.updateMany(
+      { recipient: req.user.id, status: 'unread' },
+      { status: 'read', readAt: new Date() }
+    );
+
+    res.status(200).json({
+      status: 'success',
+      message: `${result.modifiedCount} notifications marked as read`,
+      data: {
+        updatedCount: result.modifiedCount
+      }
+    });
+
+  } catch (error) {
+    console.error('Mark all notifications as read error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to mark all notifications as read',
+      error: error.message
+    });
+  }
+});
+
+// @desc    Mark all notifications as read (legacy endpoint)
 // @route   PUT /api/notifications/read-all
 // @access  Private
 router.put('/read-all', protect, async (req, res) => {
   try {
     const result = await Notification.updateMany(
-      { user: req.user.id, read: false },
-      { read: true, readAt: new Date() }
+      { recipient: req.user.id, status: 'unread' },
+      { status: 'read', readAt: new Date() }
     );
 
     res.status(200).json({
@@ -128,7 +221,7 @@ router.delete('/:id', protect, async (req, res) => {
   try {
     const notification = await Notification.findOneAndDelete({
       _id: req.params.id,
-      user: req.user.id
+      recipient: req.user.id
     });
 
     if (!notification) {
@@ -248,13 +341,13 @@ router.post('/create', protect, async (req, res) => {
     }
 
     const notification = await Notification.create({
-      user: userId,
+      recipient: userId,
       title,
       message,
       type,
       priority,
-      actionUrl,
-      createdBy: req.user.id
+      action: actionUrl ? { url: actionUrl } : {},
+      metadata: { createdBy: req.user.id }
     });
 
     res.status(201).json({
@@ -283,16 +376,16 @@ router.get('/stats', protect, async (req, res) => {
     const userId = req.user.id;
 
     // Get notification counts
-    const totalNotifications = await Notification.countDocuments({ user: userId });
+    const totalNotifications = await Notification.countDocuments({ recipient: userId });
     const unreadNotifications = await Notification.countDocuments({ 
-      user: userId, 
-      read: false 
+      recipient: userId, 
+      status: 'unread' 
     });
     const readNotifications = totalNotifications - unreadNotifications;
 
     // Get notifications by type
     const notificationsByType = await Notification.aggregate([
-      { $match: { user: userId } },
+      { $match: { recipient: userId } },
       { $group: { _id: '$type', count: { $sum: 1 } } },
       { $sort: { count: -1 } }
     ]);
@@ -302,7 +395,7 @@ router.get('/stats', protect, async (req, res) => {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     
     const recentNotifications = await Notification.countDocuments({
-      user: userId,
+      recipient: userId,
       createdAt: { $gte: sevenDaysAgo }
     });
 
@@ -322,6 +415,48 @@ router.get('/stats', protect, async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to get notification statistics',
+      error: error.message
+    });
+  }
+});
+
+// @desc    Create test notification (for debugging)
+// @route   POST /api/notifications/test
+// @access  Private
+router.post('/test', protect, async (req, res) => {
+  try {
+    const NotificationService = require('../services/notificationService');
+    
+    const testNotification = await NotificationService.createNotification({
+      recipientId: req.user.id,
+      type: 'system_announcement',
+      title: 'Test Notification',
+      message: 'This is a test notification to verify the notification system is working correctly.',
+      priority: 'normal',
+      action: {
+        type: 'view',
+        url: '/notifications',
+        buttonText: 'View Notifications'
+      },
+      metadata: {
+        test: true,
+        timestamp: new Date().toISOString()
+      }
+    });
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Test notification created successfully',
+      data: {
+        notification: testNotification
+      }
+    });
+
+  } catch (error) {
+    console.error('Create test notification error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to create test notification',
       error: error.message
     });
   }

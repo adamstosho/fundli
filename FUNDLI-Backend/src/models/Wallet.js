@@ -250,6 +250,28 @@ walletSchema.methods.addTransaction = function(transactionData) {
   this.stats.transactionCount += 1;
 };
 
+// Method to update wallet balance
+walletSchema.methods.updateBalance = function(amount, transactionType = 'deposit') {
+  if (transactionType === 'deposit') {
+    this.balance += amount;
+    this.stats.totalDeposits += amount;
+  } else if (transactionType === 'withdrawal') {
+    this.balance -= amount;
+    this.stats.totalWithdrawals += amount;
+  } else if (transactionType === 'transfer_in') {
+    this.balance += amount;
+    this.stats.totalTransfers += amount;
+  } else if (transactionType === 'transfer_out') {
+    this.balance -= amount;
+    this.stats.totalTransfers += amount;
+  }
+  
+  // Ensure balance doesn't go negative
+  if (this.balance < 0) {
+    throw new Error('Insufficient funds');
+  }
+};
+
 // Pre-save middleware to ensure balance is not negative
 walletSchema.pre('save', function(next) {
   if (this.balance < 0) {

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Bell, 
@@ -21,6 +22,11 @@ const NotificationCenter = () => {
   const [filter, setFilter] = useState('all'); // all, unread, loan_updates, system
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+
+  // Stable function to close modal
+  const closeModal = useCallback(() => {
+    setShowDetailsModal(false);
+  }, []);
 
   useEffect(() => {
     loadNotifications();
@@ -326,13 +332,24 @@ const NotificationCenter = () => {
         </div>
       )}
 
-      {/* Notification Details Modal */}
-      {showDetailsModal && selectedNotification && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      {/* Notification Details Modal - Rendered via Portal */}
+      {showDetailsModal && selectedNotification && createPortal(
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]"
+          onClick={(e) => {
+            // Only close if clicking the backdrop, not the modal content
+            if (e.target === e.currentTarget) {
+              e.preventDefault();
+              e.stopPropagation();
+              closeModal();
+            }
+          }}
+        >
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()} // Prevent event bubbling
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-neutral-900 dark:text-white flex items-center">
@@ -340,7 +357,11 @@ const NotificationCenter = () => {
                 <span className="ml-2">Notification Details</span>
               </h3>
               <button
-                onClick={() => setShowDetailsModal(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  closeModal();
+                }}
                 className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
               >
                 ×
@@ -384,7 +405,11 @@ const NotificationCenter = () => {
                 </span>
                 <div className="flex space-x-3">
                   <button
-                    onClick={() => setShowDetailsModal(false)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      closeModal();
+                    }}
                     className="px-4 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                   >
                     Close
@@ -393,7 +418,8 @@ const NotificationCenter = () => {
               </div>
             </div>
           </motion.div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

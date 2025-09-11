@@ -3,8 +3,6 @@ import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { router } from './routes';
-import MobileNavigation from './components/layout/MobileNavigation';
-import useResponsive from './hooks/useResponsive';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -55,16 +53,11 @@ class ErrorBoundary extends React.Component {
 }
 
 function App() {
-  const { isMobile } = useResponsive();
-
   return (
     <ErrorBoundary>
       <ThemeProvider>
         <AuthProvider>
-          <div className="relative">
-            <RouterProvider router={router} />
-            {isMobile && <MobileNavigation />}
-          </div>
+          <RouterProvider router={router} />
         </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>

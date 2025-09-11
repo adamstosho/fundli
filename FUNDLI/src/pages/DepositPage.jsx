@@ -76,6 +76,12 @@ const DepositPage = () => {
       }
 
       const token = localStorage.getItem('accessToken');
+      console.log('Making deposit request with:', {
+        amount: parseFloat(amount),
+        currency: currency,
+        paymentMethod: paymentMethod
+      });
+      
       const response = await fetch('http://localhost:5000/api/wallet/deposit', {
         method: 'POST',
         headers: {
@@ -89,7 +95,9 @@ const DepositPage = () => {
         })
       });
 
+      console.log('Deposit response status:', response.status);
       const data = await response.json();
+      console.log('Deposit response data:', data);
 
       if (response.ok) {
         // Handle different payment methods
@@ -107,6 +115,7 @@ const DepositPage = () => {
             await handleCardPayment(data.data);
         }
       } else {
+        console.error('Deposit failed:', data);
         setError(data.message || 'Failed to initialize payment');
         setIsLoading(false);
       }
@@ -119,7 +128,46 @@ const DepositPage = () => {
 
   const handleCardPayment = async (paymentData) => {
     try {
+      console.log('Payment data received:', paymentData);
+      
+      // Check if this is a simulated payment (development mode)
+      if (paymentData.transaction && paymentData.transaction.metadata?.simulated) {
+        // Handle simulated payment
+        setSuccess(`Deposit successful! $${parseFloat(amount).toLocaleString()} has been added to your wallet.`);
+        setIsLoading(false);
+        
+        // Refresh wallet data
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+        return;
+      }
+
+      // Handle real Paystack payment
       const { authorizationUrl, publicKey, reference } = paymentData;
+      
+      console.log('Paystack public key:', publicKey);
+      console.log('Window.PaystackPop available:', typeof window.PaystackPop);
+      
+      // Wait for Paystack to load if not immediately available
+      let attempts = 0;
+      const maxAttempts = 10;
+      
+      while (typeof window.PaystackPop === 'undefined' && attempts < maxAttempts) {
+        console.log(`Waiting for Paystack to load... attempt ${attempts + 1}`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        attempts++;
+      }
+      
+      // Check if Paystack is available after waiting
+      if (typeof window.PaystackPop === 'undefined') {
+        console.error('Paystack failed to load after waiting');
+        setError('Payment service is not available. Please refresh the page and try again.');
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log('Paystack loaded successfully, initializing payment...');
       
       // Open Paystack popup for card payment
       const handler = window.PaystackPop.setup({
@@ -129,9 +177,11 @@ const DepositPage = () => {
         currency: currency,
         ref: reference,
         callback: function(response) {
+          console.log('Payment callback received:', response);
           handlePaymentCallback(response, reference);
         },
         onClose: function() {
+          console.log('Payment popup closed');
           setIsLoading(false);
           setError('Payment was cancelled');
         }
@@ -140,15 +190,28 @@ const DepositPage = () => {
       handler.openIframe();
     } catch (error) {
       console.error('Error with card payment:', error);
-      setError('Failed to initialize card payment');
+      setError(`Failed to initialize card payment: ${error.message}`);
       setIsLoading(false);
     }
   };
 
   const handleBankTransfer = async (paymentData) => {
     try {
-      // For bank transfer, show account details
-      const bankDetails = {
+      // Check if this is a simulated payment (development mode)
+      if (paymentData.transaction && paymentData.transaction.metadata?.simulated) {
+        // Handle simulated bank transfer
+        setSuccess(`Bank transfer successful! $${parseFloat(amount).toLocaleString()} has been added to your wallet.`);
+        setIsLoading(false);
+        
+        // Refresh wallet data
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+        return;
+      }
+
+      // For real bank transfer, show account details
+      const bankDetails = paymentData.bankDetails || {
         accountNumber: '1234567890',
         accountName: 'FUNDLI WALLET',
         bankName: 'Access Bank',
@@ -160,7 +223,7 @@ const DepositPage = () => {
 Account Number: ${bankDetails.accountNumber}
 Account Name: ${bankDetails.accountName}
 Bank: ${bankDetails.bankName}
-Amount: ₦${bankDetails.amount.toLocaleString()}
+Amount: $${bankDetails.amount.toLocaleString()}
 Reference: ${bankDetails.reference}
 
 Please transfer the exact amount and use the reference number. Your wallet will be credited within 24 hours after confirmation.`);

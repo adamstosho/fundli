@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -15,7 +16,7 @@ const marketplaceRoutes = require('./routes/marketplace');
 const referralRoutes = require('./routes/referrals');
 const adminRoutes = require('./routes/admin');
 const notificationRoutes = require('./routes/notifications');
-const collateralRoutes = require('./routes/collateral');
+const manualCollateralRoutes = require('./routes/manualCollateral');
 const borrowerRoutes = require('./routes/borrower');
 const lenderRoutes = require('./routes/lender');
 const transactionRoutes = require('./routes/transactions');
@@ -61,6 +62,9 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Static file serving for uploads
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Logging middleware
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -71,9 +75,11 @@ app.use(createRequestLogger());
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   res.status(200).json({ 
     status: 'ok', 
     message: 'Server is running',
+    database: dbStatus,
     timestamp: new Date().toISOString()
   });
 });
@@ -87,7 +93,7 @@ app.use('/api/investments', investmentRoutes);
 app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/referrals', referralRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/collateral', collateralRoutes);
+app.use('/api/collateral', manualCollateralRoutes);
 app.use('/api/borrower', borrowerRoutes);
 app.use('/api/lender', lenderRoutes);
 app.use('/api/notifications', notificationRoutes);
@@ -115,17 +121,26 @@ app.use(errorHandler);
 // Connect to database and start server
 const startServer = async () => {
   try {
-    await connectDB();
-    console.log('✅ Connected to MongoDB');
+    const dbConnected = await connectDB();
+    
+    if (dbConnected) {
+      console.log('✅ Connected to MongoDB');
+    } else {
+      console.log('⚠️  Server starting without database connection');
+    }
     
     app.listen(PORT, () => {
       console.log(`🚀 Fundli Backend Server running on port ${PORT}`);
       console.log(`📱 Environment: ${process.env.NODE_ENV}`);
       console.log(`🔗 Health Check: http://localhost:${PORT}/health`);
       
-      // Start cron jobs
-      cronService.start();
-      console.log('⏰ Cron jobs started');
+      // Start cron jobs only if database is connected
+      if (dbConnected) {
+        cronService.start();
+        console.log('⏰ Cron jobs started');
+      } else {
+        console.log('⚠️  Cron jobs disabled (no database connection)');
+      }
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

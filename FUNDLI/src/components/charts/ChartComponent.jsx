@@ -49,10 +49,14 @@ const ChartComponent = ({ type, data, options, className = "" }) => {
   );
 };
 
-// Predefined chart options
+// Enhanced chart options for better visibility and responsiveness
 export const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
+  interaction: {
+    intersect: false,
+    mode: 'index'
+  },
   plugins: {
     legend: {
       position: 'top',
@@ -60,64 +64,103 @@ export const chartOptions = {
         usePointStyle: true,
         padding: 20,
         font: {
-          size: 12,
-          family: 'Inter, sans-serif'
-        }
+          size: 14,
+          family: 'Inter, sans-serif',
+          weight: '600'
+        },
+        color: '#374151'
       }
     },
     title: {
       display: true,
       font: {
-        size: 16,
+        size: 20,
         weight: 'bold',
         family: 'Inter, sans-serif'
       },
-      color: '#374151'
+      color: '#111827',
+      padding: {
+        top: 10,
+        bottom: 30
+      }
     },
     tooltip: {
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      backgroundColor: 'rgba(0, 0, 0, 0.95)',
       titleColor: '#fff',
       bodyColor: '#fff',
       borderColor: '#e5e7eb',
       borderWidth: 1,
-      cornerRadius: 8,
+      cornerRadius: 12,
       displayColors: true,
-      padding: 12
+      padding: 16,
+      titleFont: {
+        size: 14,
+        weight: 'bold'
+      },
+      bodyFont: {
+        size: 13
+      },
+      callbacks: {
+        label: function(context) {
+          const value = context.parsed.y || context.parsed;
+          if (typeof value === 'number') {
+            return `${context.dataset.label}: $${value.toLocaleString()}`;
+          }
+          return `${context.dataset.label}: ${value}`;
+        }
+      }
     }
   },
   scales: {
     x: {
       grid: {
-        display: false
-      },
-      ticks: {
-        font: {
-          size: 11,
-          family: 'Inter, sans-serif'
-        },
-        color: '#6b7280'
-      }
-    },
-    y: {
-      grid: {
-        color: '#f3f4f6',
+        display: true,
+        color: 'rgba(0, 0, 0, 0.05)',
         drawBorder: false
       },
       ticks: {
         font: {
-          size: 11,
-          family: 'Inter, sans-serif'
+          size: 13,
+          family: 'Inter, sans-serif',
+          weight: '500'
         },
         color: '#6b7280',
+        padding: 10
+      },
+      border: {
+        display: false
+      }
+    },
+    y: {
+      grid: {
+        color: 'rgba(0, 0, 0, 0.05)',
+        drawBorder: false
+      },
+      ticks: {
+        font: {
+          size: 13,
+          family: 'Inter, sans-serif',
+          weight: '500'
+        },
+        color: '#6b7280',
+        padding: 10,
         callback: function(value) {
-          return value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value;
+          if (value >= 1000000) {
+            return '$' + (value / 1000000).toFixed(1) + 'M';
+          } else if (value >= 1000) {
+            return '$' + (value / 1000).toFixed(1) + 'k';
+          }
+          return '$' + value.toLocaleString();
         }
+      },
+      border: {
+        display: false
       }
     }
   }
 };
 
-// Color palettes
+// Enhanced color palettes
 export const colorPalettes = {
   primary: ['#3b82f6', '#1d4ed8', '#1e40af', '#1e3a8a'],
   success: ['#10b981', '#059669', '#047857', '#065f46'],
@@ -126,13 +169,16 @@ export const colorPalettes = {
   purple: ['#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6'],
   pink: ['#ec4899', '#db2777', '#be185d', '#9d174d'],
   gradient: [
-    'rgba(59, 130, 246, 0.8)',
-    'rgba(16, 185, 129, 0.8)',
-    'rgba(245, 158, 11, 0.8)',
-    'rgba(239, 68, 68, 0.8)',
-    'rgba(139, 92, 246, 0.8)',
-    'rgba(236, 72, 153, 0.8)'
+    '#3b82f6',
+    '#10b981',
+    '#f59e0b',
+    '#ef4444',
+    '#8b5cf6',
+    '#ec4899',
+    '#06b6d4',
+    '#84cc16'
   ]
 };
 
 export default ChartComponent;
+

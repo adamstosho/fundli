@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { X, Home, DollarSign, Users, FileText, BarChart3, Settings, UserCheck, Shield, TrendingUp, CreditCard, Calendar, Award, Search } from 'lucide-react';
+import { X, Home, DollarSign, Users, FileText, BarChart3, Settings, UserCheck, Shield, TrendingUp, CreditCard, Calendar, Award, Search, Bell } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import clsx from 'clsx';
@@ -17,6 +17,7 @@ const Sidebar = ({ open, onClose }) => {
       { name: 'Apply for Loan', href: '/loans/apply', icon: DollarSign },
       { name: 'Loan Status', href: '/loans/status', icon: FileText },
       { name: 'Repayment Schedule', href: '/loans/repayment', icon: Calendar },
+      { name: 'Notifications', href: '/notifications', icon: Bell },
       { name: 'Profile', href: '/settings/profile', icon: UserCheck },
       { name: 'Settings', href: '/settings', icon: Settings },
     ],
@@ -27,6 +28,7 @@ const Sidebar = ({ open, onClose }) => {
       { name: 'Browse Loans', href: '/marketplace/browse', icon: CreditCard },
       { name: 'My Investments', href: '/dashboard/lender', icon: TrendingUp },
       { name: 'Analytics', href: '/dashboard/lender', icon: BarChart3 },
+      { name: 'Notifications', href: '/notifications', icon: Bell },
       { name: 'Profile', href: '/settings/profile', icon: UserCheck },
       { name: 'Settings', href: '/settings', icon: Settings },
     ],
@@ -36,6 +38,7 @@ const Sidebar = ({ open, onClose }) => {
       { name: 'KYC Management', href: '/admin/kyc', icon: Shield },
       { name: 'Loan Management', href: '/admin/loans', icon: FileText },
       { name: 'Analytics', href: '/dashboard/admin', icon: BarChart3 },
+      { name: 'Notifications', href: '/notifications', icon: Bell },
       { name: 'Settings', href: '/settings', icon: Settings },
     ],
   };

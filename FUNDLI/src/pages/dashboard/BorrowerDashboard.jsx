@@ -20,6 +20,7 @@ import { useAuth } from '../../context/AuthContext';
 import PendingLoansSection from '../../components/common/PendingLoansSection';
 import InProgressLoansSection from '../../components/common/InProgressLoansSection';
 import WalletBalanceCard from '../../components/common/WalletBalanceCard';
+import CollateralVerificationStatus from '../../components/common/CollateralVerificationStatus';
 import { 
   LoanTrendsChart, 
   RepaymentStatusChart, 
@@ -62,66 +63,49 @@ const BorrowerDashboard = () => {
         console.log('🔑 Token exists:', !!token);
         console.log('🔑 Token preview:', token.substring(0, 20) + '...');
 
-        // Fetch user's loan data
-        console.log('📡 Fetching loans from: http://localhost:5000/api/loans/user');
-        const loansResponse = await fetch('http://localhost:5000/api/loans/user', {
+        // Fetch comprehensive borrower stats
+        console.log('📡 Fetching borrower stats from: http://localhost:5000/api/loans/borrower-stats');
+        const statsResponse = await fetch('http://localhost:5000/api/loans/borrower-stats', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
 
-        console.log('📡 Loans response status:', loansResponse.status);
-        console.log('📡 Loans response ok:', loansResponse.ok);
+        console.log('📡 Stats response status:', statsResponse.status);
+        console.log('📡 Stats response ok:', statsResponse.ok);
 
-        if (loansResponse.ok) {
-          const loansData = await loansResponse.json();
-          console.log('✅ Fetched loans data:', loansData);
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          console.log('✅ Fetched borrower stats:', statsData);
           
-          // Process loans data
-          const activeLoans = loansData.data?.loans?.filter(loan => loan.status === 'active') || [];
-          const pendingLoans = loansData.data?.loans?.filter(loan => loan.status === 'pending') || [];
-          
-          console.log('📊 Active loans:', activeLoans.length);
-          console.log('📊 Pending loans:', pendingLoans.length);
-          console.log('📊 Total loans:', loansData.data?.loans?.length || 0);
-          
-          setRecentLoans(loansData.data?.loans || []);
-          
-          // Calculate stats from real data - only count funded loans for total borrowed
-          const fundedLoans = loansData.data?.loans?.filter(loan => 
-            ['funded', 'active', 'completed'].includes(loan.status)
-          ) || [];
-          const totalBorrowed = fundedLoans.reduce((sum, loan) => sum + (loan.loanAmount || 0), 0);
-          const totalRepaid = loansData.data?.loans?.reduce((sum, loan) => sum + (loan.amountPaid || 0), 0) || 0;
-          
-          console.log('💰 Total borrowed:', totalBorrowed);
-          console.log('💰 Total repaid:', totalRepaid);
-          
+          // Set stats from API response
           setStats({
-            totalBorrowed,
-            activeLoans: activeLoans.length,
-            totalRepaid,
-            creditScore: user?.creditScore || 0
+            totalBorrowed: statsData.data.stats.totalBorrowed,
+            activeLoans: statsData.data.stats.activeLoans,
+            totalRepaid: statsData.data.stats.totalRepaid,
+            creditScore: statsData.data.stats.creditScore
           });
-
-          // Get upcoming payments from active loans
-          const payments = activeLoans
-            .filter(loan => loan.nextPaymentDate)
-            .map(loan => ({
-              id: loan._id,
-              amount: loan.monthlyPayment || loan.loanAmount / loan.duration,
-              dueDate: loan.nextPaymentDate,
-              loanPurpose: loan.purpose
-            }));
           
-          setUpcomingPayments(payments);
-          console.log('📅 Upcoming payments:', payments.length);
+          // Set recent loans and upcoming payments
+          setRecentLoans(statsData.data.recentLoans || []);
+          setUpcomingPayments(statsData.data.upcomingPayments || []);
+          
+          console.log('📊 Stats updated:', {
+            totalBorrowed: statsData.data.stats.totalBorrowed,
+            activeLoans: statsData.data.stats.activeLoans,
+            totalRepaid: statsData.data.stats.totalRepaid,
+            creditScore: statsData.data.stats.creditScore
+          });
         } else {
-          const errorData = await loansResponse.json().catch(() => ({ message: 'Unknown error' }));
-          console.error('❌ Failed to fetch loans data:', errorData);
-          throw new Error(`Failed to fetch loans data: ${errorData.message || 'Unknown error'}`);
+          const errorData = await statsResponse.json().catch(() => ({ message: 'Unknown error' }));
+          console.error('❌ Stats API error:', errorData);
+          throw new Error(`Failed to fetch borrower stats: ${errorData.message || 'Unknown error'}`);
         }
+
+        // Fetch chart data
+        await fetchChartData(token);
+
       } catch (error) {
         console.error('❌ Error loading dashboard data:', error);
         setError(`Failed to load dashboard data: ${error.message}`);
@@ -152,7 +136,7 @@ const BorrowerDashboard = () => {
   const fetchChartData = async (token) => {
     try {
       // Fetch loan trends data
-      const trendsResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/loans/trends`, {
+      const trendsResponse = await fetch('http://localhost:5000/api/loans/trends', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -168,7 +152,7 @@ const BorrowerDashboard = () => {
       }
 
       // Fetch repayment status data
-      const repaymentResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/repayments/user/${user.id}`, {
+      const repaymentResponse = await fetch('http://localhost:5000/api/loans/repayment-status', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -177,43 +161,40 @@ const BorrowerDashboard = () => {
       
       if (repaymentResponse.ok) {
         const repaymentData = await repaymentResponse.json();
-        // Process repayment data for chart
-        const statusCounts = {
-          onTime: 0,
-          late: 0,
-          overdue: 0,
-          paid: 0
-        };
-        
-        repaymentData.data?.repaymentHistory?.forEach(payment => {
-          if (payment.status === 'paid') {
-            if (payment.paidAt && payment.dueDate && new Date(payment.paidAt) <= new Date(payment.dueDate)) {
-              statusCounts.onTime++;
-            } else {
-              statusCounts.late++;
-            }
-          } else if (payment.status === 'overdue') {
-            statusCounts.overdue++;
-          }
-        });
-
+        console.log('✅ Repayment status data:', repaymentData.data);
         setChartData(prev => ({
           ...prev,
-          repaymentStatus: {
-            labels: ['On Time', 'Late', 'Overdue', 'Paid'],
-            values: [statusCounts.onTime, statusCounts.late, statusCounts.overdue, statusCounts.paid]
+          repaymentStatus: repaymentData.data
+        }));
+      } else {
+        console.warn('❌ Failed to fetch repayment status:', repaymentResponse.status);
+      }
+
+      // Fetch credit score distribution data
+      const creditResponse = await fetch('http://localhost:5000/api/loans/credit-score-distribution', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (creditResponse.ok) {
+        const creditData = await creditResponse.json();
+        setChartData(prev => ({
+          ...prev,
+          creditScoreDistribution: creditData.data
+        }));
+      } else {
+        console.warn('❌ Failed to fetch credit score distribution:', creditResponse.status);
+        // Fallback to mock data
+        setChartData(prev => ({
+          ...prev,
+          creditScoreDistribution: {
+            labels: ['Excellent (750+)', 'Good (700-749)', 'Fair (650-699)', 'Poor (600-649)', 'Very Poor (<600)'],
+            values: [25, 35, 20, 15, 5]
           }
         }));
       }
-
-      // Fetch credit score distribution (mock data for now)
-      setChartData(prev => ({
-        ...prev,
-        creditScoreDistribution: {
-          labels: ['Excellent (750+)', 'Good (700-749)', 'Fair (650-699)', 'Poor (600-649)', 'Very Poor (<600)'],
-          values: [25, 35, 20, 15, 5]
-        }
-      }));
 
     } catch (error) {
       console.error('Error fetching chart data:', error);
@@ -409,6 +390,18 @@ const BorrowerDashboard = () => {
       {/* Wallet Balance */}
       <div className="mb-8">
         <WalletBalanceCard userType="borrower" />
+      </div>
+
+      {/* Collateral Verification Status */}
+      <div className="mb-8">
+        <CollateralVerificationStatus 
+          userId={user?.id} 
+          userType="borrower" 
+          onReapply={() => {
+            // Navigate to collateral verification page
+            window.location.href = '/loans/apply';
+          }}
+        />
       </div>
 
       {/* Quick Actions */}

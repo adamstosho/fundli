@@ -272,7 +272,6 @@ transactionSchema.virtual('processingTime').get(function() {
 });
 
 // Indexes
-transactionSchema.index({ transactionId: 1 }, { unique: true });
 transactionSchema.index({ sender: 1 });
 transactionSchema.index({ recipient: 1 });
 transactionSchema.index({ type: 1 });

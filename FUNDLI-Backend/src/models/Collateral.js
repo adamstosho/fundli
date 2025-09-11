@@ -20,7 +20,25 @@ const collateralSchema = new mongoose.Schema({
     required: true,
     min: 0
   },
-  documents: [{
+  // Collateral ownership proof documents
+  collateralDocuments: [{
+    fileName: String,
+    originalName: String,
+    fileUrl: String,
+    fileSize: Number,
+    mimeType: String,
+    documentType: {
+      type: String,
+      enum: ['title_deed', 'registration_paper', 'purchase_receipt', 'ownership_certificate', 'other'],
+      required: true
+    },
+    uploadDate: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  // Bank statement and BVN information
+  bankStatement: {
     fileName: String,
     originalName: String,
     fileUrl: String,
@@ -30,34 +48,53 @@ const collateralSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     }
-  }],
+  },
+  bvn: {
+    type: String,
+    required: true,
+    validate: {
+      validator: function(v) {
+        return /^\d{11}$/.test(v);
+      },
+      message: 'BVN must be exactly 11 digits'
+    }
+  },
+  // Manual verification status
   verificationStatus: {
     type: String,
-    enum: ['pending', 'submitted', 'verified', 'rejected'],
+    enum: ['pending', 'submitted', 'under_review', 'approved', 'rejected', 'deleted'],
     default: 'pending'
   },
-  verificationId: {
-    type: String,
-    sparse: true
-  },
-  onfidoResult: {
+  // Admin review information
+  adminReview: {
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    reviewedAt: Date,
     status: {
       type: String,
-      enum: ['clear', 'suspected', 'rejected', 'needs_review'],
+      enum: ['approved', 'rejected', 'needs_more_info']
+    },
+    notes: String,
+    rejectionReason: String,
+    verifiedValue: {
+      type: Number,
       default: null
     },
-    reportId: String,
-    completedAt: Date,
-    notes: String
+    verificationNotes: String
   },
   submittedAt: {
     type: Date,
     default: Date.now
   },
-  verifiedAt: Date,
+  approvedAt: Date,
   rejectedAt: Date,
-  rejectionReason: String,
-  adminNotes: String,
+  deletedAt: Date,
+  deletedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
   isActive: {
     type: Boolean,
     default: true
@@ -77,43 +114,74 @@ collateralSchema.virtual('totalValue').get(function() {
 });
 
 // Method to update verification status
-collateralSchema.methods.updateVerificationStatus = function(status, onfidoData = {}) {
+collateralSchema.methods.updateVerificationStatus = function(status, adminData = {}) {
   this.verificationStatus = status;
   
-  if (status === 'verified') {
-    this.verifiedAt = new Date();
-    this.onfidoResult = onfidoData;
+  if (status === 'approved') {
+    this.approvedAt = new Date();
+    this.adminReview = {
+      ...this.adminReview,
+      reviewedBy: adminData.reviewedBy,
+      reviewedAt: new Date(),
+      status: 'approved',
+      notes: adminData.notes,
+      verifiedValue: adminData.verifiedValue,
+      verificationNotes: adminData.verificationNotes
+    };
   } else if (status === 'rejected') {
     this.rejectedAt = new Date();
-    this.onfidoResult = onfidoData;
+    this.adminReview = {
+      ...this.adminReview,
+      reviewedBy: adminData.reviewedBy,
+      reviewedAt: new Date(),
+      status: 'rejected',
+      notes: adminData.notes,
+      rejectionReason: adminData.rejectionReason,
+      verificationNotes: adminData.verificationNotes
+    };
   } else if (status === 'submitted') {
     this.submittedAt = new Date();
+  } else if (status === 'under_review') {
+    this.adminReview = {
+      ...this.adminReview,
+      reviewedBy: adminData.reviewedBy,
+      reviewedAt: new Date(),
+      status: 'needs_more_info',
+      notes: adminData.notes,
+      verificationNotes: adminData.verificationNotes
+    };
   }
   
   return this.save();
 };
 
-// Static method to get verified collateral for a user
-collateralSchema.statics.getVerifiedCollateral = function(userId) {
+// Static method to get approved collateral for a user
+collateralSchema.statics.getApprovedCollateral = function(userId) {
   return this.find({
     userId,
-    verificationStatus: 'verified',
+    verificationStatus: 'approved',
     isActive: true
-  }).sort({ verifiedAt: -1 });
+  }).sort({ approvedAt: -1 });
 };
 
-// Static method to get pending verifications
+// Static method to get pending verifications for admin review
 collateralSchema.statics.getPendingVerifications = function() {
   return this.find({
-    verificationStatus: 'submitted',
+    verificationStatus: { $in: ['submitted', 'under_review'] },
     isActive: true
   }).populate('userId', 'firstName lastName email phone').sort({ submittedAt: 1 });
 };
 
-// Pre-save middleware to validate document count
+// Pre-save middleware to validate required documents
 collateralSchema.pre('save', function(next) {
-  if (this.documents.length === 0) {
-    return next(new Error('At least one document is required'));
+  if (this.collateralDocuments.length === 0) {
+    return next(new Error('At least one collateral document is required'));
+  }
+  if (!this.bankStatement.fileUrl) {
+    return next(new Error('Bank statement is required'));
+  }
+  if (!this.bvn) {
+    return next(new Error('BVN is required'));
   }
   next();
 });
