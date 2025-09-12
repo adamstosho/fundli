@@ -7,6 +7,12 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config();
 
+// Set default JWT_SECRET if not provided
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = 'fundli_jwt_secret_key_2024_secure_random_string';
+  console.log('⚠️ JWT_SECRET not found in .env file, using default');
+}
+
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const loanRoutes = require('./routes/loans');

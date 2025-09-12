@@ -634,7 +634,7 @@ const acceptLoanApplication = async (req, res) => {
     const fundingTransaction = {
       type: 'loan_payment',
       amount: loan.loanAmount,
-      currency: 'NGN',
+      currency: 'USD',
       description: `Funding for loan ${loanId}`,
       reference: transactionReference,
       status: 'completed',
@@ -649,7 +649,7 @@ const acceptLoanApplication = async (req, res) => {
     };
 
     lenderWallet.addTransaction(fundingTransaction);
-    lenderWallet.updateBalance(loan.loanAmount, 'subtract');
+    lenderWallet.updateBalance(loan.loanAmount, 'loan_funding');
     await lenderWallet.save();
 
     // Add loan disbursement to borrower's wallet
@@ -658,7 +658,7 @@ const acceptLoanApplication = async (req, res) => {
       const disbursementTransaction = {
         type: 'loan_disbursement',
         amount: loan.loanAmount,
-        currency: 'NGN',
+        currency: 'USD',
         description: `Loan disbursement for ${loan.purpose}`,
         reference: `LOAN_DISBURSEMENT_${loanId}_${Date.now()}`,
         status: 'completed',
@@ -672,7 +672,7 @@ const acceptLoanApplication = async (req, res) => {
       };
 
       borrowerWallet.addTransaction(disbursementTransaction);
-      borrowerWallet.updateBalance(loan.loanAmount, 'add');
+      borrowerWallet.updateBalance(loan.loanAmount, 'loan_disbursement');
       await borrowerWallet.save();
     }
 

@@ -725,13 +725,13 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
   try {
     const { investmentAmount, notes } = req.body;
 
-    // Check if user is a lender (temporarily disabled for testing)
-    // if (req.user.userType !== 'lender') {
-    //   return res.status(403).json({
-    //     status: 'error',
-    //     message: 'Only lenders can fund loans'
-    //   });
-    // }
+    // Check if user is a lender
+    if (req.user.userType !== 'lender') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Only lenders can fund loans'
+      });
+    }
 
     // Validate investment amount
     if (!investmentAmount || investmentAmount <= 0) {
@@ -785,7 +785,6 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
 
     console.log(`💰 Funding loan ${req.params.id}: Lender ${req.user.email} funding $${parseFloat(investmentAmount)}`);
     console.log(`📊 Lender balance before: $${lenderWallet.balance.toLocaleString()}`);
-    console.log(`📊 Borrower balance before: $${borrowerWallet.balance.toLocaleString()}`);
 
     // Get borrower wallet
     const borrowerWallet = await Wallet.findOne({ user: loan.borrower._id });
@@ -795,6 +794,8 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
         message: 'Borrower wallet not found'
       });
     }
+
+    console.log(`📊 Borrower balance before: $${borrowerWallet.balance.toLocaleString()}`);
 
     // Generate transaction reference
     const reference = `FUND_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;

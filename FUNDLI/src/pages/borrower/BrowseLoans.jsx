@@ -674,6 +674,10 @@ const BrowseLoans = () => {
               onCancel={() => setShowLoanApplicationModal(false)}
               isSubmitting={isSubmitting}
               user={user}
+              collateralStatus={collateralStatus}
+              setSelectedLoan={setSelectedLoan}
+              setShowLoanApplicationModal={setShowLoanApplicationModal}
+              setShowCollateralModal={setShowCollateralModal}
             />
           </div>
         </div>
@@ -683,7 +687,17 @@ const BrowseLoans = () => {
 };
 
 // Simple Loan Application Form Component
-const LoanApplicationForm = ({ loan, onSubmit, onCancel, isSubmitting, user }) => {
+const LoanApplicationForm = ({ 
+  loan, 
+  onSubmit, 
+  onCancel, 
+  isSubmitting, 
+  user, 
+  collateralStatus, 
+  setSelectedLoan, 
+  setShowLoanApplicationModal, 
+  setShowCollateralModal 
+}) => {
   const [formData, setFormData] = useState({
     requestedAmount: '',
     purpose: '',
@@ -805,14 +819,26 @@ const LoanApplicationForm = ({ loan, onSubmit, onCancel, isSubmitting, user }) =
           </p>
         </div>
 
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-          <div className="flex items-center space-x-2">
-            <CheckCircle className="h-5 w-5 text-green-600" />
-            <p className="text-sm font-medium text-green-800 dark:text-green-200">
-              Collateral verification completed and approved
-            </p>
+        {/* Collateral Status Display */}
+        {collateralStatus && collateralStatus.verificationStatus === 'approved' ? (
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                Collateral verification completed and approved
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="h-5 w-5 text-yellow-600" />
+              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                Collateral verification required before submitting loan application
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Action Buttons */}
@@ -827,7 +853,13 @@ const LoanApplicationForm = ({ loan, onSubmit, onCancel, isSubmitting, user }) =
               purpose: formData.purpose,
               duration: formData.duration
             };
-            onSubmit(applicationData);
+            // Store pending application and show collateral modal
+            setSelectedLoan(prev => ({
+              ...prev,
+              pendingApplication: applicationData
+            }));
+            setShowLoanApplicationModal(false);
+            setShowCollateralModal(true);
           }}
           disabled={isSubmitting || !formData.requestedAmount || !formData.purpose || !formData.duration}
           className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
@@ -836,21 +868,23 @@ const LoanApplicationForm = ({ loan, onSubmit, onCancel, isSubmitting, user }) =
           <span>Continue to Collateral Verification</span>
         </button>
         
-        {/* Submit Application Button */}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center"
-        >
-          {isSubmitting ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Submitting...
-            </>
-          ) : (
-            'Submit Application'
-          )}
-        </button>
+        {/* Submit Application Button - Only show if collateral is approved */}
+        {collateralStatus && collateralStatus.verificationStatus === 'approved' && (
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Submitting...
+              </>
+            ) : (
+              'Submit Application'
+            )}
+          </button>
+        )}
         
         {/* Cancel Button */}
         <button

@@ -27,7 +27,7 @@ const createWallet = async (req, res) => {
     const wallet = await Wallet.create({
       user: userId,
       balance: 0,
-      currency: 'NGN'
+      currency: 'USD'
     });
 
     res.status(201).json({

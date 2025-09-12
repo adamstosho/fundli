@@ -177,15 +177,14 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
       const fundingAmount = parseFloat(paymentData.amount);
       
       // Step 1: Process the loan funding
-      const fundingResponse = await fetch(`http://localhost:5000/api/lender/loan/${loanApplication.id}/fund`, {
+      const fundingResponse = await fetch(`http://localhost:5000/api/lender/loan/${loanApplication.id}/accept`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          amount: fundingAmount,
-          paymentMethod: paymentData.paymentMethod,
+          investmentAmount: fundingAmount,
           notes: paymentData.notes,
           borrowerId: loanApplication.borrower.id // Include borrower ID for balance transfer
         })
@@ -194,54 +193,37 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
       if (fundingResponse.ok) {
         const fundingResult = await fundingResponse.json();
         
-        // Step 2: Process wallet balance transfer
-        const transferResponse = await fetch('http://localhost:5000/api/wallet/transfer', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            fromUserId: 'lender', // Current lender's ID (you might get this from context)
-            toUserId: loanApplication.borrower.id,
-            amount: fundingAmount,
-            type: 'loan_funding',
-            description: `Loan funding for ${loanApplication.purpose}`,
-            loanId: loanApplication.id,
-            transactionId: fundingResult.data.transactionId
-          })
-        });
-
-        if (transferResponse.ok) {
-          const transferResult = await transferResponse.json();
-          
-          // Step 3: Update local wallet balance
-          const newBalance = walletBalance - fundingAmount;
-          setWalletBalance(newBalance);
-          
-          // Update local storage wallet
-          updateLocalWallet('lender', newBalance);
-          
-          // Step 4: Create notifications with updated balance information
-          await createNotifications({
-            ...fundingResult.data,
-            lenderNewBalance: transferResult.data.fromUserBalance,
-            borrowerNewBalance: transferResult.data.toUserBalance,
-            transferId: transferResult.data.transferId
-          });
-          
-          setSuccess(true);
-          
-          // Step 5: Call success callback with complete transaction data
-          if (onPaymentSuccess) {
-            onPaymentSuccess({
-              ...fundingResult.data,
-              lenderNewBalance: transferResult.data.fromUserBalance,
-              borrowerNewBalance: transferResult.data.toUserBalance,
-              transferId: transferResult.data.transferId,
-              fundingAmount: fundingAmount
-            });
-          }
+        console.log('✅ Loan funded successfully:', fundingResult);
+        
+        // Update local wallet balance
+        const newBalance = walletBalance - fundingAmount;
+        setWalletBalance(newBalance);
+        
+        // Update local storage wallet
+        updateLocalWallet('lender', newBalance);
+        
+        // Trigger wallet balance update events
+        window.dispatchEvent(new CustomEvent('walletBalanceUpdated'));
+        
+        // Trigger dashboard refresh
+        if (window.refreshLenderDashboard) {
+          window.refreshLenderDashboard();
+        }
+        
+        // Trigger wallet balance refresh
+        if (window.refreshWalletBalance) {
+          window.refreshWalletBalance();
+        }
+        
+        // Create notifications
+        await createNotifications(fundingResult.data);
+        
+        setSuccess(true);
+        
+        // Call success callback
+        if (onPaymentSuccess) {
+          onPaymentSuccess(fundingResult.data);
+        }
           
           // Close modal after delay
           setTimeout(() => {
@@ -253,16 +235,7 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
               notes: ''
             });
           }, 2000);
-        } else {
-          // If wallet transfer fails, we need to rollback the loan funding
-          const transferError = await transferResponse.json();
-          console.error('Wallet transfer failed:', transferError);
-          
-          // Attempt to rollback the loan funding
-          await rollbackLoanFunding(loanApplication.id, fundingAmount);
-          
-          setError(`Payment failed: ${transferError.message || 'Wallet transfer failed'}`);
-        }
+        
       } else {
         const errorData = await fundingResponse.json();
         setError(errorData.message || 'Payment failed');

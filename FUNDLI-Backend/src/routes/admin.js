@@ -632,57 +632,7 @@ router.get('/loans', protect, requireAdmin, async (req, res) => {
   }
 });
 
-// @route   PUT /api/admin/loans/:loanId/approve
-// @desc    Approve a loan application
-// @access  Private (Admin only)
-router.put('/loans/:loanId/approve', protect, requireAdmin, async (req, res) => {
-  try {
-    const { loanId } = req.params;
-    const { notes } = req.body;
-
-    const loan = await Loan.findById(loanId);
-    if (!loan) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Loan not found'
-      });
-    }
-
-    if (loan.status !== 'pending') {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Loan is not in pending status'
-      });
-    }
-
-    // Update loan status to approved
-    loan.status = 'approved';
-    loan.approvedBy = req.user.id;
-    loan.approvedAt = new Date();
-    if (notes) {
-      loan.notes = notes;
-    }
-
-    await loan.save();
-
-    res.status(200).json({
-      status: 'success',
-      message: 'Loan approved successfully',
-      data: {
-        loanId: loan._id,
-        status: loan.status,
-        approvedAt: loan.approvedAt
-      }
-    });
-
-  } catch (error) {
-    console.error('Error approving loan:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to approve loan'
-    });
-  }
-});
+// Removed duplicate PUT endpoint - using POST /api/admin/loan/:id/approve instead
 
 // @route   PUT /api/admin/loans/:loanId/reject
 // @desc    Reject a loan application

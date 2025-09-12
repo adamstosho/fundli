@@ -223,82 +223,123 @@ router.post('/loan/apply', protect, async (req, res) => {
       bankCode 
     } = req.body;
 
-    // Skip user type check for now - allow all authenticated users to apply
-    console.log('🔍 User applying for loan (general):', req.user.email, 'UserType:', req.user.userType);
-    console.log('✅ Proceeding with loan application for user:', req.user.id);
+    // Validate required fields
+    if (!loanAmount || !purpose || !duration) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Missing required fields: loanAmount, purpose, and duration are required'
+      });
+    }
+
+    // Validate loan amount
+    const amount = parseFloat(loanAmount);
+    if (isNaN(amount) || amount <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid loan amount. Must be a positive number.'
+      });
+    }
+
+    // Validate duration
+    const durationMonths = parseInt(duration);
+    if (isNaN(durationMonths) || durationMonths <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid duration. Must be a positive number of months.'
+      });
+    }
 
     // KYC is no longer mandatory to apply; process optional KYC if provided
     if (!req.user.kycVerified && bvn && accountNumber && bankCode) {
       try {
-        const bvnResult = await PaystackService.verifyBVN(bvn);
-        const bankResult = await PaystackService.verifyBankAccount(accountNumber, bankCode);
-        if (bvnResult.success && bankResult.success) {
-          await User.findByIdAndUpdate(req.user.id, {
-            'kycData.bvn': {
-              number: bvn,
-              verified: true,
-              verificationResult: bvnResult.data,
-              verifiedAt: new Date()
-            },
-            'kycData.bankAccount': {
-              accountNumber,
-              bankCode,
-              bankName: bankResult.data.bank,
-              accountName: bankResult.data.account_name,
-              verified: true,
-              verificationResult: bankResult.data,
-              verifiedAt: new Date()
-            },
-            'kycData.submittedAt': new Date(),
-            kycStatus: 'pending'
-          });
+        // Only attempt KYC verification if PaystackService is properly configured
+        if (PaystackService && !PaystackService.disabled) {
+          const bvnResult = await PaystackService.verifyBVN(bvn);
+          const bankResult = await PaystackService.verifyBankAccount(accountNumber, bankCode);
+          if (bvnResult.success && bankResult.success) {
+            await User.findByIdAndUpdate(req.user.id, {
+              'kycData.bvn': {
+                number: bvn,
+                verified: true,
+                verificationResult: bvnResult.data,
+                verifiedAt: new Date()
+              },
+              'kycData.bankAccount': {
+                accountNumber,
+                bankCode,
+                bankName: bankResult.data.bank,
+                accountName: bankResult.data.account_name,
+                verified: true,
+                verificationResult: bankResult.data,
+                verifiedAt: new Date()
+              },
+              'kycData.submittedAt': new Date(),
+              kycStatus: 'pending'
+            });
+          }
+        } else {
+          console.log('⚠️ PaystackService not available, skipping KYC verification');
         }
       } catch (kycError) {
-        console.error('Optional KYC processing error (continuing without KYC):', kycError);
+        console.error('Optional KYC processing error (continuing without KYC):', kycError.message);
+        // Don't throw the error, just log it and continue
       }
     }
 
     // Calculate loan terms (using a default interest rate)
     const interestRate = 8; // Default 8% interest rate
     const monthlyRate = interestRate / 100 / 12;
-    const numberOfPayments = parseInt(duration);
+    const numberOfPayments = durationMonths;
     
     let monthlyPayment, totalRepayment, totalInterest;
     
     if (monthlyRate > 0) {
-      monthlyPayment = (parseFloat(loanAmount) * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / 
+      monthlyPayment = (amount * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / 
                        (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
     } else {
-      monthlyPayment = parseFloat(loanAmount) / numberOfPayments;
+      monthlyPayment = amount / numberOfPayments;
     }
     
     totalRepayment = monthlyPayment * numberOfPayments;
-    totalInterest = totalRepayment - parseFloat(loanAmount);
+    totalInterest = totalRepayment - amount;
 
-    // Create loan application
-    const loan = await Loan.create({
-      borrower: req.user.id,
-      loanAmount: parseFloat(loanAmount),
-      purpose,
-      purposeDescription: `Loan application for ${purpose} - ${collateral || 'No collateral provided'}`,
-      duration: numberOfPayments,
-      interestRate: interestRate,
-      monthlyPayment: Math.round(monthlyPayment * 100) / 100,
-      totalRepayment: Math.round(totalRepayment * 100) / 100,
-      totalInterest: Math.round(totalInterest * 100) / 100,
-      amountRemaining: Math.round(totalRepayment * 100) / 100,
-      collateral: collateral ? {
-        type: 'other',
-        description: collateral
-      } : null,
-      status: 'pending',
-      kycStatus: req.user.kycVerified ? 'verified' : 'pending',
-      fundingProgress: {
-        targetAmount: parseFloat(loanAmount),
-        fundedAmount: 0
-      },
-      submittedAt: new Date()
-    });
+    // Create loan application with error handling
+    let loan;
+    try {
+      loan = await Loan.create({
+        borrower: req.user.id,
+        loanAmount: amount,
+        purpose,
+        purposeDescription: `Loan application for ${purpose} - ${collateral || 'No collateral provided'}`,
+        duration: numberOfPayments,
+        interestRate: interestRate,
+        monthlyPayment: Math.round(monthlyPayment * 100) / 100,
+        totalRepayment: Math.round(totalRepayment * 100) / 100,
+        totalInterest: Math.round(totalInterest * 100) / 100,
+        amountRemaining: Math.round(totalRepayment * 100) / 100,
+        collateral: collateral ? {
+          type: 'other',
+          description: collateral
+        } : null,
+        status: 'pending',
+        kycStatus: req.user.kycVerified ? 'verified' : 'pending',
+        fundingProgress: {
+          targetAmount: amount,
+          fundedAmount: 0
+        },
+        submittedAt: new Date()
+      });
+      
+      console.log('✅ Loan created successfully:', loan._id);
+    } catch (loanError) {
+      console.error('❌ Loan creation failed:', loanError);
+      return res.status(400).json({
+        status: 'error',
+        message: 'Failed to create loan application',
+        error: loanError.message,
+        details: loanError.errors || 'Validation error'
+      });
+    }
 
     res.status(201).json({
       status: 'success',
