@@ -6,17 +6,46 @@ import { useNavigate, useLocation } from 'react-router-dom';
 
 const MobileNavigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, userType } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const navigationItems = [
-    { name: 'Dashboard', icon: Home, path: '/dashboard' },
-    { name: 'Loans', icon: CreditCard, path: '/loans' },
-    { name: 'Marketplace', icon: TrendingUp, path: '/marketplace' },
-    { name: 'Profile', icon: User, path: '/profile' },
-    { name: 'Settings', icon: Settings, path: '/settings' },
-  ];
+  const getNavigationItems = () => {
+    const baseItems = [
+      { name: 'Dashboard', icon: Home, path: `/dashboard/${userType}` },
+    ];
+
+    if (userType === 'borrower') {
+      return [
+        ...baseItems,
+        { name: 'Loan Status', icon: CreditCard, path: '/loans/status' },
+        { name: 'KYC Verification', icon: User, path: '/kyc-upload' },
+        { name: 'Profile', icon: User, path: '/settings/profile' },
+        { name: 'Settings', icon: Settings, path: '/settings' },
+      ];
+    } else if (userType === 'lender') {
+      return [
+        ...baseItems,
+        { name: 'Create Pool', icon: TrendingUp, path: '/marketplace/create-pool' },
+        { name: 'Browse Loans', icon: CreditCard, path: '/marketplace/browse' },
+        { name: 'KYC Verification', icon: User, path: '/kyc-upload' },
+        { name: 'Profile', icon: User, path: '/settings/profile' },
+        { name: 'Settings', icon: Settings, path: '/settings' },
+      ];
+    } else if (userType === 'admin') {
+      return [
+        ...baseItems,
+        { name: 'User Management', icon: User, path: '/admin/users' },
+        { name: 'KYC Management', icon: User, path: '/admin/kyc' },
+        { name: 'Loan Management', icon: CreditCard, path: '/admin/loans' },
+        { name: 'Settings', icon: Settings, path: '/settings' },
+      ];
+    }
+
+    return baseItems;
+  };
+
+  const navigationItems = getNavigationItems();
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -35,7 +64,7 @@ const MobileNavigation = () => {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
+        className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
       >
         <Menu className="h-6 w-6 text-gray-700 dark:text-gray-300" />
       </button>
@@ -65,17 +94,17 @@ const MobileNavigation = () => {
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-                      <span className="text-white font-bold text-lg">F</span>
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <span className="text-white font-bold text-xl">F</span>
                     </div>
                     <div>
-                      <h1 className="text-lg font-bold text-gray-900 dark:text-white">FUNDLI</h1>
+                      <h1 className="text-lg font-bold text-gray-900 dark:text-white">Fundli</h1>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Mobile</p>
                     </div>
                   </div>
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                   >
                     <X className="h-6 w-6 text-gray-700 dark:text-gray-300" />
                   </button>
@@ -84,8 +113,8 @@ const MobileNavigation = () => {
                 {/* User Info */}
                 <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center">
-                      <User className="h-6 w-6 text-primary-600 dark:text-primary-400" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                      <User className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1">
                       <p className="font-medium text-gray-900 dark:text-white">
@@ -108,7 +137,7 @@ const MobileNavigation = () => {
                 </div>
 
                 {/* Navigation Items */}
-                <nav className="flex-1 p-4">
+                <nav className="flex-1 p-4 overflow-y-auto">
                   <ul className="space-y-2">
                     {navigationItems.map((item) => {
                       const Icon = item.icon;
@@ -118,7 +147,7 @@ const MobileNavigation = () => {
                             onClick={() => handleNavigation(item.path)}
                             className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors ${
                               isActive(item.path)
-                                ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
+                                ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                             }`}
                           >
@@ -133,7 +162,10 @@ const MobileNavigation = () => {
 
                 {/* Footer Actions */}
                 <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-                  <button className="w-full flex items-center space-x-3 px-3 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                  <button 
+                    onClick={() => handleNavigation('/notifications')}
+                    className="w-full flex items-center space-x-3 px-3 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  >
                     <Bell className="h-5 w-5" />
                     <span className="font-medium">Notifications</span>
                   </button>

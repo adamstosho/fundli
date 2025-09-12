@@ -789,4 +789,83 @@ router.get('/search', protect, async (req, res) => {
   }
 });
 
+// @route   POST /api/users/create-test-user
+// @desc    Create a test user for development/testing
+// @access  Private (Admin only)
+router.post('/create-test-user', protect, async (req, res) => {
+  try {
+    // Only allow in development or for admins
+    if (process.env.NODE_ENV === 'production' && req.user.userType !== 'admin') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Not allowed in production'
+      });
+    }
+
+    const { email, firstName, lastName, userType = 'borrower' } = req.body;
+
+    if (!email || !firstName || !lastName) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Email, firstName, and lastName are required'
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'User with this email already exists',
+        data: {
+          user: {
+            _id: existingUser._id,
+            firstName: existingUser.firstName,
+            lastName: existingUser.lastName,
+            email: existingUser.email,
+            userType: existingUser.userType
+          }
+        }
+      });
+    }
+
+    // Create test user
+    const testUser = new User({
+      firstName,
+      lastName,
+      email: email.toLowerCase(),
+      password: 'TestPassword123!', // Default password for test users
+      userType,
+      kycStatus: 'approved', // Auto-approve test users
+      isEmailVerified: true,
+      creditScore: 750 // Good credit score for testing
+    });
+
+    await testUser.save();
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Test user created successfully',
+      data: {
+        user: {
+          _id: testUser._id,
+          firstName: testUser.firstName,
+          lastName: testUser.lastName,
+          email: testUser.email,
+          userType: testUser.userType,
+          kycStatus: testUser.kycStatus
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Create test user error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to create test user',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router; 

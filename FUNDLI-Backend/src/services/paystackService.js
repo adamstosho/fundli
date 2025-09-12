@@ -11,15 +11,20 @@ class PaystackService {
     this.baseURL = 'https://api.paystack.co';
     
     if (!this.secretKey) {
-      console.error('❌ PAYSTACK_SECRET_KEY environment variable is required');
-      throw new Error('PAYSTACK_SECRET_KEY environment variable is required');
+      console.warn('⚠️ PAYSTACK_SECRET_KEY environment variable is not set. Payment features will be disabled.');
+      this.secretKey = 'sk_test_development_mode_disabled';
+      this.disabled = true;
+    } else {
+      console.log('✅ PaystackService initialized with secret key:', this.secretKey.substring(0, 10) + '...');
+      this.disabled = false;
     }
-    
-    console.log('✅ PaystackService initialized with secret key:', this.secretKey.substring(0, 10) + '...');
   }
 
   // Get headers for API requests
   getHeaders() {
+    if (this.disabled) {
+      throw new Error('PaystackService is disabled. Please configure PAYSTACK_SECRET_KEY environment variable.');
+    }
     return {
       'Authorization': `Bearer ${this.secretKey}`,
       'Content-Type': 'application/json'

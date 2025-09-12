@@ -49,28 +49,101 @@ router.get('/borrower-stats', protect, async (req, res) => {
   try {
     const userId = req.user.id;
     console.log('🔍 Fetching borrower stats for user:', userId);
+    console.log('👤 User email:', req.user.email);
+    console.log('👤 User type:', req.user.userType);
     
-    // Simple test response
+    // Get user's loans
+    const loans = await Loan.find({ borrower: userId }).sort({ createdAt: -1 });
+    console.log('📊 Found loans for user:', loans.length);
+    loans.forEach((loan, index) => {
+      console.log(`  ${index + 1}. ${loan.purpose} - $${loan.loanAmount} - ${loan.status}`);
+    });
+    
+    // Calculate stats
+    const totalBorrowed = loans.reduce((sum, loan) => sum + (loan.loanAmount || 0), 0);
+    const totalRepaid = loans.reduce((sum, loan) => sum + (loan.amountPaid || 0), 0);
+    const activeLoans = loans.filter(loan => ['active', 'funded', 'disbursed'].includes(loan.status)).length;
+    
+    console.log('📈 Calculated stats:', {
+      totalBorrowed,
+      totalRepaid,
+      activeLoans,
+      totalLoans: loans.length
+    });
+    
+    // Get user's credit score
+    const user = await User.findById(userId);
+    const creditScore = user?.creditScore || 650;
+    
+    // Get wallet balance
+    const wallet = await Wallet.findOne({ user: userId });
+    const walletBalance = wallet?.balance || 0;
+    
+    // Get recent loans (last 5)
+    const recentLoans = loans.slice(0, 5).map(loan => ({
+      _id: loan._id,
+      loanAmount: loan.loanAmount,
+      purpose: loan.purpose,
+      status: loan.status,
+      amountPaid: loan.amountPaid || 0,
+      nextPaymentDate: loan.nextPaymentDate,
+      createdAt: loan.createdAt
+    }));
+    
+    // Get upcoming payments from active loans
+    const upcomingPayments = [];
+    const activeLoanList = loans.filter(loan => ['active', 'funded', 'disbursed'].includes(loan.status));
+    
+    activeLoanList.forEach(loan => {
+      if (loan.repayments && loan.repayments.length > 0) {
+        const nextPayment = loan.repayments.find(r => r.status === 'pending');
+        if (nextPayment) {
+          upcomingPayments.push({
+            id: nextPayment._id || nextPayment.installmentNumber,
+            amount: nextPayment.amount,
+            dueDate: nextPayment.dueDate,
+            loanPurpose: loan.purpose,
+            loanId: loan._id
+          });
+        }
+      }
+    });
+    
+    // Sort upcoming payments by due date
+    upcomingPayments.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+    
+    // Calculate summary metrics
+    const averageLoanAmount = loans.length > 0 ? totalBorrowed / loans.length : 0;
+    const repaymentRate = totalBorrowed > 0 ? (totalRepaid / totalBorrowed) * 100 : 0;
+    
+    // Determine credit score category
+    let creditScoreCategory = 'Fair';
+    if (creditScore >= 750) creditScoreCategory = 'Excellent';
+    else if (creditScore >= 700) creditScoreCategory = 'Good';
+    else if (creditScore >= 650) creditScoreCategory = 'Fair';
+    else if (creditScore >= 600) creditScoreCategory = 'Poor';
+    else creditScoreCategory = 'Very Poor';
+    
     res.status(200).json({
       status: 'success',
       data: {
         stats: {
-          totalBorrowed: 0,
-          activeLoans: 0,
-          totalRepaid: 0,
-          creditScore: 750,
-          walletBalance: 0
+          totalBorrowed: totalBorrowed,
+          activeLoans: activeLoans,
+          totalRepaid: totalRepaid,
+          creditScore: creditScore,
+          walletBalance: walletBalance
         },
         wallet: {
-          balance: 0,
-          currency: 'USD'
+          balance: walletBalance,
+          currency: wallet?.currency || 'USD'
         },
-        upcomingPayments: [],
-        recentLoans: [],
+        upcomingPayments: upcomingPayments.slice(0, 5), // Limit to 5 upcoming payments
+        recentLoans: recentLoans,
         summary: {
-          averageLoanAmount: 0,
-          repaymentRate: 0,
-          creditScoreCategory: 'Good'
+          averageLoanAmount: averageLoanAmount,
+          repaymentRate: repaymentRate,
+          creditScoreCategory: creditScoreCategory
         }
       }
     });
@@ -80,6 +153,134 @@ router.get('/borrower-stats', protect, async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to fetch borrower stats',
+      error: error.message
+    });
+  }
+});
+
+// @desc    Get borrower repayment schedule
+// @route   GET /api/loans/repayment-schedule
+// @access  Private
+router.get('/repayment-schedule', protect, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    console.log('🔍 Fetching repayment schedule for user:', userId);
+    
+    // Get user's active loans
+    const loans = await Loan.find({ 
+      borrower: userId,
+      status: { $in: ['active', 'funded', 'disbursed'] }
+    }).sort({ createdAt: -1 });
+    
+    if (loans.length === 0) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'No active loans found. Please apply for a loan first.'
+      });
+    }
+    
+    // Get the most recent active loan
+    const loan = loans[0];
+    
+    // Calculate repayment schedule if not already generated
+    if (!loan.repayments || loan.repayments.length === 0) {
+      const repayments = [];
+      const monthlyRate = loan.interestRate / 100 / 12;
+      let remainingBalance = loan.loanAmount;
+      
+      // Use loan start date or funded date, fallback to current date
+      const startDate = loan.startDate || loan.fundedAt || new Date();
+      
+      for (let i = 1; i <= loan.duration; i++) {
+        const interestPayment = remainingBalance * monthlyRate;
+        const principalPayment = loan.monthlyPayment - interestPayment;
+        const newBalance = remainingBalance - principalPayment;
+        
+        // Calculate proper monthly due date
+        const dueDate = new Date(startDate);
+        dueDate.setMonth(dueDate.getMonth() + i);
+        
+        repayments.push({
+          installmentNumber: i,
+          dueDate: dueDate,
+          amount: loan.monthlyPayment,
+          principal: principalPayment,
+          interest: interestPayment,
+          status: 'pending',
+          remainingBalance: Math.max(0, newBalance)
+        });
+        
+        remainingBalance = newBalance;
+      }
+      
+      loan.repayments = repayments;
+      await loan.save();
+    }
+    
+    // Calculate summary data
+    const totalAmount = loan.totalRepayment || (loan.monthlyPayment * loan.duration);
+    const paidAmount = loan.amountPaid || 0;
+    const remainingAmount = loan.amountRemaining || (totalAmount - paidAmount);
+    const completedPayments = loan.repayments.filter(r => r.status === 'paid').length;
+    const totalPayments = loan.repayments.length;
+    
+    // Find next payment
+    const nextPayment = loan.repayments.find(r => r.status === 'pending');
+    
+    // Update repayment statuses based on current date
+    const now = new Date();
+    loan.repayments.forEach(repayment => {
+      if (repayment.status === 'pending' && new Date(repayment.dueDate) < now) {
+        repayment.status = 'overdue';
+      }
+    });
+    
+    // Save updated statuses
+    await loan.save();
+    
+    // Format repayment schedule
+    const repaymentSchedule = loan.repayments.map(repayment => ({
+      id: repayment._id || repayment.installmentNumber,
+      installmentNumber: repayment.installmentNumber,
+      dueDate: repayment.dueDate,
+      amount: repayment.amount,
+      principal: repayment.principal,
+      interest: repayment.interest,
+      remainingBalance: repayment.remainingBalance,
+      status: repayment.status,
+      paidAt: repayment.paidAt,
+      lateFees: repayment.lateFees || 0
+    }));
+    
+    const scheduleData = {
+      loanId: loan._id,
+      loanAmount: loan.loanAmount,
+      totalAmount: totalAmount,
+      paidAmount: paidAmount,
+      remainingAmount: remainingAmount,
+      monthlyPayment: loan.monthlyPayment,
+      interestRate: loan.interestRate,
+      duration: loan.duration,
+      completedPayments: completedPayments,
+      totalPayments: totalPayments,
+      nextPayment: nextPayment ? {
+        installmentNumber: nextPayment.installmentNumber,
+        dueDate: nextPayment.dueDate,
+        amount: nextPayment.amount
+      } : null,
+      repaymentSchedule: repaymentSchedule
+    };
+    
+    res.status(200).json({
+      status: 'success',
+      data: scheduleData
+    });
+    
+  } catch (error) {
+    console.error('❌ Error fetching repayment schedule:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch repayment schedule',
       error: error.message
     });
   }
@@ -152,7 +353,9 @@ router.get('/trends', protect, async (req, res) => {
       }
     });
 
-    // Always provide sample data for demonstration
+    // If no real data, provide sample data for demonstration
+    const hasRealData = loans.length > 0;
+    if (!hasRealData) {
     const sampleData = {
       '2024-07': { applied: 2, approved: 1, funded: 1 },
       '2024-08': { applied: 3, approved: 2, funded: 1 },
@@ -162,12 +365,12 @@ router.get('/trends', protect, async (req, res) => {
       '2024-12': { applied: 0, approved: 0, funded: 0 }
     };
 
-    // Use sample data for demonstration
     Object.keys(sampleData).forEach(key => {
       if (monthlyData[key]) {
         monthlyData[key] = sampleData[key];
       }
     });
+    }
 
     const trendsData = {
       labels: Object.keys(monthlyData).map(key => {
@@ -217,7 +420,37 @@ router.get('/repayment-status', protect, async (req, res) => {
       if (loan.status === 'completed') {
         statusCounts.paid += 1;
       } else if (loan.status === 'active' || loan.status === 'funded') {
-        // Check if loan is overdue
+        // Check repayment status from repayments array
+        if (loan.repayments && loan.repayments.length > 0) {
+          const now = new Date();
+          const overduePayments = loan.repayments.filter(r => 
+            r.status === 'overdue' || (r.status === 'pending' && new Date(r.dueDate) < now)
+          );
+          const latePayments = loan.repayments.filter(r => r.status === 'late');
+          const onTimePayments = loan.repayments.filter(r => r.status === 'paid');
+          
+          if (overduePayments.length > 0) {
+            statusCounts.overdue += 1;
+          } else if (latePayments.length > 0) {
+            statusCounts.late += 1;
+          } else if (onTimePayments.length > 0) {
+            statusCounts.onTime += 1;
+          } else {
+            // Check if loan is overdue based on next payment date
+            const nextPaymentDate = loan.nextPaymentDate ? new Date(loan.nextPaymentDate) : null;
+            if (nextPaymentDate && now > nextPaymentDate) {
+              const daysOverdue = Math.floor((now - nextPaymentDate) / (1000 * 60 * 60 * 24));
+              if (daysOverdue > 30) {
+                statusCounts.overdue += 1;
+              } else {
+                statusCounts.late += 1;
+              }
+            } else {
+              statusCounts.onTime += 1;
+            }
+          }
+        } else {
+          // Fallback to next payment date check
         const now = new Date();
         const nextPaymentDate = loan.nextPaymentDate ? new Date(loan.nextPaymentDate) : null;
         
@@ -230,19 +463,30 @@ router.get('/repayment-status', protect, async (req, res) => {
           }
         } else {
           statusCounts.onTime += 1;
+          }
         }
       }
     });
 
-    // Always provide sample data for demonstration
-    const sampleData = {
+    // If no real data, provide sample data for demonstration
+    const hasRealData = loans.length > 0;
+    let responseData;
+    
+    if (hasRealData) {
+      responseData = {
+        labels: ['On Time', 'Late', 'Overdue', 'Paid'],
+        values: [statusCounts.onTime, statusCounts.late, statusCounts.overdue, statusCounts.paid]
+      };
+    } else {
+      responseData = {
       labels: ['On Time', 'Late', 'Overdue', 'Paid'],
       values: [3, 1, 0, 2]
     };
+    }
 
     res.status(200).json({
       status: 'success',
-      data: sampleData
+      data: responseData
     });
 
   } catch (error) {
@@ -269,29 +513,31 @@ router.get('/credit-score-distribution', protect, async (req, res) => {
       });
     }
 
-    // Always provide sample data for demonstration
-    const sampleData = {
+    // Get user's actual credit score
+    const creditScore = user.creditScore || 650;
+    
+    // Create distribution based on user's actual credit score
+    const distributionData = {
       labels: ['Excellent (750+)', 'Good (700-749)', 'Fair (650-699)', 'Poor (600-649)', 'Very Poor (<600)'],
-      values: [1, 2, 1, 1, 0] // Based on user's current credit score
+      values: [0, 0, 0, 0, 0] // Initialize all to 0
     };
 
-    // Adjust sample data based on user's actual credit score
-    const creditScore = user.creditScore || 650;
+    // Set the user's category to 1 based on their actual credit score
     if (creditScore >= 750) {
-      sampleData.values = [1, 0, 0, 0, 0];
+      distributionData.values[0] = 1; // Excellent
     } else if (creditScore >= 700) {
-      sampleData.values = [0, 1, 0, 0, 0];
+      distributionData.values[1] = 1; // Good
     } else if (creditScore >= 650) {
-      sampleData.values = [0, 0, 1, 0, 0];
+      distributionData.values[2] = 1; // Fair
     } else if (creditScore >= 600) {
-      sampleData.values = [0, 0, 0, 1, 0];
+      distributionData.values[3] = 1; // Poor
     } else {
-      sampleData.values = [0, 0, 0, 0, 1];
+      distributionData.values[4] = 1; // Very Poor
     }
 
     res.status(200).json({
       status: 'success',
-      data: sampleData
+      data: distributionData
     });
 
   } catch (error) {

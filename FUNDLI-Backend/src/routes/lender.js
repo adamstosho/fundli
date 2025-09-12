@@ -180,15 +180,9 @@ router.get('/loan-applications', protect, async (req, res) => {
     console.log('🔍 User viewing loan applications:', req.user.email, 'UserType:', req.user.userType);
     console.log('✅ Proceeding to fetch loan applications for user:', req.user.id);
 
-    // Only get loans that are truly pending (not accepted, rejected, or funded)
+    // Only get loans that are approved and ready for funding
     const loans = await Loan.find({
-      status: { $in: ['pending', 'kyc_pending'] },
-      $or: [
-        { approvedBy: { $exists: false } },
-        { approvedBy: null },
-        { rejectedBy: { $exists: false } },
-        { rejectedBy: null }
-      ]
+      status: 'approved'
     })
       .populate('borrower', 'firstName lastName email kycStatus kycVerified kycData')
       .sort({ createdAt: -1 });
@@ -756,11 +750,11 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
       });
     }
 
-    // Check if loan is still available
-    if (loan.status !== 'pending' && loan.status !== 'kyc_pending') {
+    // Check if loan is approved and ready for funding
+    if (loan.status !== 'approved') {
       return res.status(400).json({
         status: 'error',
-        message: 'This loan is no longer available for funding'
+        message: 'This loan must be approved by admin before it can be funded'
       });
     }
 
@@ -885,13 +879,11 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
       // Don't fail the entire transaction if notifications fail
     }
 
-    // Update loan status
+    // Update loan status (from approved to funded)
     const updatedLoan = await Loan.findByIdAndUpdate(
       req.params.id,
       {
         status: 'funded',
-        approvedBy: req.user.id,
-        approvedAt: new Date(),
         fundedBy: req.user.id,
         fundedAmount: parseFloat(investmentAmount),
         fundedAt: new Date()

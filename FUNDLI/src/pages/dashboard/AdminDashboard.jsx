@@ -70,6 +70,7 @@ const AdminDashboard = () => {
           // Add recent users
           data.recentActivities.users.forEach(user => {
             activities.push({
+              id: user._id,
               type: 'user_registered',
               message: `${user.firstName} ${user.lastName} registered as ${user.userType}`,
               timestamp: user.createdAt,
@@ -80,6 +81,7 @@ const AdminDashboard = () => {
           // Add recent KYC submissions
           data.recentActivities.kyc.forEach(kyc => {
             activities.push({
+              id: kyc._id,
               type: `kyc_${kyc.kycStatus}`,
               message: `${kyc.firstName} ${kyc.lastName} KYC status: ${kyc.kycStatus}`,
               timestamp: kyc.createdAt,
@@ -90,6 +92,7 @@ const AdminDashboard = () => {
           // Add recent loans
           data.recentActivities.loans.forEach(loan => {
             activities.push({
+              id: loan._id,
               type: `loan_${loan.status}`,
               message: `Loan application for $${loan.loanAmount} - ${loan.purpose} (${loan.status})`,
               timestamp: loan.createdAt,
@@ -171,25 +174,27 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Admin Dashboard
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Welcome back, {user?.name}. Here's your platform overview.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+            Admin Dashboard
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Welcome back, {user?.name}. Here's your platform overview.
+          </p>
+        </div>
       </div>
 
       {/* Tab Navigation */}
       <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="-mb-px flex space-x-8">
+        <nav className="-mb-px flex space-x-8 overflow-x-auto">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
               activeTab === 'overview'
-                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
             }`}
           >
@@ -197,9 +202,9 @@ const AdminDashboard = () => {
           </button>
           <button
             onClick={() => setActiveTab('loans')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
               activeTab === 'loans'
-                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
             }`}
           >
@@ -207,9 +212,9 @@ const AdminDashboard = () => {
           </button>
           <button
             onClick={() => setActiveTab('collateral')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
               activeTab === 'collateral'
-                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
             }`}
           >
@@ -222,146 +227,146 @@ const AdminDashboard = () => {
       {activeTab === 'overview' && (
         <>
           {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="card p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Total Users
-              </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {stats.totalUsers.toLocaleString()}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center">
-              <Users className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-            </div>
-          </div>
-        </motion.div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Total Users
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {stats.totalUsers.toLocaleString()}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                  <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+              </div>
+            </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="card p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Pending KYC
-              </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {stats.pendingKYC}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-warning/10 rounded-lg flex items-center justify-center">
-              <Shield className="h-6 w-6 text-warning" />
-            </div>
-          </div>
-        </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Pending KYC
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {stats.pendingKYC}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center">
+                  <Shield className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                </div>
+              </div>
+            </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="card p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Pending Loans
-              </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {stats.pendingLoans}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-secondary-100 dark:bg-secondary-900/20 rounded-lg flex items-center justify-center">
-              <FileText className="h-6 w-6 text-secondary-600 dark:text-secondary-400" />
-            </div>
-          </div>
-        </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Pending Loans
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {stats.pendingLoans}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                  <FileText className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+              </div>
+            </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="card p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Total Transactions
-              </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {stats.totalTransactions.toLocaleString()}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-success/10 rounded-lg flex items-center justify-center">
-              <DollarSign className="h-6 w-6 text-success" />
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Total Transactions
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {stats.totalTransactions.toLocaleString()}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
-      </div>
 
       {/* Wallet Balance */}
       <div className="mb-8">
         <WalletBalanceCard userType="admin" />
       </div>
 
-      {/* Quick Actions */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          Quick Actions
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {quickActions.map((action, index) => (
-            <motion.div
-              key={action.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
-            >
-              <Link
-                to={action.href}
-                className="block card p-6 hover:shadow-medium transition-all duration-200 group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
-              >
-                <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
-                  <action.icon className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {action.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                  {action.description}
-                </p>
-                <div className="flex items-center text-primary-600 dark:text-primary-400 font-medium text-sm group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
-                  Access
-                  <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+          {/* Quick Actions */}
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              Quick Actions
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {quickActions.map((action, index) => (
+                <motion.div
+                  key={action.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
+                >
+                  <Link
+                    to={action.href}
+                    className="block bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200 group"
+                  >
+                    <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
+                      <action.icon className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      {action.title}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                      {action.description}
+                    </p>
+                    <div className="flex items-center text-blue-600 dark:text-blue-400 font-medium text-sm group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                      Access
+                      <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </div>
 
-      {/* Recent Activities */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.8 }}
-        className="card p-6"
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Recent Activities
-          </h3>
-          <BarChart3 className="h-5 w-5 text-gray-400" />
-        </div>
+          {/* Recent Activities */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Recent Activities
+              </h3>
+              <BarChart3 className="h-5 w-5 text-gray-400" />
+            </div>
         
         <div className="space-y-4">
           {recentActivities.map((activity) => (
@@ -393,33 +398,33 @@ const AdminDashboard = () => {
       {/* Pending Loans Section */}
       <PendingLoansSection userType="admin" title="All Pending Loans" />
 
-      {/* Platform Health */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.9 }}
-        className="card p-6 bg-gradient-to-r from-success/10 to-primary/10 dark:from-success/20 dark:to-primary/20"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-success/20 rounded-lg flex items-center justify-center">
-              <CheckCircle className="h-6 w-6 text-success" />
+          {/* Platform Health */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.9 }}
+            className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                  <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Platform Status: Healthy
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    All systems are running smoothly
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">99.9%</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Uptime</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Platform Status: Healthy
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                All systems are running smoothly
-              </p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold text-success">99.9%</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Uptime</p>
-          </div>
-        </div>
-      </motion.div>
+          </motion.div>
         </>
       )}
 

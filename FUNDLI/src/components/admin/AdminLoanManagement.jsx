@@ -46,7 +46,7 @@ const AdminLoanManagement = () => {
       setIsLoading(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`http://localhost:5000/api/admin/loan-applications?status=${statusFilter}`, {
+      const response = await fetch(`http://localhost:5000/api/loans/pending/all`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -54,8 +54,17 @@ const AdminLoanManagement = () => {
 
       if (response.ok) {
         const result = await response.json();
-        setLoanApplications(result.data.loanApplications || []);
-        setSummary(result.data.summary || {});
+        setLoanApplications(result.data.loans || []);
+        // Calculate summary from the loans
+        const loans = result.data.loans || [];
+        const summaryData = {
+          total: loans.length,
+          pending: loans.filter(loan => loan.status === 'pending').length,
+          approved: loans.filter(loan => loan.status === 'approved').length,
+          funded: loans.filter(loan => loan.status === 'funded').length,
+          rejected: loans.filter(loan => loan.status === 'rejected').length
+        };
+        setSummary(summaryData);
       } else {
         setError('Failed to load loan applications');
       }
@@ -70,7 +79,7 @@ const AdminLoanManagement = () => {
   const handleViewDetails = async (application) => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:5000/api/admin/loan/${application.id}`, {
+      const response = await fetch(`http://localhost:5000/api/loans/${application.id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -78,7 +87,7 @@ const AdminLoanManagement = () => {
 
       if (response.ok) {
         const result = await response.json();
-        setSelectedApplication(result.data.loan);
+        setSelectedApplication(result.data);
         setShowModal(true);
       } else {
         alert('Failed to load loan details');
@@ -101,16 +110,20 @@ const AdminLoanManagement = () => {
       setIsProcessing(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`http://localhost:5000/api/admin/loan/${selectedApplication.id}/approve`, {
+      const endpoint = action === 'approve' 
+        ? `http://localhost:5000/api/admin/loan/${selectedApplication.id}/approve`
+        : `http://localhost:5000/api/admin/loan/${selectedApplication.id}/reject`;
+      
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          action,
+          action: action,
           rejectionReason: action === 'reject' ? rejectionReason : undefined,
-          adminNotes: adminNotes
+          adminNotes: adminNotes || undefined
         })
       });
 
@@ -592,10 +605,55 @@ const AdminLoanManagement = () => {
               {selectedApplication.collateral && (
                 <div>
                   <h4 className="font-medium text-gray-900 dark:text-white mb-3">Collateral Information</h4>
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                    <p className="text-gray-600 dark:text-gray-400">
-                      {selectedApplication.collateral.description || 'No description provided'}
-                    </p>
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-3">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Type:</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                        {selectedApplication.collateral.type || 'Not specified'}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Description:</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {selectedApplication.collateral.description || 'No description provided'}
+                      </p>
+                    </div>
+                    
+                    {selectedApplication.collateral.estimatedValue && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Estimated Value:</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          ${selectedApplication.collateral.estimatedValue.toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+                    
+                    {selectedApplication.collateral.documents && selectedApplication.collateral.documents.length > 0 && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Documents:</p>
+                        <div className="space-y-2">
+                          {selectedApplication.collateral.documents.map((doc, index) => (
+                            <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-600 rounded p-2">
+                              <div className="flex items-center space-x-2">
+                                <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                <span className="text-sm text-gray-900 dark:text-white">{doc.name}</span>
+                              </div>
+                              {doc.url && (
+                                <a 
+                                  href={doc.url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                                >
+                                  View
+                                </a>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

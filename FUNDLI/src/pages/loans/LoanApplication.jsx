@@ -88,7 +88,7 @@ const LoanApplication = () => {
         description: formData.description
       };
 
-      const response = await fetch('http://localhost:5000/api/loans/apply', {
+      const response = await fetch('http://localhost:5000/api/borrower/loan/apply', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -168,10 +168,12 @@ const LoanApplication = () => {
         throw new Error(result.message || 'Failed to submit collateral verification');
       }
 
-      // Go back to loan form
-      setCurrentStep('loan-form');
+      // Check collateral status and proceed with loan application
       await checkCollateralStatus();
       alert('Collateral verification submitted successfully! You can now proceed with your loan application.');
+      
+      // Go back to loan form to show updated status
+      setCurrentStep('loan-form');
     } catch (err) {
       setError(err.message || 'Failed to submit collateral verification. Please try again.');
     } finally {

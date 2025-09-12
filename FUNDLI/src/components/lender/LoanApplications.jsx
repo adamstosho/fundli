@@ -147,10 +147,18 @@ const LoanApplications = () => {
         // Refresh loan applications
         await loadLoanApplications();
         
-        // Refresh lender dashboard to update Total Invested card
+        // Refresh lender dashboard to update Total Invested card and wallet balance
         if (window.refreshLenderDashboard) {
           window.refreshLenderDashboard();
         }
+        
+        // Also refresh wallet balance specifically
+        if (window.refreshWalletBalance) {
+          window.refreshWalletBalance();
+        }
+        
+        // Trigger wallet balance update event
+        window.dispatchEvent(new CustomEvent('walletBalanceUpdated'));
       } else {
         const errorData = await response.json();
         alert(`Failed to fund loan: ${errorData.message}`);
@@ -378,14 +386,14 @@ const LoanApplications = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Pending Loan Applications
+            Approved Loan Applications
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            Review loan applications that haven't been attended to by any lender
+            Fund approved loan applications that are ready for investment
           </p>
         </div>
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          {loanApplications.length} total applications
+          {loanApplications.length} approved applications
         </div>
       </div>
 
@@ -394,10 +402,10 @@ const LoanApplications = () => {
         <div className="text-center py-12">
           <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            No Pending Loan Applications
+            No Approved Loan Applications
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-4">
-            All loan applications have been reviewed by lenders. New applications will appear here when borrowers submit them.
+            No loan applications are currently approved and ready for funding. Check back later for new opportunities.
           </p>
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 max-w-md mx-auto">
             <div className="flex items-center space-x-2 mb-2">
@@ -405,7 +413,7 @@ const LoanApplications = () => {
               <span className="font-medium text-blue-800 dark:text-blue-200">Stay Updated</span>
             </div>
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              You'll be notified when new loan applications are submitted by borrowers.
+              You'll be notified when new loan applications are approved and ready for funding.
             </p>
           </div>
         </div>
@@ -516,7 +524,7 @@ const LoanApplications = () => {
                   <span>View Details</span>
                 </button>
                 
-                {application.status === 'pending' && (
+                {application.status === 'approved' && (
                   <div className="grid grid-cols-2 gap-3">
                     <motion.button
                       whileHover={{ scale: 1.02 }}
@@ -525,7 +533,7 @@ const LoanApplications = () => {
                       className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
                     >
                       <CheckCircle className="h-4 w-4" />
-                      <span>Accept</span>
+                      <span>Fund Loan</span>
                     </motion.button>
                     
                     <motion.button
@@ -738,7 +746,7 @@ const LoanApplications = () => {
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
                 <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
-                Accept Loan Application
+                Fund Loan Application
               </h3>
               <button
                 onClick={() => setShowAcceptModal(false)}
@@ -760,10 +768,10 @@ const LoanApplications = () => {
               <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                 <div className="flex items-center space-x-2 mb-2">
                   <CreditCard className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  <span className="font-medium text-blue-800 dark:text-blue-200">Next Step</span>
+                  <span className="font-medium text-blue-800 dark:text-blue-200">Funding Process</span>
                 </div>
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  After accepting, you'll be redirected to the payment modal to fund this loan. The borrower will receive the funds in their account balance.
+                  After funding, the borrower will receive the funds in their account balance and you'll be notified of the successful transaction.
                 </p>
               </div>
               
@@ -810,7 +818,7 @@ const LoanApplications = () => {
                   className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   <CheckCircle className="h-4 w-4" />
-                  <span>{isProcessing ? 'Accepting...' : 'Accept & Fund Loan'}</span>
+                  <span>{isProcessing ? 'Funding...' : 'Fund Loan'}</span>
                 </button>
               </div>
             </div>

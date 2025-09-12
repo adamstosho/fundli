@@ -5,6 +5,7 @@ const User = require('../models/User');
 const Loan = require('../models/Loan');
 const Wallet = require('../models/Wallet');
 const ReferralService = require('../services/referralService');
+const NotificationService = require('../services/notificationService');
 
 // Middleware to check if user is admin
 const requireAdmin = async (req, res, next) => {
@@ -175,6 +176,20 @@ router.put('/kyc/:userId/approve', protect, requireAdmin, async (req, res) => {
     }
     await user.save();
 
+    // Create notification for KYC approval
+    try {
+      await NotificationService.notifyKYCDecision({
+        userId: userId,
+        status: 'approved',
+        approvedAt: new Date(),
+        rejectionReason: null
+      });
+      console.log(`📧 KYC approval notification sent for user ${userId}`);
+    } catch (notificationError) {
+      console.error('Failed to create KYC approval notification:', notificationError);
+      // Don't fail the entire transaction if notifications fail
+    }
+
     // Track referral action for KYC completion
     try {
       await ReferralService.handlePlatformAction(userId, 'kyc_verification');
@@ -235,6 +250,20 @@ router.put('/kyc/:userId/reject', protect, requireAdmin, async (req, res) => {
     user.kycDocuments.rejectionReason = reason;
     user.kycDocuments.rejectedAt = new Date();
     await user.save();
+
+    // Create notification for KYC rejection
+    try {
+      await NotificationService.notifyKYCDecision({
+        userId: userId,
+        status: 'rejected',
+        approvedAt: null,
+        rejectionReason: reason
+      });
+      console.log(`📧 KYC rejection notification sent for user ${userId}`);
+    } catch (notificationError) {
+      console.error('Failed to create KYC rejection notification:', notificationError);
+      // Don't fail the entire transaction if notifications fail
+    }
 
     res.status(200).json({
       status: 'success',
@@ -730,7 +759,7 @@ router.get('/loan-applications', protect, requireAdmin, async (req, res) => {
 
     const loans = await Loan.find(filter)
       .populate('borrower', 'firstName lastName email kycStatus kycVerified')
-      .populate('fundingProgress.investors.lender', 'firstName lastName email')
+      .populate('fundingProgress.investors.user', 'firstName lastName email')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -801,6 +830,9 @@ router.get('/loan-applications', protect, requireAdmin, async (req, res) => {
 // @access  Private (Admin only)
 router.post('/loan/:id/approve', protect, requireAdmin, async (req, res) => {
   try {
+    console.log('Processing loan approval/rejection for ID:', req.params.id);
+    console.log('Request body:', req.body);
+    
     const { action, rejectionReason, adminNotes } = req.body; // action: 'approve' or 'reject'
 
     // Validate action
@@ -819,13 +851,18 @@ router.post('/loan/:id/approve', protect, requireAdmin, async (req, res) => {
       });
     }
 
+    console.log('Looking for loan with ID:', req.params.id);
     const loan = await Loan.findById(req.params.id).populate('borrower', 'firstName lastName email');
     if (!loan) {
+      console.log('Loan not found for ID:', req.params.id);
       return res.status(404).json({
         status: 'error',
         message: 'Loan application not found'
       });
     }
+
+    console.log('Loan found. Current status:', loan.status);
+    console.log('Borrower:', loan.borrower ? loan.borrower.firstName : 'Not populated');
 
     // Update loan status
     const updateData = {
@@ -860,10 +897,12 @@ router.post('/loan/:id/approve', protect, requireAdmin, async (req, res) => {
 
   } catch (error) {
     console.error('Admin loan approval error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       status: 'error',
       message: 'Failed to process loan approval',
-      error: error.message
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
@@ -873,16 +912,111 @@ router.post('/loan/:id/approve', protect, requireAdmin, async (req, res) => {
 // @access  Private (Admin only)
 router.get('/loan/:id', protect, requireAdmin, async (req, res) => {
   try {
-    const loan = await Loan.findById(req.params.id)
-      .populate('borrower', 'firstName lastName email phone kycStatus kycVerified kycData')
-      .populate('fundingProgress.investors.lender', 'firstName lastName email')
-      .populate('reviewedBy', 'firstName lastName email');
+    console.log('Getting loan details for ID:', req.params.id);
+    
+    // Validate the loan ID format
+    if (!req.params.id || req.params.id.length !== 24) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid loan ID format'
+      });
+    }
+
+    let loan;
+    try {
+      console.log('Attempting to find loan with population...');
+      loan = await Loan.findById(req.params.id)
+        .populate('borrower', 'firstName lastName email phone kycStatus kycVerified kycData')
+        .populate('fundingProgress.investors.user', 'firstName lastName email')
+        .populate('reviewedBy', 'firstName lastName email');
+      
+      console.log('Loan found with population. Borrower:', loan.borrower ? 'Found' : 'Not found');
+      if (loan.borrower) {
+        console.log('Borrower details:', {
+          id: loan.borrower._id,
+          firstName: loan.borrower.firstName,
+          lastName: loan.borrower.lastName,
+          email: loan.borrower.email
+        });
+      }
+    } catch (populateError) {
+      console.error('Population error:', populateError);
+      console.log('Trying without population...');
+      // Try without population if population fails
+      loan = await Loan.findById(req.params.id);
+      
+      if (loan && loan.borrower) {
+        console.log('Loan found without population. Borrower ID:', loan.borrower);
+        // Manually populate borrower if needed
+        try {
+          const User = require('../models/User');
+          const borrower = await User.findById(loan.borrower);
+          if (borrower) {
+            loan.borrower = borrower;
+            console.log('Manually populated borrower:', borrower.firstName, borrower.lastName);
+          }
+        } catch (userError) {
+          console.error('Error manually populating borrower:', userError);
+        }
+      }
+    }
 
     if (!loan) {
+      console.log('Loan not found for ID:', req.params.id);
       return res.status(404).json({
         status: 'error',
         message: 'Loan application not found'
       });
+    }
+
+    console.log('Loan found:', loan._id, 'Status:', loan.status);
+
+    // Ensure borrower data is properly populated
+    let borrowerData = {
+      id: 'unknown',
+      name: 'Unknown User',
+      email: 'N/A',
+      phone: 'N/A',
+      kycStatus: 'pending',
+      kycVerified: false,
+      kycData: null
+    };
+
+    if (loan.borrower) {
+      if (typeof loan.borrower === 'object' && loan.borrower._id) {
+        // Borrower is populated
+        borrowerData = {
+          id: loan.borrower._id,
+          name: loan.borrower.firstName ? `${loan.borrower.firstName} ${loan.borrower.lastName}` : 'Unknown User',
+          email: loan.borrower.email || 'N/A',
+          phone: loan.borrower.phone || 'N/A',
+          kycStatus: loan.borrower.kycStatus || 'pending',
+          kycVerified: loan.borrower.kycVerified || false,
+          kycData: loan.borrower.kycData || null
+        };
+        console.log('Using populated borrower data:', borrowerData.name);
+      } else if (typeof loan.borrower === 'string') {
+        // Borrower is just an ID, try to fetch manually
+        console.log('Borrower is ID, fetching manually:', loan.borrower);
+        try {
+          const User = require('../models/User');
+          const borrower = await User.findById(loan.borrower);
+          if (borrower) {
+            borrowerData = {
+              id: borrower._id,
+              name: borrower.firstName ? `${borrower.firstName} ${borrower.lastName}` : 'Unknown User',
+              email: borrower.email || 'N/A',
+              phone: borrower.phone || 'N/A',
+              kycStatus: borrower.kycStatus || 'pending',
+              kycVerified: borrower.kycVerified || false,
+              kycData: borrower.kycData || null
+            };
+            console.log('Manually fetched borrower data:', borrowerData.name);
+          }
+        } catch (userError) {
+          console.error('Error fetching borrower manually:', userError);
+        }
+      }
     }
 
     res.status(200).json({
@@ -906,15 +1040,7 @@ router.get('/loan/:id', protect, requireAdmin, async (req, res) => {
           reviewedAt: loan.reviewedAt,
           rejectionReason: loan.rejectionReason,
           adminNotes: loan.adminNotes,
-          borrower: {
-            id: loan.borrower._id,
-            name: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
-            email: loan.borrower.email,
-            phone: loan.borrower.phone,
-            kycStatus: loan.borrower.kycStatus,
-            kycVerified: loan.borrower.kycVerified,
-            kycData: loan.borrower.kycData
-          },
+          borrower: borrowerData,
           fundingProgress: {
             fundedAmount: loan.fundingProgress?.fundedAmount || 0,
             targetAmount: loan.fundingProgress?.targetAmount || loan.loanAmount,
@@ -923,8 +1049,8 @@ router.get('/loan/:id', protect, requireAdmin, async (req, res) => {
               Math.round((loan.fundingProgress.fundedAmount / loan.fundingProgress.targetAmount) * 100) : 0
           },
           reviewedBy: loan.reviewedBy ? {
-            name: `${loan.reviewedBy.firstName} ${loan.reviewedBy.lastName}`,
-            email: loan.reviewedBy.email
+            name: loan.reviewedBy.firstName ? `${loan.reviewedBy.firstName} ${loan.reviewedBy.lastName}` : 'Unknown Reviewer',
+            email: loan.reviewedBy.email || 'N/A'
           } : null
         }
       }
@@ -932,10 +1058,12 @@ router.get('/loan/:id', protect, requireAdmin, async (req, res) => {
 
   } catch (error) {
     console.error('Get admin loan details error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       status: 'error',
       message: 'Failed to get loan details',
-      error: error.message
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });

@@ -40,23 +40,36 @@ const PORT = process.env.PORT || 5000;
 // Security middleware
 app.use(helmet());
 
-// Rate limiting
+// CORS configuration - MUST be before rate limiting
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_URL 
+    : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200 // For legacy browser support
+}));
+
+// Rate limiting - more permissive for development
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
+  max: process.env.NODE_ENV === 'development' 
+    ? parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 10000 // Very permissive in dev
+    : parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000, // More reasonable in production
   message: {
     error: 'Too many requests from this IP, please try again later.'
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  skip: (req) => {
+    // Skip rate limiting for health checks, OPTIONS requests, and user search in development
+    return req.path === '/api/health' || 
+           req.method === 'OPTIONS' ||
+           (process.env.NODE_ENV === 'development' && req.path === '/api/users/search');
   }
 });
 app.use('/api', limiter);
-
-// CORS configuration
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -105,7 +118,7 @@ app.use('/api/credit-score', creditScoreRoutes);
 app.use('/api/repayments', repaymentRoutes);
 app.use('/api/2fa', twoFactorRoutes);
 app.use('/api/matching', matchingRoutes);
-app.use('/api/notifications', pushNotificationRoutes);
+app.use('/api/push-notifications', pushNotificationRoutes);
 
 // 404 handler for undefined routes
 app.use('*', (req, res) => {
@@ -129,10 +142,11 @@ const startServer = async () => {
       console.log('⚠️  Server starting without database connection');
     }
     
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Fundli Backend Server running on port ${PORT}`);
       console.log(`📱 Environment: ${process.env.NODE_ENV}`);
       console.log(`🔗 Health Check: http://localhost:${PORT}/health`);
+      console.log(`🌐 Server accessible on: http://0.0.0.0:${PORT}`);
       
       // Start cron jobs only if database is connected
       if (dbConnected) {

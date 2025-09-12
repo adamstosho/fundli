@@ -14,7 +14,8 @@ import {
   CreditCard,
   ArrowRight,
   BarChart3,
-  Search
+  Search,
+  RefreshCw
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import PendingLoansSection from '../../components/common/PendingLoansSection';
@@ -39,6 +40,7 @@ const BorrowerDashboard = () => {
   const [upcomingPayments, setUpcomingPayments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [chartData, setChartData] = useState({
     loanTrends: null,
     repaymentStatus: null,
@@ -78,29 +80,47 @@ const BorrowerDashboard = () => {
         if (statsResponse.ok) {
           const statsData = await statsResponse.json();
           console.log('✅ Fetched borrower stats:', statsData);
+          console.log('📊 Raw stats data:', statsData.data?.stats);
           
-          // Set stats from API response
-          setStats({
-            totalBorrowed: statsData.data.stats.totalBorrowed,
-            activeLoans: statsData.data.stats.activeLoans,
-            totalRepaid: statsData.data.stats.totalRepaid,
-            creditScore: statsData.data.stats.creditScore
-          });
+          // Set stats from API response with proper fallbacks
+          const newStats = {
+            totalBorrowed: statsData.data?.stats?.totalBorrowed || 0,
+            activeLoans: statsData.data?.stats?.activeLoans || 0,
+            totalRepaid: statsData.data?.stats?.totalRepaid || 0,
+            creditScore: statsData.data?.stats?.creditScore || user?.creditScore || 650
+          };
           
-          // Set recent loans and upcoming payments
-          setRecentLoans(statsData.data.recentLoans || []);
-          setUpcomingPayments(statsData.data.upcomingPayments || []);
+          console.log('📊 Setting stats to:', newStats);
+          setStats(newStats);
+          
+          // Set recent loans and upcoming payments with proper fallbacks
+          setRecentLoans(statsData.data?.recentLoans || []);
+          setUpcomingPayments(statsData.data?.upcomingPayments || []);
+          
+          // Show success message
+          setSuccessMessage('Dashboard data loaded successfully!');
+          setTimeout(() => setSuccessMessage(''), 3000);
           
           console.log('📊 Stats updated:', {
-            totalBorrowed: statsData.data.stats.totalBorrowed,
-            activeLoans: statsData.data.stats.activeLoans,
-            totalRepaid: statsData.data.stats.totalRepaid,
-            creditScore: statsData.data.stats.creditScore
+            totalBorrowed: statsData.data?.stats?.totalBorrowed || 0,
+            activeLoans: statsData.data?.stats?.activeLoans || 0,
+            totalRepaid: statsData.data?.stats?.totalRepaid || 0,
+            creditScore: statsData.data?.stats?.creditScore || user?.creditScore || 650
           });
         } else {
           const errorData = await statsResponse.json().catch(() => ({ message: 'Unknown error' }));
           console.error('❌ Stats API error:', errorData);
-          throw new Error(`Failed to fetch borrower stats: ${errorData.message || 'Unknown error'}`);
+          
+          // Set default values instead of throwing error
+          console.log('⚠️ Using default values due to API error');
+          setStats({
+            totalBorrowed: 0,
+            activeLoans: 0,
+            totalRepaid: 0,
+            creditScore: user?.creditScore || 650
+          });
+          setRecentLoans([]);
+          setUpcomingPayments([]);
         }
 
         // Fetch chart data
@@ -115,10 +135,28 @@ const BorrowerDashboard = () => {
           totalBorrowed: 0,
           activeLoans: 0,
           totalRepaid: 0,
-          creditScore: user?.creditScore || 0
+          creditScore: user?.creditScore || 650
         });
         setRecentLoans([]);
         setUpcomingPayments([]);
+        
+        // Set fallback chart data
+        setChartData({
+          loanTrends: {
+            labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            applied: [0, 0, 0, 0, 0, 0],
+            approved: [0, 0, 0, 0, 0, 0],
+            funded: [0, 0, 0, 0, 0, 0]
+          },
+          repaymentStatus: {
+            labels: ['On Time', 'Late', 'Overdue', 'Paid'],
+            values: [0, 0, 0, 0]
+          },
+          creditScoreDistribution: {
+            labels: ['Excellent (750+)', 'Good (700-749)', 'Fair (650-699)', 'Poor (600-649)', 'Very Poor (<600)'],
+            values: [0, 0, 1, 0, 0] // Default to Fair
+          }
+        });
       } finally {
         setIsLoading(false);
       }
@@ -135,6 +173,8 @@ const BorrowerDashboard = () => {
   // Fetch chart data
   const fetchChartData = async (token) => {
     try {
+      console.log('📊 Fetching chart data...');
+      
       // Fetch loan trends data
       const trendsResponse = await fetch('http://localhost:5000/api/loans/trends', {
         headers: {
@@ -145,9 +185,22 @@ const BorrowerDashboard = () => {
       
       if (trendsResponse.ok) {
         const trendsData = await trendsResponse.json();
+        console.log('✅ Loan trends data:', trendsData.data);
         setChartData(prev => ({
           ...prev,
           loanTrends: trendsData.data
+        }));
+      } else {
+        console.warn('❌ Failed to fetch loan trends:', trendsResponse.status);
+        // Set fallback data for trends
+        setChartData(prev => ({
+          ...prev,
+          loanTrends: {
+            labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            applied: [0, 0, 0, 0, 0, 0],
+            approved: [0, 0, 0, 0, 0, 0],
+            funded: [0, 0, 0, 0, 0, 0]
+          }
         }));
       }
 
@@ -168,6 +221,14 @@ const BorrowerDashboard = () => {
         }));
       } else {
         console.warn('❌ Failed to fetch repayment status:', repaymentResponse.status);
+        // Set fallback data for repayment status
+        setChartData(prev => ({
+          ...prev,
+          repaymentStatus: {
+            labels: ['On Time', 'Late', 'Overdue', 'Paid'],
+            values: [0, 0, 0, 0]
+          }
+        }));
       }
 
       // Fetch credit score distribution data
@@ -180,24 +241,50 @@ const BorrowerDashboard = () => {
       
       if (creditResponse.ok) {
         const creditData = await creditResponse.json();
+        console.log('✅ Credit score distribution data:', creditData.data);
         setChartData(prev => ({
           ...prev,
           creditScoreDistribution: creditData.data
         }));
       } else {
         console.warn('❌ Failed to fetch credit score distribution:', creditResponse.status);
-        // Fallback to mock data
+        // Set fallback data based on user's credit score
+        const userCreditScore = user?.creditScore || 650;
+        let fallbackValues = [0, 0, 0, 0, 0];
+        if (userCreditScore >= 750) fallbackValues[0] = 1;
+        else if (userCreditScore >= 700) fallbackValues[1] = 1;
+        else if (userCreditScore >= 650) fallbackValues[2] = 1;
+        else if (userCreditScore >= 600) fallbackValues[3] = 1;
+        else fallbackValues[4] = 1;
+        
         setChartData(prev => ({
           ...prev,
           creditScoreDistribution: {
             labels: ['Excellent (750+)', 'Good (700-749)', 'Fair (650-699)', 'Poor (600-649)', 'Very Poor (<600)'],
-            values: [25, 35, 20, 15, 5]
+            values: fallbackValues
           }
         }));
       }
 
     } catch (error) {
       console.error('Error fetching chart data:', error);
+      // Set all fallback data on error
+      setChartData({
+        loanTrends: {
+          labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+          applied: [0, 0, 0, 0, 0, 0],
+          approved: [0, 0, 0, 0, 0, 0],
+          funded: [0, 0, 0, 0, 0, 0]
+        },
+        repaymentStatus: {
+          labels: ['On Time', 'Late', 'Overdue', 'Paid'],
+          values: [0, 0, 0, 0]
+        },
+        creditScoreDistribution: {
+          labels: ['Excellent (750+)', 'Good (700-749)', 'Fair (650-699)', 'Poor (600-649)', 'Very Poor (<600)'],
+          values: [0, 0, 1, 0, 0] // Default to Fair
+        }
+      });
     }
   };
 
@@ -260,18 +347,33 @@ const BorrowerDashboard = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-h1 font-bold text-secondary-900 dark:text-secondary-100">
-            Welcome back, {user?.firstName || user?.name?.split(' ')[0] || 'Borrower'}! 👋
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+            Welcome back, {user?.firstName || user?.name?.split(' ')[0] || 'Borrower'}!
           </h1>
-          <p className="text-body text-neutral-600 dark:text-neutral-400 mt-2">
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             Here's what's happening with your loans today
           </p>
         </div>
         
+        <div className="flex-shrink-0">
+          <button
+            onClick={() => {
+              setError('');
+              setSuccessMessage('');
+              setIsLoading(true);
+              loadDashboardData();
+            }}
+            disabled={isLoading}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors text-sm font-medium"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <span>{isLoading ? 'Refreshing...' : 'Refresh Data'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Error Message */}
@@ -279,14 +381,14 @@ const BorrowerDashboard = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card p-4 bg-error/5 border border-error/20"
+          className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
         >
           <div className="flex items-start">
-            <AlertCircle className="h-5 w-5 text-error mr-2 mt-0.5" />
+            <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-error font-medium mb-2">Dashboard Data Error</p>
-              <p className="text-error/80 text-sm">{error}</p>
-              <div className="mt-2 text-xs text-error/70">
+              <p className="text-red-800 dark:text-red-200 font-medium mb-2">Dashboard Data Error</p>
+              <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+              <div className="mt-2 text-xs text-red-600 dark:text-red-400">
                 <p>Possible solutions:</p>
                 <ul className="list-disc list-inside mt-1">
                   <li>Check your internet connection</li>
@@ -300,25 +402,43 @@ const BorrowerDashboard = () => {
         </motion.div>
       )}
 
+      {/* Success Message */}
+      {successMessage && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4"
+        >
+          <div className="flex items-start">
+            <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-green-800 dark:text-green-200 font-medium mb-1">Success!</p>
+              <p className="text-green-700 dark:text-green-300 text-sm">{successMessage}</p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="card p-6"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                 Total Borrowed
               </p>
-              <p className="text-2xl font-bold text-secondary-900 dark:text-secondary-100">
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 ${stats.totalBorrowed.toLocaleString()}
               </p>
             </div>
-            <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center">
-              <DollarSign className="h-6 w-6 text-primary-600 dark:text-primary-400" />
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+              <DollarSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </motion.div>
@@ -327,19 +447,19 @@ const BorrowerDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="card p-6"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                 Active Loans
               </p>
-              <p className="text-2xl font-bold text-secondary-900 dark:text-secondary-100">
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {stats.activeLoans}
               </p>
             </div>
-            <div className="w-12 h-12 bg-secondary-100 dark:bg-secondary-900/20 rounded-lg flex items-center justify-center">
-              <CreditCard className="h-6 w-6 text-secondary-600 dark:text-secondary-400" />
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+              <CreditCard className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </motion.div>
@@ -348,19 +468,19 @@ const BorrowerDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="card p-6"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                 Total Repaid
               </p>
-              <p className="text-2xl font-bold text-secondary-900 dark:text-secondary-100">
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 ${stats.totalRepaid.toLocaleString()}
               </p>
             </div>
-            <div className="w-12 h-12 bg-success/10 rounded-lg flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-success" />
+            <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center">
+              <TrendingUp className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
         </motion.div>
@@ -369,19 +489,19 @@ const BorrowerDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="card p-6"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                 Credit Score
               </p>
-              <p className="text-2xl font-bold text-secondary-900 dark:text-secondary-100">
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {stats.creditScore}
               </p>
             </div>
-            <div className="w-12 h-12 bg-accent-100 dark:bg-accent-900/20 rounded-lg flex items-center justify-center">
-              <BarChart3 className="h-6 w-6 text-accent-600 dark:text-accent-400" />
+            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
+              <BarChart3 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
         </motion.div>
@@ -406,10 +526,10 @@ const BorrowerDashboard = () => {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-h3 font-semibold text-secondary-900 dark:text-secondary-100 mb-4">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {quickActions.map((action, index) => (
             <motion.div
               key={action.title}
@@ -419,18 +539,18 @@ const BorrowerDashboard = () => {
             >
               <Link
                 to={action.href}
-                className="block loan-card p-6 hover:shadow-medium transition-all duration-200 group"
+                className="block bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200 group"
               >
                 <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
                   <action.icon className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-100 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                   {action.title}
                 </h3>
-                <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-4">
+                <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
                   {action.description}
                 </p>
-                <div className="flex items-center text-primary-600 dark:text-primary-400 font-medium text-sm group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
+                <div className="flex items-center text-blue-600 dark:text-blue-400 font-medium text-sm group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
                   Get Started
                   <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
                 </div>
@@ -441,13 +561,13 @@ const BorrowerDashboard = () => {
       </div>
 
       {/* Recent Loans and Upcoming Payments */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Loans */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="card p-6"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
         >
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -455,7 +575,7 @@ const BorrowerDashboard = () => {
             </h3>
             <Link
               to="/loans/status"
-              className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
             >
               View All
             </Link>
@@ -500,7 +620,7 @@ const BorrowerDashboard = () => {
                 </p>
                 <Link
                   to="/loans/apply"
-                  className="inline-flex items-center mt-3 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+                  className="inline-flex items-center mt-3 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                 >
                   Apply for Loan
                   <ArrowRight className="h-4 w-4 ml-1" />
@@ -515,7 +635,7 @@ const BorrowerDashboard = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.7 }}
-          className="card p-6"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
         >
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -523,7 +643,7 @@ const BorrowerDashboard = () => {
             </h3>
             <Link
               to="/loans/repayment"
-              className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
             >
               View Schedule
             </Link>
@@ -548,7 +668,7 @@ const BorrowerDashboard = () => {
                     </p>
                   </div>
                   <div className="text-right">
-                    <button className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+                    <button className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
                       Pay Now
                     </button>
                   </div>
@@ -568,14 +688,22 @@ const BorrowerDashboard = () => {
       </div>
 
       {/* Analytics Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Loan Trends Chart */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
         >
-          <LoanTrendsChart data={chartData.loanTrends} />
+          {isLoading ? (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+              <div className="h-[400px] w-full flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+            </div>
+          ) : (
+            <LoanTrendsChart data={chartData.loanTrends} />
+          )}
         </motion.div>
 
         {/* Repayment Status Chart */}
@@ -584,7 +712,15 @@ const BorrowerDashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.9 }}
         >
-          <RepaymentStatusChart data={chartData.repaymentStatus} />
+          {isLoading ? (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+              <div className="h-[400px] w-full flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+            </div>
+          ) : (
+            <RepaymentStatusChart data={chartData.repaymentStatus} />
+          )}
         </motion.div>
       </div>
 
@@ -593,9 +729,16 @@ const BorrowerDashboard = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 1.0 }}
-        className="mb-8"
       >
-        <CreditScoreDistributionChart data={chartData.creditScoreDistribution} />
+        {isLoading ? (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+            <div className="h-[400px] w-full flex items-center justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          </div>
+        ) : (
+          <CreditScoreDistributionChart data={chartData.creditScoreDistribution} />
+        )}
       </motion.div>
 
       {/* Pending Loans Section */}

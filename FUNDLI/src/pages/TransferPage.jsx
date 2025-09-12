@@ -47,6 +47,8 @@ const TransferPage = () => {
     }
   };
 
+  const [searchTimeout, setSearchTimeout] = useState(null);
+
   const searchRecipient = async () => {
     if (!recipientEmail) {
       setError('Please enter an email address');
@@ -77,20 +79,40 @@ const TransferPage = () => {
         if (data.data && data.data.user) {
           console.log('Setting recipient:', data.data.user);
           setRecipient(data.data.user);
+          setError(''); // Clear any previous errors
         } else {
           console.log('No user found in response');
           setError('User not found');
         }
       } else {
         console.log('Search failed:', data);
-        setError(data.message || 'User not found');
+        if (response.status === 429) {
+          setError('Too many requests. Please wait a moment and try again.');
+        } else {
+          setError(data.message || 'User not found');
+        }
       }
     } catch (error) {
       console.error('Error searching user:', error);
-      setError('Failed to search user. Please try again.');
+      setError('Failed to search user. Please check your connection and try again.');
     } finally {
       setIsSearching(false);
     }
+  };
+
+  // Debounced search function
+  const debouncedSearch = () => {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    
+    const timeout = setTimeout(() => {
+      if (recipientEmail && recipientEmail.includes('@')) {
+        searchRecipient();
+      }
+    }, 500); // 500ms delay
+    
+    setSearchTimeout(timeout);
   };
 
   const handleTransfer = async () => {
@@ -224,7 +246,17 @@ const TransferPage = () => {
                   <input
                     type="email"
                     value={recipientEmail}
-                    onChange={(e) => setRecipientEmail(e.target.value)}
+                    onChange={(e) => {
+                      setRecipientEmail(e.target.value);
+                      setError(''); // Clear errors when typing
+                      setRecipient(null); // Clear previous recipient
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        searchRecipient();
+                      }
+                    }}
                     placeholder="Enter recipient's email"
                     className="flex-1 px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   />
@@ -240,6 +272,11 @@ const TransferPage = () => {
                     )}
                   </button>
                 </div>
+                {recipientEmail && !recipient && !isSearching && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    Press Enter or click search to find the user
+                  </p>
+                )}
               </div>
 
               {/* Recipient Info */}
@@ -325,35 +362,18 @@ const TransferPage = () => {
                 </motion.div>
               )}
 
-              {/* Debug Info - Remove in production */}
+              {/* Debug Info - Only show in development and when needed */}
               {process.env.NODE_ENV === 'development' && (
-                <div className="mb-4 p-2 bg-gray-100 dark:bg-gray-700 rounded text-xs">
-                  <div>Recipient: {recipient ? 'Found' : 'Not found'}</div>
-                  <div>Amount: {amount || 'Empty'}</div>
-                  <div>Amount Valid: {amount && parseFloat(amount) >= 10 ? 'Yes' : 'No'}</div>
-                  <div>Loading: {isLoading ? 'Yes' : 'No'}</div>
-                  <div>Button Disabled: {isLoading || !recipient || !amount || parseFloat(amount) < 10 ? 'Yes' : 'No'}</div>
-                  <button 
-                    onClick={() => {
-                      console.log('Test button clicked');
-                      console.log('Current state:', { recipient, amount, isLoading });
-                    }}
-                    className="mt-2 px-2 py-1 bg-blue-500 text-white text-xs rounded"
-                  >
-                    Test Button (Always Clickable)
-                  </button>
-                  <button 
-                    onClick={() => {
-                      console.log('Testing user search...');
-                      setRecipientEmail('test@example.com');
-                      setTimeout(() => {
-                        searchRecipient();
-                      }, 100);
-                    }}
-                    className="mt-2 ml-2 px-2 py-1 bg-green-500 text-white text-xs rounded"
-                  >
-                    Test Search
-                  </button>
+                <div className="mb-4 p-3 bg-gray-100 dark:bg-gray-700 rounded text-xs">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>Recipient: {recipient ? 'Found' : 'Not found'}</div>
+                    <div>Amount: {amount || 'Empty'}</div>
+                    <div>Amount Valid: {amount && parseFloat(amount) >= 10 ? 'Yes' : 'No'}</div>
+                    <div>Loading: {isLoading ? 'Yes' : 'No'}</div>
+                  </div>
+                  <div className="mt-2 text-gray-600 dark:text-gray-400">
+                    <strong>Debug:</strong> Enter a valid email address and click search to find users.
+                  </div>
                 </div>
               )}
 

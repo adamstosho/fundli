@@ -18,6 +18,17 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
 
   useEffect(() => {
     loadWalletData();
+    
+    // Listen for wallet balance updates
+    const handleWalletUpdate = () => {
+      loadWalletData();
+    };
+    
+    window.addEventListener('walletBalanceUpdated', handleWalletUpdate);
+    
+    return () => {
+      window.removeEventListener('walletBalanceUpdated', handleWalletUpdate);
+    };
   }, []);
 
   const loadWalletData = async () => {
@@ -42,9 +53,16 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
         // Use user-type-specific API endpoints
         let apiEndpoint = 'http://localhost:5000/api/wallet';
         
-        // For now, use the general wallet endpoint for all users
-        // This avoids 403 errors due to user type mismatches
-        console.log('Using general wallet endpoint for user type:', currentUserType);
+        // Use specific endpoints based on user type
+        if (currentUserType === 'lender') {
+          apiEndpoint = 'http://localhost:5000/api/lender/wallet/balance';
+        } else if (currentUserType === 'borrower') {
+          apiEndpoint = 'http://localhost:5000/api/borrower/wallet/balance';
+        } else if (currentUserType === 'admin') {
+          apiEndpoint = 'http://localhost:5000/api/admin/wallet/balance';
+        }
+        
+        console.log('Using wallet endpoint for user type:', currentUserType, '->', apiEndpoint);
         
         console.log('Trying API endpoint:', apiEndpoint);
         
@@ -63,12 +81,18 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
             setWallet({
               balance: data.data.balance,
               currency: data.data.currency || 'USD',
-              status: 'active'
+              status: data.data.status || 'active',
+              limits: data.data.limits,
+              stats: data.data.stats
             });
           } else {
             setWallet(data.data);
           }
           return; // Success, exit early
+        } else {
+          console.log('Wallet API failed with status:', response.status);
+          const errorText = await response.text();
+          console.log('Wallet API error:', errorText);
         }
       } catch (backendError) {
         console.log('Backend wallet API not available, using local storage');
@@ -285,6 +309,15 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
         <span className="text-xs text-neutral-500 dark:text-neutral-400">
           Click to view full wallet
         </span>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            loadWalletData();
+          }}
+          className="ml-2 text-xs text-blue-600 hover:text-blue-800 underline"
+        >
+          Refresh
+        </button>
       </div>
     </motion.div>
   );

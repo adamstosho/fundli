@@ -209,57 +209,318 @@ class NotificationService {
   }
 
   /**
-   * Create notification for collateral verification
+   * Create notification for KYC approval/rejection
    */
-  static async notifyCollateralVerification(collateralData) {
+  static async notifyKYCDecision(kycData) {
     try {
-      // Notify admin about new collateral verification
-      const adminUsers = await User.find({ userType: 'admin' });
+      const isApproved = kycData.status === 'approved';
       
-      const notifications = adminUsers.map(admin => ({
-        recipientId: admin._id,
-        type: 'account_verification',
-        title: 'New Collateral Verification Submitted',
-        message: `${collateralData.borrowerName} has submitted collateral verification for $${collateralData.estimatedValue.toLocaleString()}`,
-        priority: 'high',
-        actionRequired: true,
-        action: {
-          type: 'view',
-          url: `/admin/collateral-review`,
-          buttonText: 'Review Collateral'
-        },
-        relatedEntities: {
-          user: collateralData.borrowerId
-        },
-        metadata: {
-          collateralType: collateralData.collateralType,
-          estimatedValue: collateralData.estimatedValue,
-          borrowerName: collateralData.borrowerName
-        }
-      }));
-
-      await this.createBulkNotifications(notifications);
-      
-      // Notify borrower about successful submission
       await this.createNotification({
-        recipientId: collateralData.borrowerId,
-        type: 'account_verification',
-        title: 'Collateral Verification Submitted',
-        message: `Your collateral verification has been submitted and is under review by our team.`,
-        priority: 'normal',
+        recipientId: kycData.userId,
+        type: isApproved ? 'kyc_approval' : 'kyc_rejection',
+        title: isApproved ? 'KYC Verification Approved' : 'KYC Verification Rejected',
+        message: isApproved 
+          ? `Congratulations! Your KYC verification has been approved. You can now apply for loans.`
+          : `Your KYC verification has been rejected. Reason: ${kycData.rejectionReason || 'Please contact support for details.'}`,
+        priority: isApproved ? 'normal' : 'high',
         action: {
           type: 'view',
-          url: `/borrower/collateral-status`,
-          buttonText: 'Check Status'
+          url: isApproved ? '/borrower/loans/apply' : '/borrower/kyc',
+          buttonText: isApproved ? 'Apply for Loan' : 'Review KYC'
         },
         metadata: {
-          collateralType: collateralData.collateralType,
-          estimatedValue: collateralData.estimatedValue
+          kycStatus: kycData.status,
+          rejectionReason: kycData.rejectionReason,
+          approvedAt: kycData.approvedAt
         }
       });
 
     } catch (error) {
-      console.error('Error notifying collateral verification:', error);
+      console.error('Error notifying KYC decision:', error);
+    }
+  }
+
+  /**
+   * Create notification for loan approval/rejection
+   */
+  static async notifyLoanDecision(loanData) {
+    try {
+      const isApproved = loanData.status === 'approved';
+      
+      // Notify borrower
+      await this.createNotification({
+        recipientId: loanData.borrowerId,
+        type: isApproved ? 'loan_approval' : 'loan_rejection',
+        title: isApproved ? 'Loan Application Approved!' : 'Loan Application Rejected',
+        message: isApproved 
+          ? `Great news! Your loan application for $${loanData.amount.toLocaleString()} has been approved and is now available for funding.`
+          : `Your loan application for $${loanData.amount.toLocaleString()} has been rejected. Reason: ${loanData.rejectionReason || 'Please contact support for details.'}`,
+        priority: isApproved ? 'high' : 'normal',
+        action: {
+          type: 'view',
+          url: `/borrower/loans/${loanData.loanId}`,
+          buttonText: 'View Details'
+        },
+        relatedEntities: {
+          loan: loanData.loanId
+        },
+        metadata: {
+          amount: loanData.amount,
+          currency: 'USD',
+          rejectionReason: loanData.rejectionReason,
+          approvedAt: loanData.approvedAt
+        }
+      });
+
+      // Notify lenders about new approved loan (if approved)
+      if (isApproved) {
+        const lenders = await User.find({ userType: 'lender' });
+        const notifications = lenders.map(lender => ({
+          recipientId: lender._id,
+          type: 'investment_opportunity',
+          title: 'New Investment Opportunity Available',
+          message: `A new loan application for $${loanData.amount.toLocaleString()} has been approved and is available for investment.`,
+          priority: 'normal',
+          action: {
+            type: 'view',
+            url: `/lender/loan-applications/${loanData.loanId}`,
+            buttonText: 'View Opportunity'
+          },
+          relatedEntities: {
+            loan: loanData.loanId,
+            user: loanData.borrowerId
+          },
+          metadata: {
+            amount: loanData.amount,
+            currency: 'USD',
+            borrowerName: loanData.borrowerName,
+            purpose: loanData.purpose
+          }
+        }));
+
+        await this.createBulkNotifications(notifications);
+      }
+
+    } catch (error) {
+      console.error('Error notifying loan decision:', error);
+    }
+  }
+
+  /**
+   * Create notification for payment due
+   */
+  static async notifyPaymentDue(paymentData) {
+    try {
+      await this.createNotification({
+        recipientId: paymentData.borrowerId,
+        type: 'repayment_due',
+        title: 'Payment Due Reminder',
+        message: `Your loan payment of $${paymentData.amount.toLocaleString()} is due on ${new Date(paymentData.dueDate).toLocaleDateString()}. Please make your payment to avoid late fees.`,
+        priority: 'high',
+        actionRequired: true,
+        action: {
+          type: 'pay',
+          url: `/borrower/payments/${paymentData.loanId}`,
+          buttonText: 'Make Payment',
+          expiresAt: paymentData.dueDate
+        },
+        relatedEntities: {
+          loan: paymentData.loanId
+        },
+        metadata: {
+          amount: paymentData.amount,
+          currency: 'USD',
+          dueDate: paymentData.dueDate,
+          installmentNumber: paymentData.installmentNumber,
+          lateFee: paymentData.lateFee || 0
+        }
+      });
+
+    } catch (error) {
+      console.error('Error notifying payment due:', error);
+    }
+  }
+
+  /**
+   * Create notification for late payment
+   */
+  static async notifyLatePayment(paymentData) {
+    try {
+      await this.createNotification({
+        recipientId: paymentData.borrowerId,
+        type: 'payment_failed',
+        title: 'Payment Overdue',
+        message: `Your loan payment of $${paymentData.amount.toLocaleString()} is overdue. Late fee of $${paymentData.lateFee.toLocaleString()} has been applied. Please make payment immediately.`,
+        priority: 'urgent',
+        actionRequired: true,
+        action: {
+          type: 'pay',
+          url: `/borrower/payments/${paymentData.loanId}`,
+          buttonText: 'Pay Now'
+        },
+        relatedEntities: {
+          loan: paymentData.loanId
+        },
+        metadata: {
+          amount: paymentData.amount,
+          currency: 'USD',
+          dueDate: paymentData.dueDate,
+          lateFee: paymentData.lateFee,
+          daysOverdue: paymentData.daysOverdue
+        }
+      });
+
+      // Notify lender about late payment
+      await this.createNotification({
+        recipientId: paymentData.lenderId,
+        type: 'payment_failed',
+        title: 'Borrower Payment Overdue',
+        message: `Payment of $${paymentData.amount.toLocaleString()} from ${paymentData.borrowerName} is overdue. We're working to resolve this.`,
+        priority: 'normal',
+        action: {
+          type: 'view',
+          url: `/lender/investments/${paymentData.loanId}`,
+          buttonText: 'View Investment'
+        },
+        relatedEntities: {
+          loan: paymentData.loanId,
+          user: paymentData.borrowerId
+        },
+        metadata: {
+          amount: paymentData.amount,
+          currency: 'USD',
+          borrowerName: paymentData.borrowerName,
+          daysOverdue: paymentData.daysOverdue
+        }
+      });
+
+    } catch (error) {
+      console.error('Error notifying late payment:', error);
+    }
+  }
+
+  /**
+   * Create notification for security alert
+   */
+  static async notifySecurityAlert(alertData) {
+    try {
+      await this.createNotification({
+        recipientId: alertData.userId,
+        type: 'security_alert',
+        title: 'Security Alert',
+        message: alertData.message,
+        priority: 'urgent',
+        actionRequired: true,
+        action: {
+          type: 'contact',
+          url: '/support',
+          buttonText: 'Contact Support'
+        },
+        metadata: {
+          alertType: alertData.alertType,
+          ipAddress: alertData.ipAddress,
+          userAgent: alertData.userAgent,
+          timestamp: new Date().toISOString()
+        }
+      });
+
+    } catch (error) {
+      console.error('Error notifying security alert:', error);
+    }
+  }
+
+  /**
+   * Create notification for referral completion
+   */
+  static async notifyReferralCompletion(referralData) {
+    try {
+      await this.createNotification({
+        recipientId: referralData.referrerId,
+        type: 'referral_completed',
+        title: 'Referral Reward Earned!',
+        message: `Congratulations! You've earned $${referralData.rewardAmount.toLocaleString()} for successfully referring ${referralData.referredUserName}.`,
+        priority: 'normal',
+        action: {
+          type: 'view',
+          url: '/referrals',
+          buttonText: 'View Referrals'
+        },
+        metadata: {
+          rewardAmount: referralData.rewardAmount,
+          currency: 'USD',
+          referredUserName: referralData.referredUserName,
+          referralId: referralData.referralId
+        }
+      });
+
+    } catch (error) {
+      console.error('Error notifying referral completion:', error);
+    }
+  }
+
+  /**
+   * Create notification for system maintenance
+   */
+  static async notifySystemMaintenance(maintenanceData) {
+    try {
+      const users = await User.find({});
+      
+      const notifications = users.map(user => ({
+        recipientId: user._id,
+        type: 'system_announcement',
+        title: 'Scheduled System Maintenance',
+        message: `System maintenance is scheduled for ${new Date(maintenanceData.scheduledTime).toLocaleString()}. Expected downtime: ${maintenanceData.duration}.`,
+        priority: 'normal',
+        action: {
+          type: 'view',
+          url: '/maintenance',
+          buttonText: 'Learn More'
+        },
+        metadata: {
+          scheduledTime: maintenanceData.scheduledTime,
+          duration: maintenanceData.duration,
+          affectedServices: maintenanceData.affectedServices
+        }
+      }));
+
+      await this.createBulkNotifications(notifications);
+
+    } catch (error) {
+      console.error('Error notifying system maintenance:', error);
+    }
+  }
+
+  /**
+   * Create notification for wallet transaction
+   */
+  static async notifyWalletTransaction(transactionData) {
+    try {
+      const isDeposit = transactionData.type === 'deposit';
+      
+      await this.createNotification({
+        recipientId: transactionData.userId,
+        type: 'payment_received',
+        title: isDeposit ? 'Wallet Deposit Successful' : 'Wallet Withdrawal Processed',
+        message: isDeposit 
+          ? `Your wallet has been credited with $${transactionData.amount.toLocaleString()}. Transaction ID: ${transactionData.transactionId}`
+          : `Your withdrawal of $${transactionData.amount.toLocaleString()} has been processed. Transaction ID: ${transactionData.transactionId}`,
+        priority: 'normal',
+        action: {
+          type: 'view',
+          url: '/wallet',
+          buttonText: 'View Wallet'
+        },
+        metadata: {
+          amount: transactionData.amount,
+          currency: 'USD',
+          transactionId: transactionData.transactionId,
+          paymentMethod: transactionData.paymentMethod,
+          transactionType: transactionData.type
+        }
+      });
+
+    } catch (error) {
+      console.error('Error notifying wallet transaction:', error);
     }
   }
 

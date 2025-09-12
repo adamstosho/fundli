@@ -172,16 +172,19 @@ collateralSchema.statics.getPendingVerifications = function() {
   }).populate('userId', 'firstName lastName email phone').sort({ submittedAt: 1 });
 };
 
-// Pre-save middleware to validate required documents
+// Pre-save middleware to validate required documents (only for new documents)
 collateralSchema.pre('save', function(next) {
-  if (this.collateralDocuments.length === 0) {
-    return next(new Error('At least one collateral document is required'));
-  }
-  if (!this.bankStatement.fileUrl) {
-    return next(new Error('Bank statement is required'));
-  }
-  if (!this.bvn) {
-    return next(new Error('BVN is required'));
+  // Only validate for new documents, not updates
+  if (this.isNew) {
+    if (this.collateralDocuments.length === 0) {
+      return next(new Error('At least one collateral document is required'));
+    }
+    if (!this.bankStatement.fileUrl) {
+      return next(new Error('Bank statement is required'));
+    }
+    if (!this.bvn) {
+      return next(new Error('BVN is required'));
+    }
   }
   next();
 });

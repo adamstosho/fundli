@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { X, Home, DollarSign, Users, FileText, BarChart3, Settings, UserCheck, Shield, TrendingUp, CreditCard, Calendar, Award, Search, Bell } from 'lucide-react';
+import { X, Home, DollarSign, Users, FileText, BarChart3, Settings, UserCheck, Shield, TrendingUp, CreditCard, Calendar, Award, Search, Bell, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import clsx from 'clsx';
@@ -13,10 +13,7 @@ const Sidebar = ({ open, onClose }) => {
     borrower: [
       { name: 'Dashboard', href: '/dashboard/borrower', icon: Home },
       ...(userType !== 'admin' ? [{ name: 'KYC Verification', href: '/kyc-upload', icon: Shield }] : []),
-      { name: 'Browse Loans', href: '/borrower/browse-loans', icon: Search },
-      { name: 'Apply for Loan', href: '/loans/apply', icon: DollarSign },
       { name: 'Loan Status', href: '/loans/status', icon: FileText },
-      { name: 'Repayment Schedule', href: '/loans/repayment', icon: Calendar },
       { name: 'Notifications', href: '/notifications', icon: Bell },
       { name: 'Profile', href: '/settings/profile', icon: UserCheck },
       { name: 'Settings', href: '/settings', icon: Settings },
@@ -46,25 +43,45 @@ const Sidebar = ({ open, onClose }) => {
   const currentNav = navigation[userType] || navigation.borrower;
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
       {/* Logo */}
-      <div className="flex items-center justify-between h-16 px-6 border-b border-neutral-200 dark:border-secondary-700">
-        <Link to="/" className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">F</span>
+      <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700">
+        <Link to="/" className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <span className="text-white font-bold text-xl">F</span>
           </div>
-          <span className="text-lg font-bold text-gradient">Fundli</span>
+          <div className="flex flex-col">
+            <span className="text-xl font-bold text-gray-900 dark:text-white">Fundli</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Peer-to-Peer Lending</span>
+          </div>
         </Link>
         <button
           onClick={onClose}
-          className="lg:hidden p-1 rounded-md text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+          className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
         >
-          <X className="h-6 w-6" />
+          <X className="h-5 w-5" />
         </button>
       </div>
 
+      {/* User Info */}
+      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+            <User className="h-5 w-5 text-white" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+              {userType === 'borrower' ? 'Borrower' : userType === 'lender' ? 'Lender' : 'Admin'}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+              {userType === 'borrower' ? 'Access your loans' : userType === 'lender' ? 'Manage investments' : 'Platform management'}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-2">
+      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
         {currentNav.map((item) => {
           const isActive = location.pathname === item.href;
           return (
@@ -73,36 +90,26 @@ const Sidebar = ({ open, onClose }) => {
               to={item.href}
               onClick={onClose}
               className={clsx(
-                'nav-item',
-                isActive && 'active'
+                'flex items-center px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 group',
+                isActive
+                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
               )}
             >
-              <item.icon className="h-5 w-5 mr-3" />
-              {item.name}
+              <item.icon className={clsx(
+                'h-5 w-5 mr-3 transition-colors',
+                isActive
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300'
+              )} />
+              <span className="flex-1">{item.name}</span>
+              {isActive && (
+                <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
+              )}
             </Link>
           );
         })}
       </nav>
-
-      {/* Bottom section */}
-      <div className="p-4 border-t border-neutral-200 dark:border-secondary-700">
-        <div className="bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20 rounded-lg p-4">
-          <div className="flex items-center space-x-2 mb-2">
-            <Award className="h-5 w-5 text-primary-600 dark:text-primary-400" />
-            <span className="text-sm font-medium text-secondary-900 dark:text-secondary-100">Referral Program</span>
-          </div>
-          <p className="text-xs text-neutral-600 dark:text-neutral-400 mb-3">
-            Invite friends and earn rewards
-          </p>
-          <Link
-            to="/referral"
-            onClick={onClose}
-            className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors"
-          >
-            Learn More →
-          </Link>
-        </div>
-      </div>
     </div>
   );
 
@@ -120,7 +127,7 @@ const Sidebar = ({ open, onClose }) => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-secondary-900/75" />
+            <div className="fixed inset-0 bg-gray-900/75" />
           </Transition.Child>
 
           <div className="fixed inset-0 flex">
@@ -133,7 +140,7 @@ const Sidebar = ({ open, onClose }) => {
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-white dark:bg-secondary-800">
+              <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-white dark:bg-gray-900">
                 <SidebarContent />
               </Dialog.Panel>
             </Transition.Child>
@@ -142,8 +149,8 @@ const Sidebar = ({ open, onClose }) => {
       </Transition.Root>
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-col flex-grow bg-white dark:bg-secondary-800 border-r border-neutral-200 dark:border-secondary-700">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col">
+        <div className="flex flex-col flex-grow bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-lg">
           <SidebarContent />
         </div>
       </div>

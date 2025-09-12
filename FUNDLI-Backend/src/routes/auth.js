@@ -54,8 +54,8 @@ router.post('/register', [
     .withMessage('Password must contain at least one uppercase letter, one lowercase letter, and one number'),
   
   body('userType')
-    .isIn(['borrower', 'lender'])
-    .withMessage('User type must be either borrower or lender'),
+    .isIn(['borrower', 'lender', 'admin'])
+    .withMessage('User type must be either borrower, lender, or admin'),
   
   body('company.name')
     .optional()

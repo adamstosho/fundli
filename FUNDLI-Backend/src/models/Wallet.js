@@ -252,10 +252,10 @@ walletSchema.methods.addTransaction = function(transactionData) {
 
 // Method to update wallet balance
 walletSchema.methods.updateBalance = function(amount, transactionType = 'deposit') {
-  if (transactionType === 'deposit') {
+  if (transactionType === 'deposit' || transactionType === 'loan_disbursement') {
     this.balance += amount;
     this.stats.totalDeposits += amount;
-  } else if (transactionType === 'withdrawal') {
+  } else if (transactionType === 'withdrawal' || transactionType === 'loan_funding' || transactionType === 'loan_payment') {
     this.balance -= amount;
     this.stats.totalWithdrawals += amount;
   } else if (transactionType === 'transfer_in') {

@@ -20,9 +20,20 @@ const LoanStatus = () => {
           throw new Error('Authentication required');
         }
 
-        // For now, we'll show an empty state since loan API might not be implemented yet
-        // This can be updated when the loan endpoints are ready
-        setLoans([]);
+        // Fetch user's loans from the backend
+        const response = await fetch('http://localhost:5000/api/loans/user', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setLoans(result.data.loans || []);
+        } else {
+          console.error('Failed to load loans:', response.statusText);
+          setLoans([]);
+        }
       } catch (error) {
         console.error('Error loading loans:', error);
         setLoans([]);
@@ -40,6 +51,8 @@ const LoanStatus = () => {
         return <Clock className="h-5 w-5 text-warning" />;
       case 'approved':
         return <CheckCircle className="h-5 w-5 text-success" />;
+      case 'funded':
+        return <CheckCircle className="h-5 w-5 text-success" />;
       case 'rejected':
         return <XCircle className="h-5 w-5 text-error" />;
       case 'active':
@@ -54,6 +67,8 @@ const LoanStatus = () => {
       case 'pending':
         return 'bg-warning/10 text-warning border-warning/20';
       case 'approved':
+        return 'bg-success/10 text-success border-success/20';
+      case 'funded':
         return 'bg-success/10 text-success border-success/20';
       case 'rejected':
         return 'bg-error/10 text-error border-error/20';
@@ -70,6 +85,8 @@ const LoanStatus = () => {
         return 'Under Review';
       case 'approved':
         return 'Approved';
+      case 'funded':
+        return 'Funded';
       case 'rejected':
         return 'Rejected';
       case 'active':
@@ -133,10 +150,10 @@ const LoanStatus = () => {
                   {getStatusIcon(loan.status)}
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      ${loan.amount.toLocaleString()} - {loan.purpose}
+                      ${loan.loanAmount.toLocaleString()} - {loan.purpose}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Applied on {new Date(loan.appliedDate).toLocaleDateString()}
+                      Applied on {new Date(loan.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -146,17 +163,17 @@ const LoanStatus = () => {
               </div>
 
               <p className="text-gray-700 dark:text-gray-300 mb-4">
-                {loan.description}
+                {loan.purposeDescription}
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                   <DollarSign className="h-4 w-4" />
-                  <span>Amount: ${loan.amount.toLocaleString()}</span>
+                  <span>Amount: ${loan.loanAmount.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                   <Calendar className="h-4 w-4" />
-                  <span>Applied: {new Date(loan.appliedDate).toLocaleDateString()}</span>
+                  <span>Applied: {new Date(loan.createdAt).toLocaleDateString()}</span>
                 </div>
                 {loan.status === 'pending' && (
                   <div className="flex items-center space-x-2 text-sm text-warning">

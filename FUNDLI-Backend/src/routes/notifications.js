@@ -420,43 +420,240 @@ router.get('/stats', protect, async (req, res) => {
   }
 });
 
-// @desc    Create test notification (for debugging)
-// @route   POST /api/notifications/test
+// @desc    Create comprehensive test notifications for all user types
+// @route   POST /api/notifications/test-comprehensive
 // @access  Private
-router.post('/test', protect, async (req, res) => {
+router.post('/test-comprehensive', protect, async (req, res) => {
   try {
     const NotificationService = require('../services/notificationService');
     
-    const testNotification = await NotificationService.createNotification({
-      recipientId: req.user.id,
-      type: 'system_announcement',
-      title: 'Test Notification',
-      message: 'This is a test notification to verify the notification system is working correctly.',
-      priority: 'normal',
-      action: {
-        type: 'view',
-        url: '/notifications',
-        buttonText: 'View Notifications'
-      },
-      metadata: {
-        test: true,
-        timestamp: new Date().toISOString()
-      }
-    });
+    const userId = req.user.id;
+    const userType = req.user.userType;
+    
+    // Create different test notifications based on user type
+    const testNotifications = [];
+    
+    if (userType === 'borrower') {
+      testNotifications.push(
+        await NotificationService.createNotification({
+          recipientId: userId,
+          type: 'loan_application',
+          title: 'Loan Application Submitted',
+          message: 'Your loan application for $5,000 has been submitted and is under review.',
+          priority: 'normal',
+          action: {
+            type: 'view',
+            url: '/borrower/loans',
+            buttonText: 'View Application'
+          },
+          metadata: {
+            amount: 5000,
+            currency: 'USD',
+            purpose: 'Business Expansion'
+          }
+        })
+      );
+      
+      testNotifications.push(
+        await NotificationService.createNotification({
+          recipientId: userId,
+          type: 'loan_approval',
+          title: 'Loan Application Approved!',
+          message: 'Congratulations! Your loan application for $5,000 has been approved.',
+          priority: 'high',
+          action: {
+            type: 'view',
+            url: '/borrower/loans',
+            buttonText: 'View Details'
+          },
+          metadata: {
+            amount: 5000,
+            currency: 'USD',
+            duration: 12
+          }
+        })
+      );
+      
+      testNotifications.push(
+        await NotificationService.createNotification({
+          recipientId: userId,
+          type: 'repayment_due',
+          title: 'Payment Due Reminder',
+          message: 'Your loan payment of $450 is due in 3 days.',
+          priority: 'high',
+          actionRequired: true,
+          action: {
+            type: 'pay',
+            url: '/borrower/payments',
+            buttonText: 'Make Payment'
+          },
+          metadata: {
+            amount: 450,
+            currency: 'USD',
+            dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+          }
+        })
+      );
+    }
+    
+    if (userType === 'lender') {
+      testNotifications.push(
+        await NotificationService.createNotification({
+          recipientId: userId,
+          type: 'investment_opportunity',
+          title: 'New Investment Opportunity',
+          message: 'A new loan application for $8,000 is available for investment.',
+          priority: 'normal',
+          action: {
+            type: 'view',
+            url: '/lender/loan-applications',
+            buttonText: 'View Opportunity'
+          },
+          metadata: {
+            amount: 8000,
+            currency: 'USD',
+            borrowerName: 'John Doe',
+            purpose: 'Home Renovation'
+          }
+        })
+      );
+      
+      testNotifications.push(
+        await NotificationService.createNotification({
+          recipientId: userId,
+          type: 'loan_funding',
+          title: 'Investment Successful',
+          message: 'Your investment of $8,000 has been successfully processed.',
+          priority: 'normal',
+          action: {
+            type: 'view',
+            url: '/lender/investments',
+            buttonText: 'View Investment'
+          },
+          metadata: {
+            amount: 8000,
+            currency: 'USD',
+            borrowerName: 'John Doe'
+          }
+        })
+      );
+      
+      testNotifications.push(
+        await NotificationService.createNotification({
+          recipientId: userId,
+          type: 'repayment_received',
+          title: 'Repayment Received',
+          message: 'You have received a repayment of $450 from John Doe.',
+          priority: 'normal',
+          action: {
+            type: 'view',
+            url: '/lender/investments',
+            buttonText: 'View Details'
+          },
+          metadata: {
+            amount: 450,
+            currency: 'USD',
+            borrowerName: 'John Doe'
+          }
+        })
+      );
+    }
+    
+    if (userType === 'admin') {
+      testNotifications.push(
+        await NotificationService.createNotification({
+          recipientId: userId,
+          type: 'loan_application',
+          title: 'New Loan Application Requires Review',
+          message: 'A new loan application for $10,000 requires admin review.',
+          priority: 'high',
+          actionRequired: true,
+          action: {
+            type: 'view',
+            url: '/admin/loans',
+            buttonText: 'Review Application'
+          },
+          metadata: {
+            amount: 10000,
+            currency: 'USD',
+            borrowerName: 'Jane Smith'
+          }
+        })
+      );
+      
+      testNotifications.push(
+        await NotificationService.createNotification({
+          recipientId: userId,
+          type: 'kyc_approval',
+          title: 'KYC Verification Pending',
+          message: '3 KYC verifications are pending admin approval.',
+          priority: 'normal',
+          actionRequired: true,
+          action: {
+            type: 'view',
+            url: '/admin/kyc',
+            buttonText: 'Review KYC'
+          },
+          metadata: {
+            pendingCount: 3
+          }
+        })
+      );
+      
+      testNotifications.push(
+        await NotificationService.createNotification({
+          recipientId: userId,
+          type: 'system_announcement',
+          title: 'System Maintenance Scheduled',
+          message: 'System maintenance is scheduled for tomorrow at 2 AM.',
+          priority: 'normal',
+          action: {
+            type: 'view',
+            url: '/admin/maintenance',
+            buttonText: 'View Details'
+          },
+          metadata: {
+            scheduledTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            duration: '2 hours'
+          }
+        })
+      );
+    }
+    
+    // Add a welcome notification for all users
+    testNotifications.push(
+      await NotificationService.createNotification({
+        recipientId: userId,
+        type: 'welcome_message',
+        title: 'Welcome to FUNDLI!',
+        message: `Welcome to FUNDLI! Complete your profile setup to start ${userType === 'borrower' ? 'borrowing' : userType === 'lender' ? 'investing' : 'managing'}.`,
+        priority: 'normal',
+        action: {
+          type: 'view',
+          url: '/profile',
+          buttonText: 'Complete Profile'
+        },
+        metadata: {
+          userType: userType
+        }
+      })
+    );
 
     res.status(201).json({
       status: 'success',
-      message: 'Test notification created successfully',
+      message: `Created ${testNotifications.length} test notifications for ${userType}`,
       data: {
-        notification: testNotification
+        notifications: testNotifications,
+        userType: userType,
+        totalCreated: testNotifications.length
       }
     });
 
   } catch (error) {
-    console.error('Create test notification error:', error);
+    console.error('Create comprehensive test notifications error:', error);
     res.status(500).json({
       status: 'error',
-      message: 'Failed to create test notification',
+      message: 'Failed to create test notifications',
       error: error.message
     });
   }

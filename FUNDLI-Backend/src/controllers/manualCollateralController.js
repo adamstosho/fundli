@@ -283,7 +283,16 @@ const getCollateralStatus = async (req, res) => {
 // @access  Private (Admin only)
 const getPendingVerifications = async (req, res) => {
   try {
-    const pendingVerifications = await Collateral.getPendingVerifications();
+    console.log('Getting pending verifications...');
+    
+    const pendingVerifications = await Collateral.find({
+      verificationStatus: { $in: ['submitted', 'under_review'] },
+      isActive: true
+    })
+      .populate('userId', 'firstName lastName email phone')
+      .sort({ submittedAt: 1 });
+
+    console.log(`Found ${pendingVerifications.length} pending verifications`);
 
     res.status(200).json({
       status: 'success',
@@ -581,24 +590,24 @@ const getApprovedVerifications = async (req, res) => {
   try {
     console.log('Getting approved verifications...');
     
-    // First, let's check all collateral statuses
-    const allCollateral = await Collateral.find({}).select('verificationStatus approvedAt');
-    console.log('All collateral statuses:', allCollateral.map(c => ({ id: c._id, status: c.verificationStatus, approvedAt: c.approvedAt })));
+    // First check if there are any collateral records at all
+    const totalCollateral = await Collateral.countDocuments();
+    console.log(`Total collateral records in database: ${totalCollateral}`);
     
-    let approvedVerifications;
-    try {
-      approvedVerifications = await Collateral.find({ verificationStatus: 'approved' })
-        .populate('userId', 'firstName lastName email phone')
-        .populate('adminReview.reviewedBy', 'firstName lastName email')
-        .sort({ createdAt: -1 })
-        .lean();
-    } catch (populateError) {
-      console.error('Population error:', populateError);
-      // Try without population
-      approvedVerifications = await Collateral.find({ verificationStatus: 'approved' })
-        .sort({ createdAt: -1 })
-        .lean();
+    if (totalCollateral === 0) {
+      console.log('No collateral records found in database');
+      return res.status(200).json({
+        status: 'success',
+        data: {
+          verifications: []
+        }
+      });
     }
+    
+    const approvedVerifications = await Collateral.find({ verificationStatus: 'approved' })
+      .populate('userId', 'firstName lastName email phone')
+      .populate('adminReview.reviewedBy', 'firstName lastName email')
+      .sort({ approvedAt: -1 });
 
     console.log(`Found ${approvedVerifications.length} approved verifications`);
 
@@ -608,10 +617,10 @@ const getApprovedVerifications = async (req, res) => {
         verifications: approvedVerifications.map(collateral => ({
           id: collateral._id,
           user: {
-            id: collateral.userId._id || collateral.userId,
-            name: collateral.userId.firstName ? `${collateral.userId.firstName} ${collateral.userId.lastName}` : 'Unknown User',
-            email: collateral.userId.email || 'N/A',
-            phone: collateral.userId.phone || 'N/A'
+            id: collateral.userId._id,
+            name: `${collateral.userId.firstName} ${collateral.userId.lastName}`,
+            email: collateral.userId.email,
+            phone: collateral.userId.phone
           },
           collateralType: collateral.collateralType,
           description: collateral.description,
@@ -652,6 +661,7 @@ const getApprovedVerifications = async (req, res) => {
 
   } catch (error) {
     console.error('Get approved verifications error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       status: 'error',
       message: 'Failed to get approved verifications',
@@ -709,9 +719,19 @@ const getDeletedVerifications = async (req, res) => {
   try {
     console.log('Getting deleted verifications...');
     
-    // First, let's check all collateral statuses
-    const allCollateral = await Collateral.find({}).select('verificationStatus');
-    console.log('All collateral statuses:', allCollateral.map(c => ({ id: c._id, status: c.verificationStatus })));
+    // First check if there are any collateral records at all
+    const totalCollateral = await Collateral.countDocuments();
+    console.log(`Total collateral records in database: ${totalCollateral}`);
+    
+    if (totalCollateral === 0) {
+      console.log('No collateral records found in database');
+      return res.status(200).json({
+        status: 'success',
+        data: {
+          verifications: []
+        }
+      });
+    }
     
     const deletedVerifications = await Collateral.find({ verificationStatus: 'deleted' })
       .populate('userId', 'firstName lastName email phone')
@@ -776,6 +796,7 @@ const getDeletedVerifications = async (req, res) => {
 
   } catch (error) {
     console.error('Get deleted verifications error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       status: 'error',
       message: 'Failed to get deleted verifications',

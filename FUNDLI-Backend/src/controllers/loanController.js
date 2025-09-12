@@ -1,6 +1,7 @@
 const Loan = require('../models/Loan');
 const User = require('../models/User');
 const ReferralService = require('../services/referralService');
+const NotificationService = require('../services/notificationService');
 
 // Apply for a loan
 const applyForLoan = async (req, res) => {
@@ -84,6 +85,22 @@ const applyForLoan = async (req, res) => {
     });
 
     await loan.save();
+
+    // Create notification for loan application submission
+    try {
+      await NotificationService.notifyLoanApplicationSubmitted({
+        loanId: loan._id,
+        borrowerId: borrowerId,
+        borrowerName: `${user.firstName} ${user.lastName}`,
+        amount: amount,
+        purpose: purpose,
+        duration: duration
+      });
+      console.log(`📧 Loan application notification sent for loan ${loan._id}`);
+    } catch (notificationError) {
+      console.error('Failed to create loan application notification:', notificationError);
+      // Don't fail the entire transaction if notifications fail
+    }
 
     // Track referral action for loan application
     try {
@@ -413,7 +430,7 @@ const getAllPendingLoans = async (req, res) => {
     console.log('✅ Proceeding to fetch pending loans for user:', req.user.id);
 
     const pendingLoans = await Loan.find({ status: 'pending' })
-      .populate('borrower', 'firstName lastName email kycStatus kycVerified')
+      .populate('borrower', 'firstName lastName email phone kycStatus kycVerified')
       .sort({ createdAt: -1 })
       .select('-__v');
 
@@ -437,6 +454,7 @@ const getAllPendingLoans = async (req, res) => {
         id: loan.borrower._id,
         name: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
         email: loan.borrower.email,
+        phone: loan.borrower.phone,
         kycStatus: loan.borrower.kycStatus,
         kycVerified: loan.borrower.kycVerified
       }
@@ -498,12 +516,21 @@ const rejectLoanApplication = async (req, res) => {
     
     await loan.save();
 
-    // TODO: Send notification to borrower
-    // await sendNotification(loan.borrower._id, {
-    //   type: 'loan_rejected',
-    //   message: `Your loan application for $${loan.loanAmount} has been rejected.`,
-    //   reason: reason
-    // });
+    // Create notification for loan rejection
+    try {
+      await NotificationService.notifyLoanDecision({
+        loanId: loan._id,
+        borrowerId: loan.borrower._id,
+        status: 'rejected',
+        amount: loan.loanAmount,
+        rejectionReason: reason || 'No reason provided',
+        borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`
+      });
+      console.log(`📧 Loan rejection notification sent for loan ${loan._id}`);
+    } catch (notificationError) {
+      console.error('Failed to create loan rejection notification:', notificationError);
+      // Don't fail the entire transaction if notifications fail
+    }
 
     res.status(200).json({
       status: 'success',
@@ -531,9 +558,16 @@ const acceptLoanApplication = async (req, res) => {
     const { paymentReference, amount } = req.body;
     const lenderId = req.user.id;
 
-    // Skip user type check for now - allow all authenticated users to accept loans
-    console.log('🔍 User accepting loan:', req.user.email, 'UserType:', req.user.userType);
-    console.log('✅ Proceeding to accept loan for user:', req.user.id);
+    // Check if user is a lender
+    if (req.user.userType !== 'lender') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Only lenders can accept loan applications'
+      });
+    }
+
+    console.log('🔍 Lender accepting loan:', req.user.email, 'UserType:', req.user.userType);
+    console.log('✅ Proceeding to accept loan for lender:', req.user.id);
 
     const loan = await Loan.findById(loanId).populate('borrower', 'firstName lastName email');
     
@@ -544,10 +578,11 @@ const acceptLoanApplication = async (req, res) => {
       });
     }
 
-    if (loan.status !== 'pending') {
+    // Check if loan is approved by admin before lender can fund it
+    if (loan.status !== 'approved') {
       return res.status(400).json({
         status: 'error',
-        message: 'Cannot accept loan in current status'
+        message: 'Loan must be approved by admin before lenders can fund it. Current status: ' + loan.status
       });
     }
 
@@ -641,6 +676,23 @@ const acceptLoanApplication = async (req, res) => {
       await borrowerWallet.save();
     }
 
+    // Create notification for loan funding
+    try {
+      await NotificationService.notifyLoanFunded({
+        loanId: loan._id,
+        borrowerId: loan.borrower._id,
+        lenderId: lenderId,
+        amount: loan.loanAmount,
+        investmentAmount: loan.loanAmount,
+        borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+        lenderName: `${req.user.firstName} ${req.user.lastName}`
+      });
+      console.log(`📧 Loan funding notification sent for loan ${loan._id}`);
+    } catch (notificationError) {
+      console.error('Failed to create loan funding notification:', notificationError);
+      // Don't fail the entire transaction if notifications fail
+    }
+
     res.status(200).json({
       status: 'success',
       message: 'Loan accepted and funded successfully',
@@ -663,6 +715,151 @@ const acceptLoanApplication = async (req, res) => {
   }
 };
 
+// Admin approve loan application
+const adminApproveLoan = async (req, res) => {
+  try {
+    const { loanId } = req.params;
+    const adminId = req.user.id;
+
+    // Check if user is an admin
+    if (req.user.userType !== 'admin') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Only admins can approve loan applications'
+      });
+    }
+
+    const loan = await Loan.findById(loanId).populate('borrower', 'firstName lastName email');
+    
+    if (!loan) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Loan not found'
+      });
+    }
+
+    if (loan.status !== 'pending') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Can only approve pending loans. Current status: ' + loan.status
+      });
+    }
+
+    // Update loan status to approved
+    loan.status = 'approved';
+    loan.approvedBy = adminId;
+    loan.approvedAt = new Date();
+    
+    await loan.save();
+
+    // Create notification for loan approval
+    try {
+      await NotificationService.notifyLoanDecision({
+        loanId: loan._id,
+        borrowerId: loan.borrower._id,
+        status: 'approved',
+        amount: loan.loanAmount,
+        borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`
+      });
+      console.log(`📧 Loan approval notification sent for loan ${loan._id}`);
+    } catch (notificationError) {
+      console.error('Failed to create loan approval notification:', notificationError);
+      // Don't fail the entire transaction if notifications fail
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Loan application approved successfully',
+      data: {
+        loanId: loan._id,
+        status: loan.status,
+        approvedAt: loan.approvedAt
+      }
+    });
+
+  } catch (error) {
+    console.error('Error approving loan:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to approve loan application'
+    });
+  }
+};
+
+// Admin reject loan application
+const adminRejectLoan = async (req, res) => {
+  try {
+    const { loanId } = req.params;
+    const { reason } = req.body;
+    const adminId = req.user.id;
+
+    // Check if user is an admin
+    if (req.user.userType !== 'admin') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Only admins can reject loan applications'
+      });
+    }
+
+    const loan = await Loan.findById(loanId).populate('borrower', 'firstName lastName email');
+    
+    if (!loan) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Loan not found'
+      });
+    }
+
+    if (loan.status !== 'pending') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Can only reject pending loans. Current status: ' + loan.status
+      });
+    }
+
+    // Update loan status to rejected
+    loan.status = 'rejected';
+    loan.rejectedBy = adminId;
+    loan.rejectedAt = new Date();
+    loan.rejectionReason = reason || 'No reason provided';
+    
+    await loan.save();
+
+    // Create notification for loan rejection
+    try {
+      await NotificationService.notifyLoanDecision({
+        loanId: loan._id,
+        borrowerId: loan.borrower._id,
+        status: 'rejected',
+        amount: loan.loanAmount,
+        rejectionReason: reason || 'No reason provided',
+        borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`
+      });
+      console.log(`📧 Loan rejection notification sent for loan ${loan._id}`);
+    } catch (notificationError) {
+      console.error('Failed to create loan rejection notification:', notificationError);
+      // Don't fail the entire transaction if notifications fail
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Loan application rejected successfully',
+      data: {
+        loanId: loan._id,
+        status: loan.status,
+        rejectionReason: loan.rejectionReason
+      }
+    });
+
+  } catch (error) {
+    console.error('Error rejecting loan:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to reject loan application'
+    });
+  }
+};
+
 module.exports = {
   applyForLoan,
   getUserLoans,
@@ -673,5 +870,7 @@ module.exports = {
   getPendingLoansForBorrower,
   getAllPendingLoans,
   rejectLoanApplication,
-  acceptLoanApplication
+  acceptLoanApplication,
+  adminApproveLoan,
+  adminRejectLoan
 }; 

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
+const Wallet = require('../models/Wallet');
 const {
   createWallet,
   getWallet,
@@ -51,5 +52,35 @@ router.post('/withdraw', protect, withdrawFunds);
 // @desc    Transfer funds to another user
 // @access  Private
 router.post('/transfer', protect, transferFunds);
+
+// @route   POST /api/wallet/test-add-funds
+// @desc    Add test funds to wallet (development only)
+// @access  Private
+router.post('/test-add-funds', protect, async (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(403).json({ status: 'error', message: 'Not allowed in production' });
+  }
+  
+  try {
+    const userId = req.user.id;
+    const { amount = 1000 } = req.body;
+    
+    const wallet = await Wallet.findOne({ user: userId });
+    if (!wallet) {
+      return res.status(404).json({ status: 'error', message: 'Wallet not found' });
+    }
+    
+    wallet.balance += amount;
+    await wallet.save();
+    
+    res.json({
+      status: 'success',
+      message: `Added $${amount} test funds to wallet`,
+      data: { wallet: { balance: wallet.balance } }
+    });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: 'Failed to add test funds' });
+  }
+});
 
 module.exports = router;
