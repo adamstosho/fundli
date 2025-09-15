@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Authentication</title>
+</head>
+<body>
+    <h1>Test Authentication Setup</h1>
+    <button onclick="createTestUser()">Create Test Lender User</button>
+    <button onclick="checkAuth()">Check Current Auth State</button>
+    <button onclick="clearAuth()">Clear Auth Data</button>
+    <div id="output"></div>
+
+    <script>
+        function createTestUser() {
+            const testUser = {
+                id: 'test-lender-id',
+                firstName: 'Test',
+                lastName: 'Lender',
+                email: 'lender@test.com',
+                userType: 'lender',
+                kycStatus: 'approved',
+                isEmailVerified: true,
+                creditScore: 750
+            };
+
+            const testToken = 'test-access-token-' + Date.now();
+            const testRefreshToken = 'test-refresh-token-' + Date.now();
+
+            localStorage.setItem('accessToken', testToken);
+            localStorage.setItem('refreshToken', testRefreshToken);
+            localStorage.setItem('user', JSON.stringify(testUser));
+
+            document.getElementById('output').innerHTML = `
+                <h3>Test User Created:</h3>
+                <pre>${JSON.stringify(testUser, null, 2)}</pre>
+                <p>Access Token: ${testToken}</p>
+                <p>Refresh Token: ${testRefreshToken}</p>
+            `;
+        }
+
+        function checkAuth() {
+            const token = localStorage.getItem('accessToken');
+            const user = localStorage.getItem('user');
+            const refreshToken = localStorage.getItem('refreshToken');
+
+            document.getElementById('output').innerHTML = `
+                <h3>Current Auth State:</h3>
+                <p>Access Token: ${token ? 'Present' : 'Missing'}</p>
+                <p>Refresh Token: ${refreshToken ? 'Present' : 'Missing'}</p>
+                <p>User Data: ${user ? 'Present' : 'Missing'}</p>
+                ${user ? `<pre>${JSON.stringify(JSON.parse(user), null, 2)}</pre>` : ''}
+            `;
+        }
+
+        function clearAuth() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            document.getElementById('output').innerHTML = '<p>Auth data cleared</p>';
+        }
+
+        // Check auth state on load
+        checkAuth();
+    </script>
+</body>
+</html>
+

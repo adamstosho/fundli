@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Test Data</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .step { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .log { background-color: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 3px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Create Test Data for Fundli</h1>
+        <p>This page will create test users, loan applications, and notifications to test the lender dashboard.</p>
+        
+        <div class="step">
+            <h3>Step 1: Create Test Users</h3>
+            <button onclick="createUsers()">Create Test Users</button>
+            <div id="users-log" class="log"></div>
+        </div>
+        
+        <div class="step">
+            <h3>Step 2: Create Test Loan Application</h3>
+            <button onclick="createLoan()">Create Test Loan</button>
+            <div id="loan-log" class="log"></div>
+        </div>
+        
+        <div class="step">
+            <h3>Step 3: Approve Loan as Admin</h3>
+            <button onclick="approveLoan()">Approve Loan</button>
+            <div id="approval-log" class="log"></div>
+        </div>
+        
+        <div class="step">
+            <h3>Step 4: Check Results</h3>
+            <button onclick="checkResults()">Check Results</button>
+            <div id="results-log" class="log"></div>
+        </div>
+        
+        <div class="step info">
+            <h3>Test Credentials</h3>
+            <p><strong>Borrower:</strong> borrower@test.com / TestPassword123!</p>
+            <p><strong>Lender:</strong> lender@test.com / TestPassword123!</p>
+            <p><strong>Admin:</strong> admin@test.com / TestPassword123!</p>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:5000/api';
+        let tokens = {};
+
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            element.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+        }
+
+        async function createUsers() {
+            const users = [
+                { type: 'borrower', email: 'borrower@test.com', name: 'Test Borrower' },
+                { type: 'lender', email: 'lender@test.com', name: 'Test Lender' },
+                { type: 'admin', email: 'admin@test.com', name: 'Test Admin' }
+            ];
+
+            for (const user of users) {
+                try {
+                    log('users-log', `Creating ${user.name}...`);
+                    
+                    // Try to register first
+                    const registerResponse = await fetch(`${BASE_URL}/auth/register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            firstName: user.name.split(' ')[0],
+                            lastName: user.name.split(' ')[1],
+                            email: user.email,
+                            phone: '+1234567890',
+                            password: 'TestPassword123!',
+                            userType: user.type
+                        })
+                    });
+
+                    if (registerResponse.ok) {
+                        const data = await registerResponse.json();
+                        tokens[user.type] = data.accessToken;
+                        log('users-log', `✅ ${user.name} created successfully`, 'success');
+                    } else {
+                        const errorData = await registerResponse.json();
+                        if (errorData.message?.includes('already exists')) {
+                            // Try to login instead
+                            const loginResponse = await fetch(`${BASE_URL}/auth/login`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    email: user.email,
+                                    password: 'TestPassword123!'
+                                })
+                            });
+                            
+                            if (loginResponse.ok) {
+                                const loginData = await loginResponse.json();
+                                tokens[user.type] = loginData.accessToken;
+                                log('users-log', `✅ ${user.name} logged in (already exists)`, 'success');
+                            } else {
+                                throw new Error('Login failed');
+                            }
+                        } else {
+                            throw new Error(errorData.message);
+                        }
+                    }
+                } catch (error) {
+                    log('users-log', `❌ Failed to create ${user.name}: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function createLoan() {
+            if (!tokens.borrower) {
+                log('loan-log', '❌ No borrower token available. Please create users first.', 'error');
+                return;
+            }
+
+            try {
+                log('loan-log', 'Creating test loan application...');
+                
+                const response = await fetch(`${BASE_URL}/borrower/loan/apply`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${tokens.borrower}`
+                    },
+                    body: JSON.stringify({
+                        requestedAmount: 50000,
+                        purpose: 'Business Expansion',
+                        duration: 12,
+                        collateral: {
+                            type: 'property',
+                            description: 'Commercial property in downtown area',
+                            estimatedValue: 100000
+                        }
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    window.loanId = data.data.loan.id;
+                    log('loan-log', `✅ Test loan application created: ${window.loanId}`, 'success');
+                } else {
+                    const errorData = await response.json();
+                    log('loan-log', `❌ Loan creation failed: ${errorData.message}`, 'error');
+                }
+            } catch (error) {
+                log('loan-log', `❌ Loan creation error: ${error.message}`, 'error');
+            }
+        }
+
+        async function approveLoan() {
+            if (!tokens.admin) {
+                log('approval-log', '❌ No admin token available. Please create users first.', 'error');
+                return;
+            }
+
+            if (!window.loanId) {
+                log('approval-log', '❌ No loan ID available. Please create loan first.', 'error');
+                return;
+            }
+
+            try {
+                log('approval-log', `Approving loan ${window.loanId}...`);
+                
+                const response = await fetch(`${BASE_URL}/admin/loan/${window.loanId}/approve`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${tokens.admin}`
+                    },
+                    body: JSON.stringify({
+                        action: 'approve',
+                        adminNotes: 'Test approval for demo purposes'
+                    })
+                });
+
+                if (response.ok) {
+                    log('approval-log', '✅ Loan approved by admin', 'success');
+                } else {
+                    const errorData = await response.json();
+                    log('approval-log', `❌ Loan approval failed: ${errorData.message}`, 'error');
+                }
+            } catch (error) {
+                log('approval-log', `❌ Loan approval error: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkResults() {
+            if (!tokens.lender) {
+                log('results-log', '❌ No lender token available. Please create users first.', 'error');
+                return;
+            }
+
+            try {
+                log('results-log', 'Checking lender dashboard data...');
+                
+                // Check loan applications
+                const loanAppsResponse = await fetch(`${BASE_URL}/lender/loan-applications`, {
+                    headers: { 'Authorization': `Bearer ${tokens.lender}` }
+                });
+                
+                if (loanAppsResponse.ok) {
+                    const loanAppsData = await loanAppsResponse.json();
+                    log('results-log', `📊 Loan applications: ${loanAppsData.data.loanApplications.length}`, 'success');
+                } else {
+                    log('results-log', '❌ Failed to fetch loan applications', 'error');
+                }
+
+                // Check notifications
+                const notificationsResponse = await fetch(`${BASE_URL}/lender/notifications`, {
+                    headers: { 'Authorization': `Bearer ${tokens.lender}` }
+                });
+                
+                if (notificationsResponse.ok) {
+                    const notificationsData = await notificationsResponse.json();
+                    log('results-log', `🔔 Notifications: ${notificationsData.data.notifications.length}`, 'success');
+                } else {
+                    log('results-log', '❌ Failed to fetch notifications', 'error');
+                }
+
+                log('results-log', '🎉 Test data creation complete! You can now check the lender dashboard.', 'success');
+            } catch (error) {
+                log('results-log', `❌ Check results error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
+

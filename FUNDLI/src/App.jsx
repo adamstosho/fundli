@@ -3,6 +3,10 @@ import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { router } from './routes';
+import { clearIncorrectWalletData } from './utils/clearLocalWalletData';
+
+// Clear incorrect wallet data on app start
+clearIncorrectWalletData();
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {

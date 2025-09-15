@@ -22,7 +22,7 @@ const Register = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const { register } = useAuth();
+  const { register, isLoading: authLoading, isRetrying, retryCount } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -480,10 +480,12 @@ const Register = () => {
                 disabled={isLoading}
                 className="w-full btn-cta disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
               >
-                {isLoading ? (
+                {isLoading || authLoading ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                    <span>Creating account...</span>
+                    <span>
+                      {isRetrying ? `Retrying... (${retryCount}/2)` : 'Creating account...'}
+                    </span>
                   </>
                 ) : (
                   <>

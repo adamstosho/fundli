@@ -59,16 +59,18 @@ router.get('/borrower-stats', protect, async (req, res) => {
       console.log(`  ${index + 1}. ${loan.purpose} - $${loan.loanAmount} - ${loan.status}`);
     });
     
-    // Calculate stats
-    const totalBorrowed = loans.reduce((sum, loan) => sum + (loan.loanAmount || 0), 0);
+    // Calculate stats - only count funded/active loans for total borrowed
+    const fundedLoans = loans.filter(loan => ['active', 'funded', 'disbursed'].includes(loan.status));
+    const totalBorrowed = fundedLoans.reduce((sum, loan) => sum + (loan.loanAmount || 0), 0);
     const totalRepaid = loans.reduce((sum, loan) => sum + (loan.amountPaid || 0), 0);
-    const activeLoans = loans.filter(loan => ['active', 'funded', 'disbursed'].includes(loan.status)).length;
+    const activeLoans = fundedLoans.length;
     
     console.log('📈 Calculated stats:', {
       totalBorrowed,
       totalRepaid,
       activeLoans,
-      totalLoans: loans.length
+      totalLoans: loans.length,
+      fundedLoansCount: fundedLoans.length
     });
     
     // Get user's credit score

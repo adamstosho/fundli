@@ -14,8 +14,10 @@ import {
   ArrowRight,
   Loader
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) => {
+  const { user } = useAuth();
   const [paymentData, setPaymentData] = useState({
     amount: '',
     paymentMethod: 'bank_transfer',
@@ -84,7 +86,7 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
       if (!localWallets[userType]) {
         // Create default wallet for this user type
         const defaultWallet = {
-          balance: userType === 'lender' ? 10000 : userType === 'admin' ? 50000 : 1000,
+          balance: 0, // All user types start with 0 balance
           currency: 'USD',
           status: 'active',
           userType: userType,
@@ -195,23 +197,34 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
         
         console.log('✅ Loan funded successfully:', fundingResult);
         
-        // Update local wallet balance
-        const newBalance = walletBalance - fundingAmount;
-        setWalletBalance(newBalance);
+        // Update local wallet balance from response
+        if (fundingResult.data?.lenderWallet?.balance !== undefined) {
+          const newBalance = fundingResult.data.lenderWallet.balance;
+          setWalletBalance(newBalance);
+          
+          // Update local storage wallet
+          updateLocalWallet('lender', newBalance);
+          
+          console.log('Updated wallet balance from response:', newBalance);
+        } else {
+          // Fallback to manual calculation
+          const newBalance = walletBalance - fundingAmount;
+          setWalletBalance(newBalance);
+          updateLocalWallet('lender', newBalance);
+        }
         
-        // Update local storage wallet
-        updateLocalWallet('lender', newBalance);
-        
-        // Trigger wallet balance update events
-        window.dispatchEvent(new CustomEvent('walletBalanceUpdated'));
+        // Trigger wallet balance update events for this user only
+        window.dispatchEvent(new CustomEvent('walletBalanceUpdated', { 
+          detail: { userId: user.id, userType: 'lender' } 
+        }));
         
         // Trigger dashboard refresh
         if (window.refreshLenderDashboard) {
           window.refreshLenderDashboard();
         }
         
-        // Trigger wallet balance refresh
-        if (window.refreshWalletBalance) {
+        // Trigger wallet balance refresh (only for lenders)
+        if (window.refreshWalletBalance && user?.userType === 'lender') {
           window.refreshWalletBalance();
         }
         
@@ -558,11 +571,10 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
                   onChange={handleInputChange}
                   placeholder="Enter amount to fund"
                   min="1"
-                  max={loanApplication.loanAmount}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Maximum: ${loanApplication.loanAmount?.toLocaleString()}
+                  Loan amount: ${loanApplication.loanAmount?.toLocaleString()}
                 </p>
               </div>
 

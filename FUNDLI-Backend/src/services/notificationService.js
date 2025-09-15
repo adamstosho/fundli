@@ -755,6 +755,81 @@ class NotificationService {
       throw error;
     }
   }
+
+  /**
+   * Notify borrower about loan approval
+   */
+  static async notifyLoanApproved({ borrowerId, borrowerName, loanId, loanAmount, purpose }) {
+    try {
+      await this.createNotification({
+        recipientId: borrowerId,
+        type: 'loan_approved',
+        title: 'Loan Application Approved! 🎉',
+        message: `Congratulations! Your loan application for $${loanAmount.toLocaleString()} (${purpose}) has been approved and is now available for funding.`,
+        priority: 'high',
+        actionRequired: false,
+        metadata: {
+          loanId,
+          loanAmount,
+          purpose,
+          action: 'view_loan'
+        }
+      });
+      console.log(`📧 Loan approval notification sent to borrower ${borrowerId}`);
+    } catch (error) {
+      console.error('Error sending loan approval notification:', error);
+    }
+  }
+
+  /**
+   * Notify lenders about new approved loan
+   */
+  static async notifyNewApprovedLoan({ lenderId, lenderName, loanId, borrowerName, loanAmount, purpose }) {
+    try {
+      await this.createNotification({
+        recipientId: lenderId,
+        type: 'new_approved_loan',
+        title: 'New Loan Available for Funding! 💰',
+        message: `A new loan application has been approved: $${loanAmount.toLocaleString()} for ${purpose} by ${borrowerName}. Check it out!`,
+        priority: 'high',
+        actionRequired: true,
+        metadata: {
+          loanId,
+          loanAmount,
+          purpose,
+          borrowerName,
+          action: 'view_loan'
+        }
+      });
+      console.log(`📧 New approved loan notification sent to lender ${lenderId}`);
+    } catch (error) {
+      console.error('Error sending new approved loan notification:', error);
+    }
+  }
+
+  /**
+   * Notify borrower about loan rejection
+   */
+  static async notifyLoanRejected({ borrowerId, borrowerName, loanId, rejectionReason }) {
+    try {
+      await this.createNotification({
+        recipientId: borrowerId,
+        type: 'loan_rejected',
+        title: 'Loan Application Update',
+        message: `Your loan application has been reviewed. Unfortunately, it was not approved at this time. Reason: ${rejectionReason}`,
+        priority: 'normal',
+        actionRequired: false,
+        metadata: {
+          loanId,
+          rejectionReason,
+          action: 'view_loan'
+        }
+      });
+      console.log(`📧 Loan rejection notification sent to borrower ${borrowerId}`);
+    } catch (error) {
+      console.error('Error sending loan rejection notification:', error);
+    }
+  }
 }
 
 module.exports = NotificationService;

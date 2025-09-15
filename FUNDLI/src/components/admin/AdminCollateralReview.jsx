@@ -21,6 +21,7 @@ import {
   FileSpreadsheet,
   Printer
 } from 'lucide-react';
+import FeedbackManagement from './FeedbackManagement';
 
 const AdminCollateralReview = () => {
   const [verifications, setVerifications] = useState([]);
@@ -41,6 +42,8 @@ const AdminCollateralReview = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showActions, setShowActions] = useState({});
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [selectedBorrowerForFeedback, setSelectedBorrowerForFeedback] = useState(null);
 
   useEffect(() => {
     loadAllVerifications();
@@ -215,6 +218,16 @@ const AdminCollateralReview = () => {
     }
   };
 
+  const handleSendFeedback = (verification) => {
+    setSelectedBorrowerForFeedback({
+      id: verification._id,
+      borrower: verification.user,
+      purpose: 'Collateral Verification Review',
+      loanAmount: verification.estimatedValue,
+      recipientType: 'borrower'
+    });
+    setShowFeedbackModal(true);
+  };
 
   // Export data functionality
   const exportToCSV = (data, filename) => {
@@ -576,6 +589,16 @@ const AdminCollateralReview = () => {
                                 </button>
                                 <button
                                   onClick={() => {
+                                    handleSendFeedback(verification);
+                                    setShowActions({});
+                                  }}
+                                  className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-2"
+                                >
+                                  <MessageSquare className="h-4 w-4" />
+                                  <span>Send Feedback</span>
+                                </button>
+                                <button
+                                  onClick={() => {
                                     printVerification(verification);
                                     setShowActions({});
                                   }}
@@ -920,6 +943,18 @@ const AdminCollateralReview = () => {
           )}
         </div>
       </div>
+
+      {/* Feedback Management Modal */}
+      {showFeedbackModal && selectedBorrowerForFeedback && (
+        <FeedbackManagement
+          loanId={selectedBorrowerForFeedback.id}
+          loanData={selectedBorrowerForFeedback}
+          onClose={() => {
+            setShowFeedbackModal(false);
+            setSelectedBorrowerForFeedback(null);
+          }}
+        />
+      )}
     </div>
   );
 };

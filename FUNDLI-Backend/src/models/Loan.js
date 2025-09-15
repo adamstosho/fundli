@@ -16,8 +16,8 @@ const loanSchema = new mongoose.Schema({
   loanAmount: {
     type: Number,
     required: [true, 'Loan amount is required'],
-    min: [10, 'Minimum loan amount is $10'],
-    max: [100000, 'Maximum loan amount is $100,000']
+    min: [0, 'Loan amount must be positive'],
+    max: [999999999, 'No practical maximum limit']
   },
   
   currency: {
@@ -52,14 +52,14 @@ const loanSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'Loan duration is required'],
     min: [1, 'Minimum duration is 1 month'],
-    max: [120, 'Maximum duration is 120 months']
+    max: [999999, 'No practical maximum duration']
   },
   
   interestRate: {
     type: Number,
     required: [true, 'Interest rate is required'],
-    min: [0.01, 'Minimum interest rate is 0.01%'],
-    max: [100, 'Maximum interest rate is 100%']
+    min: [0, 'Interest rate must be non-negative'],
+    max: [1000, 'No practical maximum interest rate']
   },
   
   // Repayment Information

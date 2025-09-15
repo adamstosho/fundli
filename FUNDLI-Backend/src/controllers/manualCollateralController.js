@@ -1,5 +1,6 @@
 const Collateral = require('../models/Collateral');
 const User = require('../models/User');
+const Loan = require('../models/Loan');
 const NotificationService = require('../services/notificationService');
 const cloudinary = require('cloudinary').v2;
 
@@ -76,7 +77,7 @@ const submitCollateralVerification = async (req, res) => {
     if (existingCollateral) {
       return res.status(400).json({
         status: 'error',
-        message: 'You already have a collateral verification submission pending review'
+        message: 'You already have a collateral verification submission pending review. Please wait for it to be approved before submitting another one.'
       });
     }
 

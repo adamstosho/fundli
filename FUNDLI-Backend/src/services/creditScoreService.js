@@ -5,9 +5,9 @@ const logger = require('../utils/logger');
 
 class CreditScoreService {
   constructor() {
-    this.baseScore = 650; // Starting credit score
+    this.baseScore = 0; // Starting credit score
     this.maxScore = 850; // Maximum credit score
-    this.minScore = 300; // Minimum credit score
+    this.minScore = 0; // Minimum credit score
   }
 
   /**

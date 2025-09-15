@@ -51,10 +51,10 @@ const userRegistrationRules = {
 const loanApplicationRules = {
   loanAmount: {
     required: true,
-    min: 10,
-    max: 100000,
+    min: 0,
+    max: 999999999,
     type: 'number',
-    message: 'Loan amount must be between $10 and $100,000'
+    message: 'Loan amount must be a positive number'
   },
   purpose: {
     required: true,
@@ -65,9 +65,9 @@ const loanApplicationRules = {
   duration: {
     required: true,
     min: 1,
-    max: 60,
+    max: 999999,
     type: 'number',
-    message: 'Loan duration must be between 1 and 60 months'
+    message: 'Loan duration must be at least 1 month'
   },
   collateral: {
     required: false,
@@ -117,24 +117,24 @@ const lendingPoolRules = {
   },
   poolSize: {
     required: true,
-    min: 100,
-    max: 500000,
+    min: 0,
+    max: 999999999,
     type: 'number',
-    message: 'Pool size must be between $100 and $500,000'
+    message: 'Pool size must be a positive number'
   },
   interestRate: {
     required: true,
-    min: 5,
-    max: 50,
+    min: 0,
+    max: 1000,
     type: 'number',
-    message: 'Interest rate must be between 5% and 50%'
+    message: 'Interest rate must be a non-negative number'
   },
   duration: {
     required: true,
     min: 1,
-    max: 60,
+    max: 999999,
     type: 'number',
-    message: 'Duration must be between 1 and 60 months'
+    message: 'Duration must be at least 1 month'
   },
   riskLevel: {
     required: true,
@@ -154,10 +154,10 @@ const lendingPoolRules = {
 const investmentRules = {
   amount: {
     required: true,
-    min: 10,
-    max: 100000,
+    min: 0,
+    max: 999999999,
     type: 'number',
-    message: 'Investment amount must be between $10 and $100,000'
+    message: 'Investment amount must be a positive number'
   },
   lendingPoolId: {
     required: false,

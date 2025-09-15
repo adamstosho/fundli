@@ -38,8 +38,10 @@ const PendingLoansSection = ({ userType, title = "Pending Loans" }) => {
       let endpoint;
       if (userType === 'borrower') {
         endpoint = 'http://localhost:5000/api/loans/pending/borrower';
-      } else if (userType === 'lender' || userType === 'admin') {
-        endpoint = 'http://localhost:5000/api/loans/pending/all';
+      } else if (userType === 'lender') {
+        endpoint = 'http://localhost:5000/api/lender/loan-applications';
+      } else if (userType === 'admin') {
+        endpoint = 'http://localhost:5000/api/admin/loans';
       } else {
         throw new Error('Invalid user type');
       }
@@ -52,7 +54,14 @@ const PendingLoansSection = ({ userType, title = "Pending Loans" }) => {
 
       if (response.ok) {
         const result = await response.json();
-        setPendingLoans(result.data.loans || []);
+        // Handle different response formats based on user type
+        if (userType === 'lender') {
+          setPendingLoans(result.data.loanApplications || []);
+        } else if (userType === 'admin') {
+          setPendingLoans(result.data.loans || []);
+        } else {
+          setPendingLoans(result.data.loans || []);
+        }
       } else {
         const errorData = await response.json();
         setError(errorData.message || 'Failed to load pending loans');
@@ -204,7 +213,7 @@ const PendingLoansSection = ({ userType, title = "Pending Loans" }) => {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-3">
                   <h4 className="font-medium text-gray-900 dark:text-white">
-                    ${loan.loanAmount?.toLocaleString()}
+                    {loan.currency || 'USD'} {loan.loanAmount?.toLocaleString()}
                   </h4>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(loan.status)}`}>
                     {loan.status}
@@ -217,7 +226,7 @@ const PendingLoansSection = ({ userType, title = "Pending Loans" }) => {
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    ${loan.loanAmount?.toLocaleString()}
+                    {loan.currency || 'USD'} {loan.loanAmount?.toLocaleString()}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-500">
                     Remaining
@@ -358,7 +367,7 @@ const PendingLoansSection = ({ userType, title = "Pending Loans" }) => {
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">Amount:</span>
                     <span className="font-medium text-gray-900 dark:text-white">
-                      ${selectedLoan.loanAmount?.toLocaleString()}
+                      {selectedLoan.currency || 'USD'} {selectedLoan.loanAmount?.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">

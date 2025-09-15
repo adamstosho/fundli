@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { DollarSign, Calendar, TrendingUp, Shield, CheckCircle, AlertCircle, ArrowRight, Calculator } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const CreatePool = () => {
-  const { user } = useAuth();
+  const { user, refreshAuthToken, logout, isLoading: authLoading, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     poolName: '',
     poolSize: '',
@@ -14,13 +14,60 @@ const CreatePool = () => {
     minInvestment: '',
     maxInvestment: '',
     description: '',
-    riskLevel: 'medium'
+    riskLevel: 'medium',
+    currency: 'USD'
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [redirectCountdown, setRedirectCountdown] = useState(0);
 
   const navigate = useNavigate();
+
+  // Check authentication status
+  useEffect(() => {
+    console.log('CreatePool - Auth state:', {
+      authLoading,
+      isAuthenticated,
+      user: user ? { email: user.email, userType: user.userType } : null
+    });
+    
+    // Check localStorage directly for debugging
+    const token = localStorage.getItem('accessToken');
+    const userData = localStorage.getItem('user');
+    console.log('CreatePool - localStorage check:', {
+      hasToken: !!token,
+      hasUserData: !!userData,
+      userData: userData ? JSON.parse(userData) : null
+    });
+    
+    if (!authLoading) {
+      if (!isAuthenticated || !user) {
+        console.log('CreatePool - Not authenticated or no user, checking localStorage...');
+        
+        // If we have data in localStorage but AuthContext hasn't loaded it yet, wait a bit
+        if (token && userData) {
+          console.log('CreatePool - Found data in localStorage, waiting for AuthContext to load...');
+          // Don't set error yet, wait for AuthContext to process
+          return;
+        }
+        
+        setError('Please log in to create a lending pool.');
+        setIsCheckingAuth(false);
+        return;
+      }
+      
+      if (user.userType !== 'lender') {
+        setError('Only lenders can create lending pools.');
+        setIsCheckingAuth(false);
+        return;
+      }
+      
+      console.log('CreatePool - Authentication successful, user is lender');
+      setIsCheckingAuth(false);
+    }
+  }, [authLoading, isAuthenticated, user]);
 
   // KYC verification is now optional - all users can create lending pools
 
@@ -39,11 +86,27 @@ const CreatePool = () => {
     setError('');
 
     try {
-      // Get the authentication token
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        throw new Error('Authentication required');
+      // Check if user is authenticated
+      if (!isAuthenticated || !user) {
+        throw new Error('Please log in to create a lending pool.');
       }
+
+      // Check if user is a lender
+      if (user.userType !== 'lender') {
+        throw new Error('Only lenders can create lending pools.');
+      }
+
+      // Get the authentication token
+      let token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in again.');
+      }
+
+      console.log('User authenticated:', {
+        email: user.email,
+        userType: user.userType,
+        hasToken: !!token
+      });
 
       // Prepare the pool data
       const poolData = {
@@ -54,7 +117,8 @@ const CreatePool = () => {
         interestRate: parseFloat(formData.interestRate),
         minInvestment: parseFloat(formData.minInvestment),
         maxInvestment: parseFloat(formData.maxInvestment),
-        riskLevel: formData.riskLevel
+        riskLevel: formData.riskLevel,
+        currency: formData.currency
       };
 
       console.log('Creating pool with data:', poolData);
@@ -81,11 +145,87 @@ const CreatePool = () => {
           navigate('/dashboard/lender');
         }, 2000);
       } else {
-        throw new Error(result.message || 'Failed to create lending pool');
+        // Handle specific error cases
+        console.error('Pool creation failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          result: result
+        });
+
+        if (response.status === 401) {
+          // Try to refresh token first before giving up
+          try {
+            console.log('Attempting to refresh token...');
+            await refreshAuthToken();
+            const newToken = localStorage.getItem('accessToken');
+            
+            if (newToken) {
+              console.log('Token refreshed, retrying pool creation...');
+              // Retry the request with the new token
+              const retryResponse = await fetch('http://localhost:5000/api/pools', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${newToken}`
+                },
+                body: JSON.stringify(poolData)
+              });
+              
+              const retryResult = await retryResponse.json();
+              
+              if (retryResponse.ok) {
+                setSuccess(true);
+                console.log('Pool created successfully on retry:', retryResult.data.pool);
+                setTimeout(() => {
+                  navigate('/dashboard/lender');
+                }, 2000);
+                return;
+              }
+            }
+          } catch (refreshError) {
+            console.error('Token refresh failed:', refreshError);
+          }
+          
+          // If refresh failed or retry failed, then logout
+          throw new Error('Session expired. Please log in again.');
+        } else if (response.status === 403) {
+          throw new Error('Access denied. Only lenders can create pools.');
+        } else {
+          throw new Error(result.message || result.error || 'Failed to create lending pool');
+        }
       }
     } catch (err) {
       console.error('Error creating pool:', err);
-      setError(err.message || 'Failed to create lending pool. Please try again.');
+      
+      // Only redirect to login for specific authentication errors
+      if (err.message.includes('Session expired') || 
+          err.message.includes('Authentication required') ||
+          err.message.includes('Please log in')) {
+        
+        // Only clear auth data if it's really a session issue
+        if (err.message.includes('Session expired')) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          logout();
+        }
+        
+        setError(err.message);
+        setRedirectCountdown(3);
+        
+        const countdownInterval = setInterval(() => {
+          setRedirectCountdown(prev => {
+            if (prev <= 1) {
+              clearInterval(countdownInterval);
+              navigate('/login', { state: { from: { pathname: '/marketplace/create-pool' } } });
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      } else {
+        setError(err.message || 'Failed to create lending pool. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -93,6 +233,20 @@ const CreatePool = () => {
 
   const isFormValid = formData.poolName && formData.poolSize && formData.duration && 
                      formData.interestRate && formData.minInvestment && formData.maxInvestment;
+
+  // Show loading state while checking authentication or while auth is loading
+  if (isCheckingAuth || authLoading) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="card p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">
+            {authLoading ? 'Loading...' : 'Verifying authentication...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -131,7 +285,22 @@ const CreatePool = () => {
                 className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg text-sm flex items-center"
               >
                 <AlertCircle className="h-4 w-4 mr-2" />
-                {error}
+                <div className="flex-1">
+                  <div>{error}</div>
+                  {redirectCountdown > 0 && (
+                    <div className="text-xs mt-1">
+                      Redirecting to login in {redirectCountdown} seconds...
+                    </div>
+                  )}
+                  {error.includes('Please log in') && (
+                    <button
+                      onClick={() => navigate('/login')}
+                      className="mt-2 px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 text-sm"
+                    >
+                      Go to Login
+                    </button>
+                  )}
+                </div>
               </motion.div>
             )}
 
@@ -154,7 +323,7 @@ const CreatePool = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="poolSize" className="form-label">
-                  Amount (USD)
+                  Amount
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -175,6 +344,30 @@ const CreatePool = () => {
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   Total amount available for borrowing in this pool
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="currency" className="form-label">
+                  Currency
+                </label>
+                <select
+                  id="currency"
+                  name="currency"
+                  value={formData.currency}
+                  onChange={handleChange}
+                  className="input-field"
+                  required
+                >
+                  <option value="USD">USD - US Dollar</option>
+                  <option value="NGN">NGN - Nigerian Naira</option>
+                  <option value="EUR">EUR - Euro</option>
+                  <option value="GBP">GBP - British Pound</option>
+                  <option value="GHS">GHS - Ghanaian Cedi</option>
+                  <option value="ZAR">ZAR - South African Rand</option>
+                </select>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Select the currency for this lending pool
                 </p>
               </div>
 
@@ -252,7 +445,7 @@ const CreatePool = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="minInvestment" className="form-label">
-                  Minimum Investment (USD)
+                  Minimum Investment ({formData.currency})
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -274,7 +467,7 @@ const CreatePool = () => {
 
               <div>
                 <label htmlFor="maxInvestment" className="form-label">
-                  Maximum Investment (USD)
+                  Maximum Investment ({formData.currency})
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

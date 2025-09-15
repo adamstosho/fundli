@@ -39,7 +39,7 @@ const applyForLoan = async (req, res) => {
     // Calculate loan terms (using a default interest rate based on credit score)
     const baseInterestRate = 8; // 8% base rate
     const creditScoreAdjustment = Math.max(0, (750 - user.creditScore) * 0.02); // Higher score = lower rate
-    const interestRate = Math.max(5, baseInterestRate - creditScoreAdjustment); // Min 5%
+    const interestRate = Math.max(0, baseInterestRate - creditScoreAdjustment); // No minimum
 
     // Calculate monthly payment and total amounts
     const monthlyRate = interestRate / 100 / 12;
@@ -73,7 +73,8 @@ const applyForLoan = async (req, res) => {
       collateral: collateral ? {
         type: collateral.type || 'other',
         description: collateral.description || '',
-        estimatedValue: collateral.estimatedValue || 0
+        estimatedValue: collateral.estimatedValue || 0,
+        documents: collateral.documents || []
       } : null,
       status: 'pending',
       submittedAt: new Date(),

@@ -33,14 +33,43 @@ const NotificationsPage = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('http://localhost:5000/api/notifications', {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      if (!token) {
+        setError('No authentication token found');
+        return;
+      }
+      
+      if (!user.userType) {
+        setError('No user type found');
+        return;
+      }
+      
+      // Use different endpoints based on user type
+      const endpoint = user.userType === 'lender' 
+        ? 'http://localhost:5000/api/lender/notifications'
+        : 'http://localhost:5000/api/notifications';
+      
+      console.log('🔔 Loading notifications for user type:', user.userType);
+      console.log('🔔 Using endpoint:', endpoint);
+      console.log('🔔 User data:', user);
+      
+      const response = await fetch(endpoint, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
+      console.log('🔔 Notifications response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('🔔 Notifications data:', data);
+        console.log('🔔 Notifications count:', data.data?.notifications?.length || 0);
+        console.log('🔔 Notifications details:', data.data?.notifications?.map(n => ({ id: n._id, title: n.title, type: n.type })));
         setNotifications(data.data.notifications || []);
       } else {
+        const errorText = await response.text();
+        console.error('❌ Notifications error:', errorText);
+        console.error('❌ Notifications status:', response.status);
         setError('Failed to load notifications');
       }
     } catch (error) {

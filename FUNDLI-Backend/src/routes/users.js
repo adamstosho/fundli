@@ -838,7 +838,7 @@ router.post('/create-test-user', protect, async (req, res) => {
       userType,
       kycStatus: 'approved', // Auto-approve test users
       isEmailVerified: true,
-      creditScore: 750 // Good credit score for testing
+      creditScore: 0 // Start with 0 credit score
     });
 
     await testUser.save();

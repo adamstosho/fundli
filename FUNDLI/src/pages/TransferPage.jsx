@@ -433,7 +433,7 @@ const TransferPage = () => {
               </p>
             </motion.div>
 
-            {/* Transfer Limits */}
+            {/* Transfer Information */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -441,31 +441,19 @@ const TransferPage = () => {
               className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm"
             >
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Transfer Limits
+                Transfer Information
               </h3>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
-                    <span>Daily Limit</span>
-                    <span>${wallet?.limits?.dailyTransferLimit?.toLocaleString() || '0'}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{
-                        width: `${Math.min(
-                          ((wallet?.dailyUsage?.transferAmount || 0) / (wallet?.limits?.dailyTransferLimit || 1)) * 100,
-                          100
-                        )}%`
-                      }}
-                    ></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
-                    <span>Used Today</span>
+                    <span>Transferred Today</span>
                     <span>${wallet?.dailyUsage?.transferAmount?.toLocaleString() || '0'}</span>
                   </div>
+                </div>
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                  <p className="text-sm text-green-800 dark:text-green-200">
+                    ✓ Unlimited transfers available
+                  </p>
                 </div>
               </div>
             </motion.div>

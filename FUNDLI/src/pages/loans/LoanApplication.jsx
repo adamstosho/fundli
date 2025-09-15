@@ -13,6 +13,12 @@ const LoanApplication = () => {
     repaymentSchedule: 'monthly',
     description: ''
   });
+  const [collateralData, setCollateralData] = useState({
+    type: '',
+    description: '',
+    estimatedValue: '',
+    documents: []
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -81,13 +87,33 @@ const LoanApplication = () => {
 
       // Format data for backend
       const loanData = {
-        amount: parseFloat(formData.amount),
+        requestedAmount: parseFloat(formData.amount), // Backend expects 'requestedAmount'
         purpose: formData.purpose,
         duration: parseInt(formData.duration),
         repaymentSchedule: formData.repaymentSchedule,
-        description: formData.description
+        description: formData.description,
+        collateral: collateralData.type ? {
+          type: collateralData.type,
+          description: collateralData.description,
+          estimatedValue: parseFloat(collateralData.estimatedValue) || 0,
+          documents: collateralData.documents || []
+        } : null
       };
 
+      console.log('Submitting loan application with data:', loanData);
+      console.log('Collateral data:', collateralData);
+      console.log('Collateral in loanData:', loanData.collateral);
+      
+      // Validate collateral data before submission
+      if (!collateralData.type || !collateralData.description) {
+        console.error('❌ Collateral validation failed:', {
+          type: collateralData.type,
+          description: collateralData.description,
+          estimatedValue: collateralData.estimatedValue
+        });
+        throw new Error('Please complete the collateral information before submitting the loan application');
+      }
+      
       const response = await fetch('http://localhost:5000/api/borrower/loan/apply', {
         method: 'POST',
         headers: {
@@ -97,10 +123,13 @@ const LoanApplication = () => {
         body: JSON.stringify(loanData)
       });
 
+      console.log('Loan application response status:', response.status);
       const result = await response.json();
+      console.log('Loan application response data:', result);
 
       if (!response.ok) {
-        throw new Error(result.message || 'Failed to submit loan application');
+        console.error('Loan application failed:', result);
+        throw new Error(result.message || `Failed to submit loan application (${response.status})`);
       }
 
       setCurrentStep('success');
@@ -132,6 +161,20 @@ const LoanApplication = () => {
         throw new Error('Authentication required - please log in again');
       }
 
+      console.log('Submitting collateral verification with data:', {
+        formData,
+        collateralDocumentsCount: collateralDocuments?.length || 0,
+        hasBankStatement: !!bankStatement
+      });
+
+      // Store collateral data for loan application
+      setCollateralData({
+        type: formData.collateralType,
+        description: formData.description,
+        estimatedValue: formData.estimatedValue,
+        documents: collateralDocuments || []
+      });
+
       // Prepare data for JSON submission
       const submitData = {
         collateralType: formData.collateralType,
@@ -153,6 +196,9 @@ const LoanApplication = () => {
         } : null
       };
 
+      console.log('Sending request to:', 'http://localhost:5000/api/collateral/submit');
+      console.log('Request payload size:', JSON.stringify(submitData).length, 'bytes');
+      
       const response = await fetch('http://localhost:5000/api/collateral/submit', {
         method: 'POST',
         headers: {
@@ -162,10 +208,15 @@ const LoanApplication = () => {
         body: JSON.stringify(submitData)
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
       const result = await response.json();
+      console.log('Response data:', result);
 
       if (!response.ok) {
-        throw new Error(result.message || 'Failed to submit collateral verification');
+        console.error('API Error:', result);
+        throw new Error(result.message || `Failed to submit collateral verification (${response.status})`);
       }
 
       // Check collateral status and proceed with loan application
@@ -344,17 +395,16 @@ const LoanApplication = () => {
                     id="amount"
                     name="amount"
                     type="number"
-                    min="100"
-                    max="50000"
+                    min="0"
                     required
                     value={formData.amount}
                     onChange={handleChange}
                     className="input-field pl-10"
-                    placeholder="Enter loan amount (min: $100, max: $50,000)"
+                    placeholder="Enter loan amount"
                   />
                 </div>
                 <p className="text-sm text-neutral-500 mt-1">
-                  Minimum: $100 | Maximum: $50,000
+                  Enter the amount you need
                 </p>
               </div>
 
@@ -446,7 +496,75 @@ const LoanApplication = () => {
                 />
               </div>
 
-              {/* Collateral verification is now handled separately */}
+              {/* Basic Collateral Information */}
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                  <Shield className="h-5 w-5 mr-2 text-blue-600" />
+                  Collateral Information (Optional)
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Providing collateral information can help improve your loan approval chances and interest rates.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="collateralType" className="form-label">
+                      Collateral Type
+                    </label>
+                    <select
+                      id="collateralType"
+                      name="collateralType"
+                      value={collateralData.type}
+                      onChange={(e) => setCollateralData(prev => ({ ...prev, type: e.target.value }))}
+                      className="input-field"
+                    >
+                      <option value="">Select collateral type</option>
+                      <option value="real_estate">Real Estate</option>
+                      <option value="vehicle">Vehicle</option>
+                      <option value="equipment">Equipment</option>
+                      <option value="inventory">Inventory</option>
+                      <option value="securities">Securities</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="collateralValue" className="form-label">
+                      Estimated Value (USD)
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <DollarSign className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        id="collateralValue"
+                        name="estimatedValue"
+                        type="number"
+                        min="0"
+                        value={collateralData.estimatedValue}
+                        onChange={(e) => setCollateralData(prev => ({ ...prev, estimatedValue: e.target.value }))}
+                        className="input-field pl-10"
+                        placeholder="Enter estimated value"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-4">
+                  <label htmlFor="collateralDescription" className="form-label">
+                    Collateral Description
+                  </label>
+                  <textarea
+                    id="collateralDescription"
+                    name="description"
+                    rows={3}
+                    value={collateralData.description}
+                    onChange={(e) => setCollateralData(prev => ({ ...prev, description: e.target.value }))}
+                    className="input-field"
+                    placeholder="Describe your collateral in detail..."
+                  />
+                </div>
+              </div>
 
               {/* Terms and Conditions */}
               <div className="flex items-start space-x-3">

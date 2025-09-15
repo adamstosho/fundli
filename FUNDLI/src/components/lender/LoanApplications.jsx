@@ -17,9 +17,11 @@ import {
   Bell,
   CreditCard
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import PaymentModal from './PaymentModal';
 
 const LoanApplications = () => {
+  const { user } = useAuth();
   const [loanApplications, setLoanApplications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -136,6 +138,17 @@ const LoanApplications = () => {
       if (response.ok) {
         const result = await response.json();
         
+        console.log('Loan funding response:', result);
+        
+        // Update wallet balance from response
+        if (result.data?.lenderWallet?.balance !== undefined) {
+          console.log('Updating wallet balance from response:', result.data.lenderWallet.balance);
+          // Update local storage with new wallet balance
+          const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+          userInfo.walletBalance = result.data.lenderWallet.balance;
+          localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        }
+        
         alert(`Successfully funded loan! $${investmentAmount} has been transferred to ${selectedApplication.borrower.name}.`);
         
         // Clear form data
@@ -152,13 +165,15 @@ const LoanApplications = () => {
           window.refreshLenderDashboard();
         }
         
-        // Also refresh wallet balance specifically
-        if (window.refreshWalletBalance) {
+        // Also refresh wallet balance specifically (only for lenders)
+        if (window.refreshWalletBalance && user?.userType === 'lender') {
           window.refreshWalletBalance();
         }
         
-        // Trigger wallet balance update event
-        window.dispatchEvent(new CustomEvent('walletBalanceUpdated'));
+        // Trigger wallet balance update event for this user only
+        window.dispatchEvent(new CustomEvent('walletBalanceUpdated', { 
+          detail: { userId: user.id, userType: 'lender' } 
+        }));
       } else {
         const errorData = await response.json();
         alert(`Failed to fund loan: ${errorData.message}`);
@@ -633,16 +648,69 @@ const LoanApplications = () => {
               </div>
 
               {/* Collateral Information */}
-              {selectedApplication.collateral && (
-                <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-3">Collateral Information</h4>
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                    <p className="text-gray-600 dark:text-gray-400">
-                      {selectedApplication.collateral.description || 'No description provided'}
-                    </p>
-                  </div>
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white mb-3">Collateral Information</h4>
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-3">
+                  {selectedApplication.collateral ? (
+                    <>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Type:</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                          {selectedApplication.collateral.type || 'Not specified'}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Description:</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {selectedApplication.collateral.description || 'No description provided'}
+                        </p>
+                      </div>
+                      
+                      {selectedApplication.collateral.estimatedValue && (
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Estimated Value:</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            ${selectedApplication.collateral.estimatedValue.toLocaleString()}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {selectedApplication.collateral.documents && selectedApplication.collateral.documents.length > 0 && (
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Documents:</p>
+                          <div className="space-y-2">
+                            {selectedApplication.collateral.documents.map((doc, index) => (
+                              <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-600 rounded p-2">
+                                <div className="flex items-center space-x-2">
+                                  <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                  <span className="text-sm text-gray-900 dark:text-white">{doc.name}</span>
+                                </div>
+                                {doc.url && (
+                                  <a 
+                                    href={doc.url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                                  >
+                                    View
+                                  </a>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-gray-500 dark:text-gray-400 text-sm">
+                        No collateral information provided by the borrower
+                      </p>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
 
               {/* Investment Interface */}
               {(selectedApplication.status === 'pending' || selectedApplication.status === 'approved') && (
@@ -698,11 +766,10 @@ const LoanApplications = () => {
                         onChange={(e) => setInvestmentAmount(e.target.value)}
                         placeholder="Enter amount to invest"
                         min="1"
-                        max={((selectedApplication.fundingProgress?.targetAmount || selectedApplication.loanAmount) - (selectedApplication.fundingProgress?.fundedAmount || 0))}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                       />
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Maximum: ${((selectedApplication.fundingProgress?.targetAmount || selectedApplication.loanAmount) - (selectedApplication.fundingProgress?.fundedAmount || 0)).toLocaleString()}
+                        Remaining needed: ${((selectedApplication.fundingProgress?.targetAmount || selectedApplication.loanAmount) - (selectedApplication.fundingProgress?.fundedAmount || 0)).toLocaleString()}
                       </p>
                     </div>
                     
@@ -786,7 +853,6 @@ const LoanApplications = () => {
                   onChange={(e) => setInvestmentAmount(e.target.value)}
                   placeholder="Enter amount to invest"
                   min="1"
-                  max={selectedApplication.loanAmount}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
               </div>

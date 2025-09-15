@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Feedback System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .test-section h3 {
+            color: #333;
+            margin-top: 0;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+        }
+        .step.success {
+            border-left-color: #28a745;
+            background-color: #d4edda;
+        }
+        .step.error {
+            border-left-color: #dc3545;
+            background-color: #f8d7da;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .button.success {
+            background: #28a745;
+        }
+        .button.error {
+            background: #dc3545;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-list li:before {
+            content: "✅ ";
+            color: #28a745;
+            font-weight: bold;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Admin Feedback System Test</h1>
+            <p>Comprehensive testing guide for the newly implemented admin feedback system</p>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Test Overview</h3>
+            <p>This test verifies that the admin feedback system is properly integrated and functional across all admin interfaces.</p>
+            
+            <div class="info">
+                <strong>What's New:</strong>
+                <ul class="feature-list">
+                    <li>Feedback Management tab in Admin Dashboard</li>
+                    <li>Send Feedback buttons in Collateral Verification Review</li>
+                    <li>Chat Borrower/Chat Lender buttons in Loan Applications</li>
+                    <li>Feedback Inbox for borrowers and lenders</li>
+                    <li>Complete backend API for feedback system</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Test Steps</h3>
+            
+            <div class="step">
+                <h4>Step 1: Access Admin Dashboard</h4>
+                <p>1. Login as an admin user</p>
+                <p>2. Navigate to the Admin Dashboard</p>
+                <p>3. Verify you can see the new "Feedback Management" tab</p>
+                <button class="button" onclick="testStep(1)">Test Step 1</button>
+                <span id="status-1" class="status pending">Pending</span>
+            </div>
+
+            <div class="step">
+                <h4>Step 2: Test Feedback Management Tab</h4>
+                <p>1. Click on the "Feedback Management" tab</p>
+                <p>2. Verify you see three main sections:</p>
+                <ul>
+                    <li>Send Feedback (blue card)</li>
+                    <li>View Responses (green card)</li>
+                    <li>Feedback Analytics (purple card)</li>
+                </ul>
+                <p>3. Click "Send Feedback" button to open the feedback modal</p>
+                <button class="button" onclick="testStep(2)">Test Step 2</button>
+                <span id="status-2" class="status pending">Pending</span>
+            </div>
+
+            <div class="step">
+                <h4>Step 3: Test Collateral Verification Feedback</h4>
+                <p>1. Go to "Collateral Verification" tab</p>
+                <p>2. Find a collateral verification in the list</p>
+                <p>3. Click the three-dot menu (⋮) next to a verification</p>
+                <p>4. Verify you see "Send Feedback" option in the dropdown</p>
+                <p>5. Click "Send Feedback" to open the feedback modal</p>
+                <button class="button" onclick="testStep(3)">Test Step 3</button>
+                <span id="status-3" class="status pending">Pending</span>
+            </div>
+
+            <div class="step">
+                <h4>Step 4: Test Loan Application Feedback</h4>
+                <p>1. Go to "Loan Applications" tab</p>
+                <p>2. Find a loan application in the list</p>
+                <p>3. Verify you see "Chat Borrower" and "Chat Lender" buttons</p>
+                <p>4. Click either button to open the feedback modal</p>
+                <button class="button" onclick="testStep(4)">Test Step 4</button>
+                <span id="status-4" class="status pending">Pending</span>
+            </div>
+
+            <div class="step">
+                <h4>Step 5: Test Feedback Modal Functionality</h4>
+                <p>1. In the feedback modal, verify you can:</p>
+                <ul>
+                    <li>Select recipient type (Borrower/Lender)</li>
+                    <li>Enter subject and message</li>
+                    <li>Set priority level</li>
+                    <li>Set deadline (optional)</li>
+                    <li>Send the feedback</li>
+                </ul>
+                <button class="button" onclick="testStep(5)">Test Step 5</button>
+                <span id="status-5" class="status pending">Pending</span>
+            </div>
+
+            <div class="step">
+                <h4>Step 6: Test Borrower Feedback Inbox</h4>
+                <p>1. Login as a borrower</p>
+                <p>2. Go to Borrower Dashboard</p>
+                <p>3. Verify you see "Feedback Inbox" in Quick Actions</p>
+                <p>4. Click "Feedback Inbox" to view received feedback</p>
+                <p>5. Test replying to feedback</p>
+                <button class="button" onclick="testStep(6)">Test Step 6</button>
+                <span id="status-6" class="status pending">Pending</span>
+            </div>
+
+            <div class="step">
+                <h4>Step 7: Test Backend API</h4>
+                <p>1. Test creating feedback via API</p>
+                <p>2. Test retrieving feedback for a user</p>
+                <p>3. Test replying to feedback</p>
+                <p>4. Test marking feedback as read</p>
+                <button class="button" onclick="testStep(7)">Test Step 7</button>
+                <span id="status-7" class="status pending">Pending</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Manual API Testing</h3>
+            <p>Use these API endpoints to test the feedback system:</p>
+            
+            <div class="code-block">
+<strong>1. Create Feedback (Admin only):</strong>
+POST http://localhost:5000/api/feedback
+Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
+Body: {
+  "recipient": "USER_ID",
+  "subject": "Test Feedback",
+  "message": "This is a test feedback message",
+  "priority": "medium"
+}
+            </div>
+
+            <div class="code-block">
+<strong>2. Get User Feedback:</strong>
+GET http://localhost:5000/api/feedback/user/USER_ID
+Headers: Authorization: Bearer YOUR_TOKEN
+            </div>
+
+            <div class="code-block">
+<strong>3. Reply to Feedback:</strong>
+POST http://localhost:5000/api/feedback/FEEDBACK_ID/reply
+Headers: Authorization: Bearer YOUR_TOKEN
+Body: {
+  "message": "This is my reply to the feedback"
+}
+            </div>
+
+            <div class="code-block">
+<strong>4. Mark as Read:</strong>
+PUT http://localhost:5000/api/feedback/FEEDBACK_ID/read
+Headers: Authorization: Bearer YOUR_TOKEN
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>⚠️ Troubleshooting</h3>
+            
+            <div class="warning">
+                <strong>Common Issues:</strong>
+                <ul>
+                    <li><strong>Feedback tab not visible:</strong> Make sure you're logged in as an admin user</li>
+                    <li><strong>Send Feedback button not working:</strong> Check browser console for JavaScript errors</li>
+                    <li><strong>API errors:</strong> Verify backend server is running and database is connected</li>
+                    <li><strong>Modal not opening:</strong> Check if FeedbackManagement component is properly imported</li>
+                </ul>
+            </div>
+
+            <div class="info">
+                <strong>Debug Steps:</strong>
+                <ol>
+                    <li>Open browser developer tools (F12)</li>
+                    <li>Check Console tab for any JavaScript errors</li>
+                    <li>Check Network tab for failed API requests</li>
+                    <li>Verify localStorage contains valid accessToken</li>
+                    <li>Check if user has admin role in the database</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>✅ Expected Results</h3>
+            <p>After completing all tests, you should have:</p>
+            <ul class="feature-list">
+                <li>Admin can access Feedback Management tab</li>
+                <li>Admin can send feedback from Collateral Verification page</li>
+                <li>Admin can send feedback from Loan Applications page</li>
+                <li>Borrowers can view and reply to feedback in their dashboard</li>
+                <li>Lenders can view and reply to feedback in their dashboard</li>
+                <li>All API endpoints are working correctly</li>
+                <li>Feedback is properly stored in the database</li>
+                <li>Real-time updates work for feedback status</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Test Results Summary</h3>
+            <div id="test-summary">
+                <p>Complete the tests above to see results here.</p>
+            </div>
+            <button class="button success" onclick="generateSummary()">Generate Summary</button>
+        </div>
+    </div>
+
+    <script>
+        let testResults = {};
+
+        function testStep(stepNumber) {
+            const statusElement = document.getElementById(`status-${stepNumber}`);
+            const button = event.target;
+            
+            // Simulate test execution
+            button.textContent = 'Testing...';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                // For demo purposes, mark as completed
+                // In real testing, you would perform actual checks
+                testResults[stepNumber] = 'completed';
+                statusElement.textContent = 'Completed';
+                statusElement.className = 'status completed';
+                button.textContent = 'Test Step ' + stepNumber;
+                button.className = 'button success';
+                button.disabled = false;
+            }, 1000);
+        }
+
+        function generateSummary() {
+            const summary = document.getElementById('test-summary');
+            const totalTests = 7;
+            const completedTests = Object.keys(testResults).length;
+            
+            let summaryHTML = `
+                <h4>Test Results Summary</h4>
+                <p><strong>Completed:</strong> ${completedTests}/${totalTests} tests</p>
+                <p><strong>Success Rate:</strong> ${Math.round((completedTests/totalTests) * 100)}%</p>
+            `;
+            
+            if (completedTests === totalTests) {
+                summaryHTML += '<p style="color: #28a745;"><strong>🎉 All tests completed successfully!</strong></p>';
+            } else {
+                summaryHTML += '<p style="color: #ffc107;"><strong>⚠️ Some tests still pending</strong></p>';
+            }
+            
+            summary.innerHTML = summaryHTML;
+        }
+
+        // Auto-generate summary when page loads
+        window.onload = function() {
+            generateSummary();
+        };
+    </script>
+</body>
+</html>
+

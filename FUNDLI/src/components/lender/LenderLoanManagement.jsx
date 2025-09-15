@@ -139,7 +139,14 @@ const LenderLoanManagement = () => {
         setInvestmentAmount('');
         setInvestmentNotes('');
         
+        // Refresh loan data
         await loadLoanData();
+        
+        // Refresh dashboard data globally
+        if (window.refreshLenderDashboard) {
+          console.log('🔄 Refreshing lender dashboard after loan funding');
+          window.refreshLenderDashboard();
+        }
       } else {
         const errorData = await response.json();
         alert(`Failed to fund loan: ${errorData.message}`);
@@ -195,6 +202,13 @@ const LenderLoanManagement = () => {
 
   const handlePaymentSuccess = (paymentData) => {
     loadLoanData();
+    
+    // Refresh dashboard data globally
+    if (window.refreshLenderDashboard) {
+      console.log('🔄 Refreshing lender dashboard after payment success');
+      window.refreshLenderDashboard();
+    }
+    
     alert(`Payment successful! ${paymentData.amount} has been transferred to the borrower.`);
   };
 
@@ -423,7 +437,7 @@ const LenderLoanManagement = () => {
                         <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
                         <span className="text-gray-600 dark:text-gray-400">Amount:</span>
                         <span className="font-medium text-gray-900 dark:text-white">
-                          ${loan.loanAmount?.toLocaleString()}
+                          {loan.currency || 'USD'} {loan.loanAmount?.toLocaleString()}
                         </span>
                       </div>
                       
@@ -570,7 +584,7 @@ const LenderLoanManagement = () => {
                         <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
                         <span className="text-gray-600 dark:text-gray-400">Funded:</span>
                         <span className="font-medium text-gray-900 dark:text-white">
-                          ${loan.fundedAmount?.toLocaleString()}
+                          {loan.currency || 'USD'} {loan.fundedAmount?.toLocaleString()}
                         </span>
                       </div>
                       
@@ -767,35 +781,69 @@ const LenderLoanManagement = () => {
               ) : null}
 
               {/* Collateral Information */}
-              {selectedLoan.collateral && (
-                <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-3">Collateral Information</h4>
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-gray-600 dark:text-gray-400">Type:</span>
-                      <span className="font-medium text-gray-900 dark:text-white capitalize">
-                        {selectedLoan.collateral.type?.replace('_', ' ')}
-                      </span>
-                    </div>
-                    {selectedLoan.collateral.description && (
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white mb-3">Collateral Information</h4>
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-3">
+                  {selectedLoan.collateral ? (
+                    <>
                       <div>
-                        <span className="text-gray-600 dark:text-gray-400">Description:</span>
-                        <p className="text-gray-900 dark:text-white mt-1">
-                          {selectedLoan.collateral.description}
+                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Type:</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                          {selectedLoan.collateral.type?.replace('_', ' ') || 'Not specified'}
                         </p>
                       </div>
-                    )}
-                    {selectedLoan.collateral.estimatedValue && (
-                      <div className="flex justify-between mt-2">
-                        <span className="text-gray-600 dark:text-gray-400">Estimated Value:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">
-                          ${selectedLoan.collateral.estimatedValue.toLocaleString()}
-                        </span>
+                      
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Description:</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {selectedLoan.collateral.description || 'No description provided'}
+                        </p>
                       </div>
-                    )}
-                  </div>
+                      
+                      {selectedLoan.collateral.estimatedValue && (
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Estimated Value:</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            ${selectedLoan.collateral.estimatedValue.toLocaleString()}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {selectedLoan.collateral.documents && selectedLoan.collateral.documents.length > 0 && (
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Documents:</p>
+                          <div className="space-y-2">
+                            {selectedLoan.collateral.documents.map((doc, index) => (
+                              <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-600 rounded p-2">
+                                <div className="flex items-center space-x-2">
+                                  <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                  <span className="text-sm text-gray-900 dark:text-white">{doc.name}</span>
+                                </div>
+                                {doc.url && (
+                                  <a 
+                                    href={doc.url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                                  >
+                                    View
+                                  </a>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-gray-500 dark:text-gray-400 text-sm">
+                        No collateral information provided by the borrower
+                      </p>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
@@ -852,7 +900,6 @@ const LenderLoanManagement = () => {
                   onChange={(e) => setInvestmentAmount(e.target.value)}
                   placeholder="Enter amount to invest"
                   min="1"
-                  max={selectedLoan.loanAmount}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
               </div>

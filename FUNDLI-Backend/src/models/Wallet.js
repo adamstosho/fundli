@@ -86,27 +86,27 @@ const walletSchema = new mongoose.Schema({
     }
   }],
 
-  // Wallet limits
+  // Wallet limits (unlimited)
   limits: {
     dailyDepositLimit: {
       type: Number,
-      default: 10000 // $10,000
+      default: 999999999 // Unlimited
     },
     dailyWithdrawalLimit: {
       type: Number,
-      default: 5000 // $5,000
+      default: 999999999 // Unlimited
     },
     dailyTransferLimit: {
       type: Number,
-      default: 2000 // $2,000
+      default: 999999999 // Unlimited
     },
     monthlyDepositLimit: {
       type: Number,
-      default: 100000 // $100,000
+      default: 999999999 // Unlimited
     },
     monthlyWithdrawalLimit: {
       type: Number,
-      default: 50000 // $50,000
+      default: 999999999 // Unlimited
     }
   },
 
@@ -196,7 +196,7 @@ walletSchema.virtual('availableBalance').get(function() {
   return this.balance;
 });
 
-// Method to check if transaction is within limits
+// Method to check if transaction is within limits (unlimited)
 walletSchema.methods.checkLimits = function(transactionType, amount) {
   const today = new Date();
   const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -217,30 +217,7 @@ walletSchema.methods.checkLimits = function(transactionType, amount) {
     this.monthlyUsage.lastResetDate = startOfMonth;
   }
 
-  switch (transactionType) {
-    case 'deposit':
-      if (this.dailyUsage.depositAmount + amount > this.limits.dailyDepositLimit) {
-        return { allowed: false, reason: 'Daily deposit limit exceeded' };
-      }
-      if (this.monthlyUsage.depositAmount + amount > this.limits.monthlyDepositLimit) {
-        return { allowed: false, reason: 'Monthly deposit limit exceeded' };
-      }
-      break;
-    case 'withdrawal':
-      if (this.dailyUsage.withdrawalAmount + amount > this.limits.dailyWithdrawalLimit) {
-        return { allowed: false, reason: 'Daily withdrawal limit exceeded' };
-      }
-      if (this.monthlyUsage.withdrawalAmount + amount > this.limits.monthlyWithdrawalLimit) {
-        return { allowed: false, reason: 'Monthly withdrawal limit exceeded' };
-      }
-      break;
-    case 'transfer':
-      if (this.dailyUsage.transferAmount + amount > this.limits.dailyTransferLimit) {
-        return { allowed: false, reason: 'Daily transfer limit exceeded' };
-      }
-      break;
-  }
-
+  // All limits are now unlimited - always allow transactions
   return { allowed: true };
 };
 

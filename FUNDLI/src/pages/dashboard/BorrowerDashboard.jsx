@@ -15,7 +15,8 @@ import {
   ArrowRight,
   BarChart3,
   Search,
-  RefreshCw
+  RefreshCw,
+  MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import PendingLoansSection from '../../components/common/PendingLoansSection';
@@ -27,6 +28,7 @@ import {
   RepaymentStatusChart, 
   CreditScoreDistributionChart 
 } from '../../components/charts/DashboardCharts';
+import FeedbackInbox from '../../components/common/FeedbackInbox';
 
 const BorrowerDashboard = () => {
   const { user, kycStatus } = useAuth();
@@ -34,7 +36,7 @@ const BorrowerDashboard = () => {
     totalBorrowed: 0,
     activeLoans: 0,
     totalRepaid: 0,
-    creditScore: user?.creditScore || 0
+    creditScore: 0
   });
   const [recentLoans, setRecentLoans] = useState([]);
   const [upcomingPayments, setUpcomingPayments] = useState([]);
@@ -46,6 +48,8 @@ const BorrowerDashboard = () => {
     repaymentStatus: null,
     creditScoreDistribution: null
   });
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [unreadFeedbackCount, setUnreadFeedbackCount] = useState(0);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -87,7 +91,7 @@ const BorrowerDashboard = () => {
             totalBorrowed: statsData.data?.stats?.totalBorrowed || 0,
             activeLoans: statsData.data?.stats?.activeLoans || 0,
             totalRepaid: statsData.data?.stats?.totalRepaid || 0,
-            creditScore: statsData.data?.stats?.creditScore || user?.creditScore || 650
+            creditScore: statsData.data?.stats?.creditScore || user?.creditScore || 0
           };
           
           console.log('📊 Setting stats to:', newStats);
@@ -105,7 +109,7 @@ const BorrowerDashboard = () => {
             totalBorrowed: statsData.data?.stats?.totalBorrowed || 0,
             activeLoans: statsData.data?.stats?.activeLoans || 0,
             totalRepaid: statsData.data?.stats?.totalRepaid || 0,
-            creditScore: statsData.data?.stats?.creditScore || user?.creditScore || 650
+            creditScore: statsData.data?.stats?.creditScore || user?.creditScore || 0
           });
         } else {
           const errorData = await statsResponse.json().catch(() => ({ message: 'Unknown error' }));
@@ -117,7 +121,7 @@ const BorrowerDashboard = () => {
             totalBorrowed: 0,
             activeLoans: 0,
             totalRepaid: 0,
-            creditScore: user?.creditScore || 650
+            creditScore: user?.creditScore || 0
           });
           setRecentLoans([]);
           setUpcomingPayments([]);
@@ -135,7 +139,7 @@ const BorrowerDashboard = () => {
           totalBorrowed: 0,
           activeLoans: 0,
           totalRepaid: 0,
-          creditScore: user?.creditScore || 650
+          creditScore: user?.creditScore || 0
         });
         setRecentLoans([]);
         setUpcomingPayments([]);
@@ -335,6 +339,14 @@ const BorrowerDashboard = () => {
       icon: Calendar,
       href: '/loans/repayment',
       color: 'from-accent-500 to-accent-600'
+    },
+    {
+      title: 'Feedback Inbox',
+      description: 'View messages from admin',
+      icon: MessageSquare,
+      href: '#',
+      color: 'from-purple-500 to-purple-600',
+      onClick: () => setShowFeedbackModal(true)
     }
   ];
 
@@ -537,24 +549,45 @@ const BorrowerDashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
             >
-              <Link
-                to={action.href}
-                className="block bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200 group"
-              >
-                <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
-                  <action.icon className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {action.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                  {action.description}
-                </p>
-                <div className="flex items-center text-blue-600 dark:text-blue-400 font-medium text-sm group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
-                  Get Started
-                  <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
-                </div>
-              </Link>
+              {action.onClick ? (
+                <button
+                  onClick={action.onClick}
+                  className="w-full text-left bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200 group"
+                >
+                  <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
+                    <action.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    {action.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                    {action.description}
+                  </p>
+                  <div className="flex items-center text-blue-600 dark:text-blue-400 font-medium text-sm group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                    Get Started
+                    <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
+                  </div>
+                </button>
+              ) : (
+                <Link
+                  to={action.href}
+                  className="block bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200 group"
+                >
+                  <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
+                    <action.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    {action.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                    {action.description}
+                  </p>
+                  <div className="flex items-center text-blue-600 dark:text-blue-400 font-medium text-sm group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                    Get Started
+                    <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
+                  </div>
+                </Link>
+              )}
             </motion.div>
           ))}
         </div>
@@ -748,6 +781,11 @@ const BorrowerDashboard = () => {
       <InProgressLoansSection />
 
       {/* KYC verification is now optional */}
+
+      {/* Feedback Modal */}
+      {showFeedbackModal && (
+        <FeedbackInbox onClose={() => setShowFeedbackModal(false)} />
+      )}
     </div>
   );
 };

@@ -8,7 +8,7 @@ const { protect } = require('../middleware/auth');
 // @access  Private (Lenders only)
 router.post('/', protect, async (req, res) => {
   try {
-    const { name, description, poolSize, duration, interestRate, minInvestment, maxInvestment, riskLevel } = req.body;
+    const { name, description, poolSize, duration, interestRate, minInvestment, maxInvestment, riskLevel, currency } = req.body;
     
     // Check if user is a lender
     if (req.user.userType !== 'lender') {
@@ -24,6 +24,7 @@ router.post('/', protect, async (req, res) => {
       name,
       description,
       poolSize: parseFloat(poolSize),
+      currency: currency || 'USD',
       duration: parseInt(duration),
       interestRate: parseFloat(interestRate),
       minInvestment: parseFloat(minInvestment),
@@ -53,6 +54,7 @@ router.post('/', protect, async (req, res) => {
           name: pool.name,
           description: pool.description,
           poolSize: pool.poolSize,
+          currency: pool.currency,
           duration: pool.duration,
           interestRate: pool.interestRate,
           minInvestment: pool.minInvestment,
@@ -92,6 +94,7 @@ router.get('/', async (req, res) => {
           name: pool.name,
           description: pool.description,
           poolSize: pool.poolSize,
+          currency: pool.currency,
           fundedAmount: pool.fundedAmount,
           duration: pool.duration,
           interestRate: pool.interestRate,

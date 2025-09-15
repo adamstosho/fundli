@@ -34,6 +34,7 @@ const repaymentRoutes = require('./routes/repayments');
 const twoFactorRoutes = require('./routes/twoFactor');
 const matchingRoutes = require('./routes/matching');
 const pushNotificationRoutes = require('./routes/pushNotifications');
+const feedbackRoutes = require('./routes/feedback');
 
 const { errorHandler } = require('./middleware/errorHandler');
 const { connectDB } = require('./config/database');
@@ -57,25 +58,27 @@ app.use(cors({
   optionsSuccessStatus: 200 // For legacy browser support
 }));
 
-// Rate limiting - more permissive for development
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'development' 
-    ? parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 10000 // Very permissive in dev
-    : parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000, // More reasonable in production
-  message: {
-    error: 'Too many requests from this IP, please try again later.'
-  },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  skip: (req) => {
-    // Skip rate limiting for health checks, OPTIONS requests, and user search in development
-    return req.path === '/api/health' || 
-           req.method === 'OPTIONS' ||
-           (process.env.NODE_ENV === 'development' && req.path === '/api/users/search');
-  }
-});
-app.use('/api', limiter);
+// Rate limiting - disabled in development, enabled in production
+if (process.env.NODE_ENV !== 'development') {
+  const limiter = rateLimit({
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // More restrictive in production
+    message: {
+      error: 'Too many requests from this IP, please try again later.'
+    },
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    skip: (req) => {
+      // Skip rate limiting for health checks, OPTIONS requests, auth endpoints
+      return req.path === '/api/health' || 
+             req.method === 'OPTIONS' ||
+             req.path.startsWith('/api/auth/');
+    }
+  });
+  app.use('/api', limiter);
+} else {
+  console.log('🚀 Rate limiting disabled in development mode');
+}
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -125,6 +128,7 @@ app.use('/api/repayments', repaymentRoutes);
 app.use('/api/2fa', twoFactorRoutes);
 app.use('/api/matching', matchingRoutes);
 app.use('/api/push-notifications', pushNotificationRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 // 404 handler for undefined routes
 app.use('*', (req, res) => {

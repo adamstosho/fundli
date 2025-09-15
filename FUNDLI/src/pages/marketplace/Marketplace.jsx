@@ -54,6 +54,7 @@ const Marketplace = () => {
           purpose: pool.name || 'Lending Pool',
           borrower: pool.creator?.firstName + ' ' + pool.creator?.lastName || 'Lender',
           amount: pool.poolSize || 0,
+          currency: pool.currency || 'USD',
           category: 'business', // Default category since pools don't have categories yet
           roi: pool.interestRate || 0,
           duration: pool.duration || 12,
@@ -238,7 +239,7 @@ const Marketplace = () => {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-neutral-600 dark:text-neutral-400">Amount</span>
                 <span className="text-lg font-bold text-neutral-900 dark:text-white">
-                  ${(loan.amount || 0).toLocaleString()}
+                  {loan.currency || 'USD'} {(loan.amount || 0).toLocaleString()}
                 </span>
               </div>
               

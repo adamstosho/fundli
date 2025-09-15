@@ -15,8 +15,10 @@ import {
   Search,
   Shield,
   Users,
-  BarChart3
+  BarChart3,
+  MessageSquare
 } from 'lucide-react';
+import FeedbackManagement from './FeedbackManagement';
 
 const AdminLoanManagement = () => {
   const [loanApplications, setLoanApplications] = useState([]);
@@ -36,6 +38,8 @@ const AdminLoanManagement = () => {
     funded: 0,
     rejected: 0
   });
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [selectedLoanForFeedback, setSelectedLoanForFeedback] = useState(null);
 
   useEffect(() => {
     loadLoanApplications();
@@ -46,17 +50,25 @@ const AdminLoanManagement = () => {
       setIsLoading(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`http://localhost:5000/api/loans/pending/all`, {
+      console.log('Loading loan applications...');
+      
+      // Use the admin loans endpoint to get ALL loans
+      const response = await fetch(`http://localhost:5000/api/admin/loans`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
+      console.log('Loan applications response status:', response.status);
+
       if (response.ok) {
         const result = await response.json();
-        setLoanApplications(result.data.loans || []);
-        // Calculate summary from the loans
+        console.log('Loan applications result:', result);
+        
         const loans = result.data.loans || [];
+        setLoanApplications(loans);
+        
+        // Calculate summary from the loans
         const summaryData = {
           total: loans.length,
           pending: loans.filter(loan => loan.status === 'pending').length,
@@ -64,8 +76,12 @@ const AdminLoanManagement = () => {
           funded: loans.filter(loan => loan.status === 'funded').length,
           rejected: loans.filter(loan => loan.status === 'rejected').length
         };
+        
+        console.log('Loan summary:', summaryData);
         setSummary(summaryData);
       } else {
+        const errorText = await response.text();
+        console.error('Failed to load loan applications:', response.status, errorText);
         setError('Failed to load loan applications');
       }
     } catch (error) {
@@ -98,6 +114,14 @@ const AdminLoanManagement = () => {
     }
   };
 
+  const handleSendFeedback = (application, recipientType) => {
+    setSelectedLoanForFeedback({
+      ...application,
+      recipientType
+    });
+    setShowFeedbackModal(true);
+  };
+
   const handleApproveReject = async (action) => {
     if (!selectedApplication) return;
     
@@ -111,8 +135,8 @@ const AdminLoanManagement = () => {
       const token = localStorage.getItem('accessToken');
       
       const endpoint = action === 'approve' 
-        ? `http://localhost:5000/api/admin/loan/${selectedApplication.id}/approve`
-        : `http://localhost:5000/api/admin/loan/${selectedApplication.id}/reject`;
+        ? `http://localhost:5000/api/admin/loan/${selectedApplication?.id}/approve`
+        : `http://localhost:5000/api/admin/loan/${selectedApplication?.id}/reject`;
       
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -167,9 +191,9 @@ const AdminLoanManagement = () => {
   };
 
   const filteredApplications = loanApplications.filter(app => 
-    app.borrower.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    app.purpose.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    app.id.toLowerCase().includes(searchTerm.toLowerCase())
+    (app.borrower?.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+    (app.purpose?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+    (app.id?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) {
@@ -435,7 +459,7 @@ const AdminLoanManagement = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="p-6 pt-0">
+              <div className="p-6 pt-0 space-y-3">
                 <button
                   onClick={() => handleViewDetails(application)}
                   className="w-full px-4 py-2 border border-primary-600 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors flex items-center justify-center space-x-2"
@@ -443,6 +467,24 @@ const AdminLoanManagement = () => {
                   <Eye className="h-4 w-4" />
                   <span>Review Application</span>
                 </button>
+                
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleSendFeedback(application, 'borrower')}
+                    className="px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors flex items-center justify-center space-x-1 text-sm"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    <span>Chat Borrower</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => handleSendFeedback(application, 'lender')}
+                    className="px-3 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors flex items-center justify-center space-x-1 text-sm"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    <span>Chat Lender</span>
+                  </button>
+                </div>
               </div>
             </motion.div>
           ))}
@@ -466,27 +508,33 @@ const AdminLoanManagement = () => {
             </div>
             
             <div className="space-y-6">
-              {/* Borrower Information */}
-              <div>
+              {!selectedApplication ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500 dark:text-gray-400">No application selected</p>
+                </div>
+              ) : (
+                <>
+                  {/* Borrower Information */}
+                  <div>
                 <h4 className="font-medium text-gray-900 dark:text-white mb-3">Borrower Information</h4>
                 <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Name:</span>
                       <span className="font-medium text-gray-900 dark:text-white">
-                        {selectedApplication.borrower.name}
+                        {selectedApplication.borrower?.name || 'N/A'}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Email:</span>
                       <span className="font-medium text-gray-900 dark:text-white">
-                        {selectedApplication.borrower.email}
+                        {selectedApplication.borrower?.email || 'N/A'}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Phone:</span>
                       <span className="font-medium text-gray-900 dark:text-white">
-                        {selectedApplication.borrower.phone || 'N/A'}
+                        {selectedApplication.borrower?.phone || 'N/A'}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -711,9 +759,23 @@ const AdminLoanManagement = () => {
                   </div>
                 </div>
               )}
+                </>
+              )}
             </div>
           </div>
         </div>
+      )}
+
+      {/* Feedback Management Modal */}
+      {showFeedbackModal && selectedLoanForFeedback && (
+        <FeedbackManagement
+          loanId={selectedLoanForFeedback.id}
+          loanData={selectedLoanForFeedback}
+          onClose={() => {
+            setShowFeedbackModal(false);
+            setSelectedLoanForFeedback(null);
+          }}
+        />
       )}
     </div>
   );

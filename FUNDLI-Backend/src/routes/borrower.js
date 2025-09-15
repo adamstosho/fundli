@@ -90,6 +90,28 @@ router.post('/loan/:loanId/apply', protect, async (req, res) => {
       bankCode 
     } = req.body;
 
+    // Validate required fields
+    if (!requestedAmount || !purpose || !duration) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Missing required fields: requestedAmount, purpose, and duration are required'
+      });
+    }
+
+    // Debug collateral data
+    console.log('🔍 Collateral validation - Raw collateral:', collateral);
+    console.log('🔍 Collateral validation - Type:', typeof collateral);
+    console.log('🔍 Collateral validation - Has type:', collateral?.type);
+
+    // Validate collateral - can be string or object
+    if (!collateral || (typeof collateral === 'object' && !collateral.type)) {
+      console.log('❌ Collateral validation failed - missing collateral or type');
+      return res.status(400).json({
+        status: 'error',
+        message: 'Collateral information is required'
+      });
+    }
+
     // Skip user type check for now - allow all authenticated users to apply
     console.log('🔍 User applying for loan:', req.user.email, 'UserType:', req.user.userType);
     console.log('✅ Proceeding with loan application for user:', req.user.id);
@@ -107,6 +129,38 @@ router.post('/loan/:loanId/apply', protect, async (req, res) => {
       return res.status(400).json({
         status: 'error',
         message: 'This loan is not available for applications'
+      });
+    }
+
+    // Each loan application requires its own collateral submission
+    // No global collateral verification required - each loan is independent
+
+    // Check if user has already applied for this lending pool
+    const existingApplication = await Loan.findOne({
+      borrower: req.user.id,
+      lendingPool: loanId,
+      status: { $in: ['pending', 'approved', 'funded', 'active'] }
+    });
+
+    if (existingApplication) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'You have already applied for this lending pool. You cannot apply multiple times for the same pool.'
+      });
+    }
+
+    // Check if user has already applied for a loan with the same purpose recently (within 24 hours)
+    const recentApplication = await Loan.findOne({
+      borrower: req.user.id,
+      purpose: purpose, // Same purpose
+      status: { $in: ['pending', 'approved', 'funded', 'active'] },
+      createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } // 24 hours ago
+    });
+
+    if (recentApplication) {
+      return res.status(400).json({
+        status: 'error',
+        message: `You have already applied for a ${purpose} loan recently. Please wait for it to be processed before applying for another ${purpose} loan.`
       });
     }
 
@@ -159,6 +213,15 @@ router.post('/loan/:loanId/apply', protect, async (req, res) => {
     totalInterest = totalRepayment - parseFloat(requestedAmount);
 
     // Create loan application
+    console.log('📝 Creating loan application with data:', {
+      borrower: req.user.id,
+      lendingPool: loanId,
+      loanAmount: parseFloat(requestedAmount),
+      purpose,
+      duration: numberOfPayments,
+      status: 'pending'
+    });
+
     const loan = await Loan.create({
       borrower: req.user.id,
       lendingPool: loanId,
@@ -171,10 +234,15 @@ router.post('/loan/:loanId/apply', protect, async (req, res) => {
       totalRepayment: Math.round(totalRepayment * 100) / 100,
       totalInterest: Math.round(totalInterest * 100) / 100,
       amountRemaining: Math.round(totalRepayment * 100) / 100,
-      collateral: collateral ? {
+      collateral: collateral ? (typeof collateral === 'object' ? {
+        type: collateral.type || 'other',
+        description: collateral.description || 'No description provided',
+        estimatedValue: collateral.estimatedValue || 0,
+        documents: collateral.documents || []
+      } : {
         type: 'other',
         description: collateral
-      } : null,
+      }) : null,
       status: 'pending',
       kycStatus: req.user.kycVerified ? 'verified' : 'pending',
       fundingProgress: {
@@ -182,6 +250,14 @@ router.post('/loan/:loanId/apply', protect, async (req, res) => {
         fundedAmount: 0
       },
       submittedAt: new Date()
+    });
+
+    console.log('✅ Loan application created successfully:', {
+      id: loan._id,
+      status: loan.status,
+      borrower: loan.borrower,
+      amount: loan.loanAmount,
+      purpose: loan.purpose
     });
 
     res.status(201).json({
@@ -228,6 +304,32 @@ router.post('/loan/apply', protect, async (req, res) => {
       return res.status(400).json({
         status: 'error',
         message: 'Missing required fields: loanAmount, purpose, and duration are required'
+      });
+    }
+
+    // Validate collateral - can be string or object
+    if (!collateral || (typeof collateral === 'object' && !collateral.type)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Collateral information is required'
+      });
+    }
+
+    // Each loan application requires its own collateral submission
+    // No global collateral verification required - each loan is independent
+
+    // Check if user has already applied for a loan with the same purpose recently (within 24 hours)
+    const recentApplication = await Loan.findOne({
+      borrower: req.user.id,
+      purpose: purpose, // Same purpose
+      status: { $in: ['pending', 'approved', 'funded', 'active'] },
+      createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } // 24 hours ago
+    });
+
+    if (recentApplication) {
+      return res.status(400).json({
+        status: 'error',
+        message: `You have already applied for a ${purpose} loan recently. Please wait for it to be processed before applying for another ${purpose} loan.`
       });
     }
 
@@ -304,6 +406,14 @@ router.post('/loan/apply', protect, async (req, res) => {
     totalInterest = totalRepayment - amount;
 
     // Create loan application with error handling
+    console.log('📝 Creating loan application (general) with data:', {
+      borrower: req.user.id,
+      loanAmount: amount,
+      purpose,
+      duration: durationMonths,
+      status: 'pending'
+    });
+
     let loan;
     try {
       loan = await Loan.create({
@@ -317,10 +427,15 @@ router.post('/loan/apply', protect, async (req, res) => {
         totalRepayment: Math.round(totalRepayment * 100) / 100,
         totalInterest: Math.round(totalInterest * 100) / 100,
         amountRemaining: Math.round(totalRepayment * 100) / 100,
-        collateral: collateral ? {
+        collateral: collateral ? (typeof collateral === 'object' ? {
+          type: collateral.type || 'other',
+          description: collateral.description || 'No description provided',
+          estimatedValue: collateral.estimatedValue || 0,
+          documents: collateral.documents || []
+        } : {
           type: 'other',
           description: collateral
-        } : null,
+        }) : null,
         status: 'pending',
         kycStatus: req.user.kycVerified ? 'verified' : 'pending',
         fundingProgress: {
@@ -330,7 +445,13 @@ router.post('/loan/apply', protect, async (req, res) => {
         submittedAt: new Date()
       });
       
-      console.log('✅ Loan created successfully:', loan._id);
+      console.log('✅ Loan created successfully:', {
+        id: loan._id,
+        status: loan.status,
+        borrower: loan.borrower,
+        amount: loan.loanAmount,
+        purpose: loan.purpose
+      });
     } catch (loanError) {
       console.error('❌ Loan creation failed:', loanError);
       return res.status(400).json({
@@ -722,7 +843,7 @@ router.post('/wallet/create', protect, async (req, res) => {
     // Create new wallet with default borrower balance
     const wallet = await Wallet.create({
       user: userId,
-      balance: 1000, // Default borrower balance
+      balance: 0, // Default borrower balance
       currency: 'USD'
     });
 

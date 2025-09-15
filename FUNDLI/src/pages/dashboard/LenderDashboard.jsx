@@ -58,9 +58,18 @@ const LenderDashboard = () => {
         const token = localStorage.getItem('accessToken');
         console.log('🔑 Token found:', token ? 'Yes' : 'No');
         console.log('👤 User:', user);
+        console.log('👤 User type:', user?.userType);
         
         if (!token) {
           throw new Error('No authentication token found');
+        }
+        
+        if (!user) {
+          throw new Error('No user data found');
+        }
+        
+        if (user.userType !== 'lender') {
+          throw new Error(`Invalid user type: ${user.userType}`);
         }
 
         console.log('🚀 Starting API calls...');
@@ -127,7 +136,15 @@ const LenderDashboard = () => {
         let loanApplications = [];
         if (loanApplicationsResponse.ok) {
           const loanApplicationsData = await loanApplicationsResponse.json();
+          console.log('📋 Loan Applications Data:', loanApplicationsData);
           loanApplications = loanApplicationsData.data?.loanApplications || [];
+          console.log('📋 Processed Loan Applications:', loanApplications);
+          console.log('📋 Loan Applications Count:', loanApplications.length);
+          console.log('📋 Loan Applications Statuses:', loanApplications.map(app => ({ id: app.id, status: app.status, borrower: app.borrower?.name })));
+        } else {
+          const errorText = await loanApplicationsResponse.text();
+          console.log('❌ Loan Applications Error:', errorText);
+          console.log('❌ Loan Applications Status:', loanApplicationsResponse.status);
         }
 
         // Process my pools data
@@ -232,15 +249,19 @@ const LenderDashboard = () => {
     }
   }, [user, loadDashboardData]);
 
-  // Expose refresh function globally for real-time updates
+  // Expose refresh function globally for real-time updates (lender-specific)
   useEffect(() => {
-    window.refreshLenderDashboard = loadDashboardData;
-    window.refreshWalletBalance = loadDashboardData; // Same function refreshes wallet balance too
+    if (user?.userType === 'lender') {
+      window.refreshLenderDashboard = loadDashboardData;
+      window.refreshWalletBalance = loadDashboardData; // Same function refreshes wallet balance too
+    }
     return () => {
-      delete window.refreshLenderDashboard;
-      delete window.refreshWalletBalance;
+      if (user?.userType === 'lender') {
+        delete window.refreshLenderDashboard;
+        delete window.refreshWalletBalance;
+      }
     };
-  }, [loadDashboardData]);
+  }, [loadDashboardData, user]);
 
   const quickActions = [
     {
@@ -626,7 +647,7 @@ const LenderDashboard = () => {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                     <div>
                       <p className="text-gray-500 dark:text-gray-500">Pool Size</p>
-                      <p className="font-medium text-gray-900 dark:text-white">${pool.poolSize.toLocaleString()}</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{pool.currency || 'USD'} {pool.poolSize.toLocaleString()}</p>
                     </div>
                     <div>
                       <p className="text-gray-500 dark:text-gray-500">Interest Rate</p>

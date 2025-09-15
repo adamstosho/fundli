@@ -360,34 +360,29 @@ const WalletPage = () => {
             {activeTab === 'limits' && (
               <div className="space-y-6">
                 <h3 className="text-h3 text-neutral-900 dark:text-white">
-                  Limits & Usage
+                  Usage & Information
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
-                    <h4 className="font-medium text-neutral-900 dark:text-white">Daily Limits</h4>
+                    <h4 className="font-medium text-neutral-900 dark:text-white">Daily Activity</h4>
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-sm text-neutral-600 dark:text-neutral-400">Deposit Limit</span>
-                        <span className="text-sm font-medium text-neutral-900 dark:text-white">
-                          ${wallet?.limits?.dailyDepositLimit?.toLocaleString() || '0'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-neutral-600 dark:text-neutral-400">Used Today</span>
+                        <span className="text-sm text-neutral-600 dark:text-neutral-400">Deposited Today</span>
                         <span className="text-sm font-medium text-neutral-900 dark:text-white">
                           ${wallet?.dailyUsage?.depositAmount?.toLocaleString() || '0'}
                         </span>
                       </div>
-                      <div className="w-full bg-neutral-200 dark:bg-neutral-600 rounded-full h-2">
-                        <div
-                          className="bg-success h-2 rounded-full transition-all duration-300"
-                          style={{
-                            width: `${Math.min(
-                              ((wallet?.dailyUsage?.depositAmount || 0) / (wallet?.limits?.dailyDepositLimit || 1)) * 100,
-                              100
-                            )}%`
-                          }}
-                        ></div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-neutral-600 dark:text-neutral-400">Withdrawn Today</span>
+                        <span className="text-sm font-medium text-neutral-900 dark:text-white">
+                          ${wallet?.dailyUsage?.withdrawalAmount?.toLocaleString() || '0'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-neutral-600 dark:text-neutral-400">Transferred Today</span>
+                        <span className="text-sm font-medium text-neutral-900 dark:text-white">
+                          ${wallet?.dailyUsage?.transferAmount?.toLocaleString() || '0'}
+                        </span>
                       </div>
                     </div>
                   </div>

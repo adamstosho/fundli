@@ -22,12 +22,12 @@ const Layout = () => {
       {!isLandingPage && <Navbar onMenuClick={() => setSidebarOpen(true)} />}
       
       <div className="flex">
-        {isAuthenticated && (
+        {isAuthenticated && !isLandingPage && (
           <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         )}
         
         <main className={`flex-1 transition-all duration-300 ${
-          isAuthenticated 
+          isAuthenticated && !isLandingPage
             ? isMobile 
               ? 'ml-0' 
               : isTablet 
@@ -45,11 +45,11 @@ const Layout = () => {
         </main>
       </div>
       
-      {/* Mobile Navigation - only show on mobile and when authenticated */}
-      {isMobile && isAuthenticated && <MobileNavigation />}
+      {/* Mobile Navigation - only show on mobile and when authenticated, but not on landing page */}
+      {isMobile && isAuthenticated && !isLandingPage && <MobileNavigation />}
       
       {/* Notification Toast Container */}
-      {isAuthenticated && <NotificationToastContainer />}
+      {isAuthenticated && !isLandingPage && <NotificationToastContainer />}
     </div>
   );
 };

@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Loan = require('../models/Loan');
 const Wallet = require('../models/Wallet');
 const Notification = require('../models/Notification');
+const Feedback = require('../models/Feedback');
 const NotificationService = require('../services/notificationService');
 const { protect } = require('../middleware/auth');
 
@@ -180,9 +181,9 @@ router.get('/loan-applications', protect, async (req, res) => {
     console.log('🔍 User viewing loan applications:', req.user.email, 'UserType:', req.user.userType);
     console.log('✅ Proceeding to fetch loan applications for user:', req.user.id);
 
-    // Only get loans that are approved and ready for funding
+    // Get loans that are pending admin review and approved loans ready for funding
     const loans = await Loan.find({
-      status: 'approved'
+      status: { $in: ['pending', 'approved'] }
     })
       .populate('borrower', 'firstName lastName email kycStatus kycVerified kycData')
       .sort({ createdAt: -1 });
@@ -213,9 +214,11 @@ router.get('/loan-applications', protect, async (req, res) => {
       data: {
         loanApplications,
         total: loanApplications.length,
+        pendingAdminReview: loanApplications.filter(loan => loan.status === 'pending').length,
+        approvedForFunding: loanApplications.filter(loan => loan.status === 'approved').length,
         pendingKyc: loanApplications.filter(loan => loan.kycStatus === 'pending').length,
         approvedKyc: loanApplications.filter(loan => loan.kycStatus === 'verified').length,
-        message: loanApplications.length === 0 ? 'No unattended loan applications available' : `${loanApplications.length} unattended loan applications available`
+        message: loanApplications.length === 0 ? 'No loan applications available' : `${loanApplications.length} loan applications available (${loanApplications.filter(loan => loan.status === 'pending').length} pending admin review, ${loanApplications.filter(loan => loan.status === 'approved').length} approved for funding)`
       }
     });
 
@@ -412,7 +415,7 @@ router.post('/wallet/create', protect, async (req, res) => {
     // Create new wallet with default lender balance
     const wallet = await Wallet.create({
       user: userId,
-      balance: 10000, // Default lender balance
+      balance: 0, // Default lender balance
       currency: 'USD'
     });
 
@@ -847,6 +850,10 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
     console.log(`✅ Wallet updates completed:`);
     console.log(`📊 Lender balance after: $${lenderWallet.balance.toLocaleString()}`);
     console.log(`📊 Borrower balance after: $${borrowerWallet.balance.toLocaleString()}`);
+    
+    // Debug: Log the actual wallet balance values
+    console.log(`🔍 DEBUG - Lender wallet balance: ${lenderWallet.balance}`);
+    console.log(`🔍 DEBUG - Borrower wallet balance: ${borrowerWallet.balance}`);
 
     // Update lender's investment statistics
     try {
@@ -874,7 +881,18 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
         lenderName: `${req.user.firstName} ${req.user.lastName}`
       });
 
-      console.log(`📧 Notifications sent to lender and borrower via NotificationService`);
+      // Also notify admin about the loan funding
+      await NotificationService.notifyAdminLoanFunded({
+        loanId: loan._id,
+        borrowerId: loan.borrower._id,
+        lenderId: req.user.id,
+        amount: parseFloat(investmentAmount),
+        borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+        lenderName: `${req.user.firstName} ${req.user.lastName}`,
+        loanPurpose: loan.purpose
+      });
+
+      console.log(`📧 Notifications sent to lender, borrower, and admin via NotificationService`);
     } catch (notificationError) {
       console.error('Failed to create notifications:', notificationError);
       // Don't fail the entire transaction if notifications fail
@@ -891,6 +909,49 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
       },
       { new: true }
     );
+
+    // Update lending pool status to 'funded' if it exists
+    if (loan.lendingPool) {
+      try {
+        const LendingPool = require('../models/LendingPool');
+        await LendingPool.findByIdAndUpdate(
+          loan.lendingPool,
+          {
+            status: 'funded',
+            fundedAt: new Date(),
+            fundedBy: req.user.id,
+            fundedAmount: parseFloat(investmentAmount)
+          }
+        );
+        console.log(`✅ Lending pool ${loan.lendingPool} status updated to 'funded'`);
+      } catch (poolError) {
+        console.error('Failed to update lending pool status:', poolError);
+        // Don't fail the entire transaction if pool update fails
+      }
+    }
+
+    // Update collateral verification status to approved if it exists
+    try {
+      const Collateral = require('../models/Collateral');
+      await Collateral.findOneAndUpdate(
+        { userId: loan.borrower._id },
+        { 
+          verificationStatus: 'approved',
+          approvedAt: new Date(),
+          adminReview: {
+            reviewedBy: req.user.id,
+            reviewedAt: new Date(),
+            status: 'approved',
+            notes: 'Automatically approved due to loan funding',
+            verifiedValue: loan.collateral?.estimatedValue || 0
+          }
+        }
+      );
+      console.log(`✅ Collateral verification auto-approved for borrower ${loan.borrower._id}`);
+    } catch (collateralError) {
+      console.error('Failed to update collateral verification:', collateralError);
+      // Don't fail the entire transaction if collateral update fails
+    }
 
     res.status(200).json({
       status: 'success',
@@ -1446,6 +1507,86 @@ router.get('/dashboard-charts', protect, async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to fetch dashboard chart data',
+      error: error.message
+    });
+  }
+});
+
+// @desc    Get feedback for lender
+// @route   GET /api/lender/feedback
+// @access  Private (Lenders only)
+router.get('/feedback', protect, async (req, res) => {
+  try {
+    // Check if user is a lender
+    if (req.user.userType !== 'lender') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Only lenders can view lender feedback'
+      });
+    }
+
+    // Get feedback sent to this lender
+    const feedback = await Feedback.find({
+      recipient: req.user.id
+    })
+    .populate('sender', 'firstName lastName email userType')
+    .populate('recipient', 'firstName lastName email userType')
+    .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        feedback,
+        total: feedback.length,
+        unread: feedback.filter(f => !f.readAt).length
+      }
+    });
+
+  } catch (error) {
+    console.error('Get lender feedback error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch lender feedback',
+      error: error.message
+    });
+  }
+});
+
+// @desc    Get notifications for lender
+// @route   GET /api/lender/notifications
+// @access  Private (Lenders only)
+router.get('/notifications', protect, async (req, res) => {
+  try {
+    // Check if user is a lender
+    if (req.user.userType !== 'lender') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Only lenders can view lender notifications'
+      });
+    }
+
+    // Get notifications for this lender
+    const notifications = await Notification.find({
+      recipient: req.user.id
+    })
+    .populate('sender', 'firstName lastName email userType')
+    .sort({ createdAt: -1 })
+    .limit(50); // Limit to last 50 notifications
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        notifications,
+        total: notifications.length,
+        unread: notifications.filter(n => !n.readAt).length
+      }
+    });
+
+  } catch (error) {
+    console.error('Get lender notifications error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch lender notifications',
       error: error.message
     });
   }

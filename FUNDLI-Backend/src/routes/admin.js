@@ -586,6 +586,7 @@ router.get('/users', protect, requireAdmin, async (req, res) => {
 // @access  Private (Admin only)
 router.get('/loans', protect, requireAdmin, async (req, res) => {
   try {
+    console.log('🔍 Admin fetching loans...');
     const { page = 1, limit = 10, status, purpose, search } = req.query;
     
     const query = {};
@@ -600,6 +601,8 @@ router.get('/loans', protect, requireAdmin, async (req, res) => {
       ];
     }
 
+    console.log('🔍 Query filters:', query);
+
     const skip = (page - 1) * limit;
     
     const loans = await Loan.find(query)
@@ -609,6 +612,10 @@ router.get('/loans', protect, requireAdmin, async (req, res) => {
       .limit(parseInt(limit));
 
     const total = await Loan.countDocuments(query);
+
+    console.log('📊 Found loans:', loans.length);
+    console.log('📊 Total loans in database:', total);
+    console.log('📊 Loan statuses:', loans.map(loan => ({ id: loan._id, status: loan.status, borrower: loan.borrower?.firstName })));
 
     res.status(200).json({
       status: 'success',
@@ -830,7 +837,49 @@ router.post('/loan/:id/approve', protect, requireAdmin, async (req, res) => {
       req.params.id,
       updateData,
       { new: true }
-    );
+    ).populate('borrower', 'firstName lastName email');
+
+    // Create notifications for loan approval/rejection
+    try {
+      if (action === 'approve') {
+        // Notify borrower about loan approval
+        await NotificationService.notifyLoanApproved({
+          borrowerId: loan.borrower._id,
+          borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+          loanId: loan._id,
+          loanAmount: loan.loanAmount,
+          purpose: loan.purpose
+        });
+
+        // Notify all lenders about new approved loan
+        const lenders = await User.find({ userType: 'lender' });
+        for (const lender of lenders) {
+          await NotificationService.notifyNewApprovedLoan({
+            lenderId: lender._id,
+            lenderName: `${lender.firstName} ${lender.lastName}`,
+            loanId: loan._id,
+            borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+            loanAmount: loan.loanAmount,
+            purpose: loan.purpose
+          });
+        }
+
+        console.log(`📧 Notifications sent for loan approval: ${loan._id}`);
+      } else {
+        // Notify borrower about loan rejection
+        await NotificationService.notifyLoanRejected({
+          borrowerId: loan.borrower._id,
+          borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+          loanId: loan._id,
+          rejectionReason: rejectionReason
+        });
+
+        console.log(`📧 Notification sent for loan rejection: ${loan._id}`);
+      }
+    } catch (notificationError) {
+      console.error('Failed to send loan approval notifications:', notificationError);
+      // Don't fail the entire operation if notifications fail
+    }
 
     res.status(200).json({
       status: 'success',
@@ -1039,7 +1088,7 @@ router.post('/wallet/create', protect, requireAdmin, async (req, res) => {
     // Create new wallet with default admin balance
     const wallet = await Wallet.create({
       user: userId,
-      balance: 50000, // Default admin balance
+      balance: 0, // Default admin balance
       currency: 'USD'
     });
 

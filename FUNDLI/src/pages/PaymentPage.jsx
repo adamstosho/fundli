@@ -290,11 +290,10 @@ const PaymentPage = () => {
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                     placeholder="Enter amount"
                     min="0"
-                    max={loan?.loanAmount}
                   />
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Maximum: ${loan?.loanAmount?.toLocaleString()}
+                  Loan amount: ${loan?.loanAmount?.toLocaleString()}
                 </p>
               </div>
 

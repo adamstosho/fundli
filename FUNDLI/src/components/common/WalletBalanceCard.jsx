@@ -9,8 +9,10 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const WalletBalanceCard = ({ userType = 'user' }) => {
+  const { user } = useAuth();
   const [wallet, setWallet] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -19,9 +21,16 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
   useEffect(() => {
     loadWalletData();
     
-    // Listen for wallet balance updates
-    const handleWalletUpdate = () => {
-      loadWalletData();
+    // Listen for wallet balance updates for this user only
+    const handleWalletUpdate = (event) => {
+      const eventUserId = event.detail?.userId;
+      const eventUserType = event.detail?.userType;
+      
+      // Only update if the event is for this user or if no user info is provided (backward compatibility)
+      if (!eventUserId || eventUserId === user?.id) {
+        console.log('Wallet balance update event received for user:', eventUserId, 'current user:', user?.id);
+        loadWalletData();
+      }
     };
     
     window.addEventListener('walletBalanceUpdated', handleWalletUpdate);
@@ -29,7 +38,7 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
     return () => {
       window.removeEventListener('walletBalanceUpdated', handleWalletUpdate);
     };
-  }, []);
+  }, [user]);
 
   const loadWalletData = async () => {
     try {
@@ -73,18 +82,21 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
         if (response.ok) {
           const data = await response.json();
           console.log('Backend wallet response:', data);
+          console.log('Current user:', user);
           
           // Handle different response structures
           if (data.data && data.data.wallet) {
             setWallet(data.data.wallet);
           } else if (data.data && typeof data.data.balance !== 'undefined') {
-            setWallet({
+            const walletData = {
               balance: data.data.balance,
               currency: data.data.currency || 'USD',
               status: data.data.status || 'active',
               limits: data.data.limits,
               stats: data.data.stats
-            });
+            };
+            console.log('Setting wallet data:', walletData);
+            setWallet(walletData);
           } else {
             setWallet(data.data);
           }
@@ -118,7 +130,7 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
       if (!localWallets[userType]) {
         // Create default wallet for this user type
         const defaultWallet = {
-          balance: userType === 'lender' ? 10000 : userType === 'admin' ? 50000 : 1000,
+          balance: 0, // All user types start with 0 balance
           currency: 'USD',
           status: 'active',
           userType: userType,

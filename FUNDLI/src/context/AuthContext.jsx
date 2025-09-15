@@ -15,7 +15,13 @@ const initialState = {
 const authReducer = (state, action) => {
   switch (action.type) {
     case 'AUTH_START':
-      return { ...state, isLoading: true, error: null };
+      return { 
+        ...state, 
+        isLoading: true, 
+        error: null,
+        isRetrying: action.payload?.isRetrying || false,
+        retryCount: action.payload?.retryCount || 0
+      };
     
     case 'AUTH_SUCCESS':
       // Handle both { user: {...} } and direct user object payloads
@@ -164,6 +170,8 @@ export const AuthProvider = ({ children }) => {
         
         console.log('checkAuthStatus - Token exists:', !!token);
         console.log('checkAuthStatus - User data exists:', !!userData);
+        console.log('checkAuthStatus - Token value:', token);
+        console.log('checkAuthStatus - User data value:', userData);
         
         if (token && userData) {
           try {
@@ -205,10 +213,15 @@ export const AuthProvider = ({ children }) => {
           }
         } else {
           console.log('checkAuthStatus - No token or user data, setting as not authenticated');
+          console.log('checkAuthStatus - Setting isLoading to false');
           dispatch({ type: 'AUTH_FAILURE', payload: null });
         }
       } catch (error) {
         console.error('checkAuthStatus - Error:', error);
+        // In development mode, don't fail completely if there's an error
+        if (process.env.NODE_ENV === 'development') {
+          console.log('checkAuthStatus - Development mode: setting as not authenticated but not failing');
+        }
         dispatch({ type: 'AUTH_FAILURE', payload: null });
       }
     };
@@ -247,8 +260,14 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.log('verifyTokenWithBackend - Error verifying token:', error);
-      // Don't clear session on network errors, keep user logged in
+      // In development mode, if backend is not available, keep user logged in
       // This prevents logout when backend is temporarily unavailable
+      if (process.env.NODE_ENV === 'development') {
+        console.log('verifyTokenWithBackend - Development mode: keeping user logged in despite backend error');
+        // Don't clear session in development mode
+      } else {
+        clearAuthData();
+      }
     }
   };
 
@@ -282,12 +301,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Register new user
-  const register = async (userData) => {
+  // Register new user with retry mechanism
+  const register = async (userData, retryCount = 0) => {
     try {
       console.log('AuthContext: Starting registration with data:', userData);
       console.log('AuthContext: userType in registration data:', userData.userType);
-      dispatch({ type: 'AUTH_START' });
+      console.log('AuthContext: Retry attempt:', retryCount);
+      
+      // Set retry status for UI feedback
+      if (retryCount > 0) {
+        dispatch({ type: 'AUTH_START', payload: { isRetrying: true, retryCount } });
+      } else {
+        dispatch({ type: 'AUTH_START' });
+      }
+      
       const response = await authAPI.register(userData);
       console.log('AuthContext: Registration API response:', response);
       
@@ -324,6 +351,26 @@ export const AuthProvider = ({ children }) => {
         status: error.response?.status,
         statusText: error.response?.statusText
       });
+      
+      // Handle timeout errors with retry mechanism
+      if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+        if (retryCount < 2) { // Retry up to 2 times
+          console.log('AuthContext: Timeout error, retrying registration...', retryCount + 1);
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retry
+          return register(userData, retryCount + 1);
+        } else {
+          const timeoutMessage = 'Registration request timed out after multiple attempts. Please check your internet connection and try again.';
+          dispatch({ type: 'AUTH_FAILURE', payload: timeoutMessage });
+          return { success: false, message: timeoutMessage };
+        }
+      }
+      
+      // Handle network errors
+      if (error.message === 'Network Error' || !error.response) {
+        const networkMessage = 'Network error. Please check your internet connection and try again.';
+        dispatch({ type: 'AUTH_FAILURE', payload: networkMessage });
+        return { success: false, message: networkMessage };
+      }
       
       // Handle validation errors specifically
       if (error.response?.status === 400 && error.response?.data?.errors) {
@@ -856,4 +903,6 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}; 
+};
+
+export { AuthContext }; 

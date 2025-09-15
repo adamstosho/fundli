@@ -188,8 +188,8 @@ const RATE_LIMITS = {
  * Interest rate ranges
  */
 const INTEREST_RATES = {
-  MIN: 5, // 5% minimum
-  MAX: 50, // 50% maximum
+  MIN: 0, // No minimum
+  MAX: 1000, // No practical maximum
   DEFAULT: 15 // 15% default
 };
 
@@ -197,8 +197,8 @@ const INTEREST_RATES = {
  * Loan amount limits
  */
 const LOAN_LIMITS = {
-  MIN: 10, // $10 minimum
-  MAX: 100000, // $100,000 maximum
+  MIN: 0, // No minimum
+  MAX: 999999999, // No practical maximum
   DEFAULT: 500 // $500 default
 };
 
@@ -206,8 +206,8 @@ const LOAN_LIMITS = {
  * Investment limits
  */
 const INVESTMENT_LIMITS = {
-  MIN: 10, // $10 minimum
-  MAX: 100000, // $100,000 maximum
+  MIN: 0, // No minimum
+  MAX: 999999999, // No practical maximum
   DEFAULT: 100 // $100 default
 };
 
@@ -216,7 +216,7 @@ const INVESTMENT_LIMITS = {
  */
 const DURATION_LIMITS = {
   MIN: 1, // 1 month minimum
-  MAX: 60, // 60 months maximum
+  MAX: 999999, // No practical maximum
   DEFAULT: 12 // 12 months default
 };
 

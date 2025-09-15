@@ -50,7 +50,7 @@ const LoanStatus = () => {
       case 'pending':
         return <Clock className="h-5 w-5 text-warning" />;
       case 'approved':
-        return <CheckCircle className="h-5 w-5 text-success" />;
+        return <Clock className="h-5 w-5 text-warning" />;
       case 'funded':
         return <CheckCircle className="h-5 w-5 text-success" />;
       case 'rejected':
@@ -67,7 +67,7 @@ const LoanStatus = () => {
       case 'pending':
         return 'bg-warning/10 text-warning border-warning/20';
       case 'approved':
-        return 'bg-success/10 text-success border-success/20';
+        return 'bg-warning/10 text-warning border-warning/20';
       case 'funded':
         return 'bg-success/10 text-success border-success/20';
       case 'rejected':
@@ -84,9 +84,9 @@ const LoanStatus = () => {
       case 'pending':
         return 'Under Review';
       case 'approved':
-        return 'Approved';
+        return 'Approved - Awaiting Funding';
       case 'funded':
-        return 'Funded';
+        return 'Funded & Disbursed';
       case 'rejected':
         return 'Rejected';
       case 'active':
@@ -208,13 +208,27 @@ const LoanStatus = () => {
               )}
 
               {loan.status === 'approved' && (
+                <div className="bg-warning/10 border border-warning/20 rounded-lg p-4 mb-4">
+                  <div className="flex items-start space-x-2">
+                    <Clock className="h-5 w-5 text-warning mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-warning mb-1">Loan Approved - Awaiting Funding</h4>
+                      <p className="text-sm text-warning/80">
+                        Your loan has been approved by admin but is waiting for lenders to fund it. You will be notified once the loan is fully funded and disbursed.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {(loan.status === 'funded' || loan.status === 'active') && (
                 <div className="bg-success/10 border border-success/20 rounded-lg p-4 mb-4">
                   <div className="flex items-start space-x-2">
                     <CheckCircle className="h-5 w-5 text-success mt-0.5" />
                     <div>
                       <h4 className="font-medium text-success mb-1">Congratulations!</h4>
                       <p className="text-sm text-success/80">
-                        Your loan has been approved and disbursed. Check your account for the funds.
+                        Your loan has been funded and disbursed. Check your account for the funds.
                       </p>
                     </div>
                   </div>

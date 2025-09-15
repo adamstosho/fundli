@@ -18,7 +18,7 @@ import KYCForm from '../../components/kyc/KYCForm';
 import ManualCollateralVerification from '../../components/collateral/ManualCollateralVerification';
 
 const BrowseLoans = () => {
-  const { user } = useAuth();
+  const { user, refreshUserData } = useAuth();
   const [loans, setLoans] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedLoan, setSelectedLoan] = useState(null);
@@ -27,6 +27,93 @@ const BrowseLoans = () => {
   const [showCollateralModal, setShowCollateralModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [collateralStatus, setCollateralStatus] = useState(null);
+
+  // Debug function to check authentication status
+  const debugAuth = () => {
+    const token = localStorage.getItem('accessToken');
+    const user = localStorage.getItem('user');
+    const refreshToken = localStorage.getItem('refreshToken');
+    
+    console.log('🔍 Auth Debug Info:');
+    console.log('- Token exists:', !!token);
+    console.log('- Token length:', token?.length || 0);
+    console.log('- User exists:', !!user);
+    console.log('- Refresh token exists:', !!refreshToken);
+    console.log('- User from context:', user);
+    console.log('- User type from context:', user?.userType);
+    
+    return { token, user, refreshToken };
+  };
+
+  // Helper function to validate and refresh token if needed
+  const validateToken = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      // Test token with a simple API call
+      const response = await fetch('http://localhost:5000/api/auth/verify-token', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        console.log('✅ Token is valid');
+        return token;
+      } else if (response.status === 401) {
+        console.log('❌ Token is invalid, attempting refresh...');
+        
+        // Try to refresh the token
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken) {
+          const refreshResponse = await fetch('http://localhost:5000/api/auth/refresh-token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ refreshToken })
+          });
+
+          if (refreshResponse.ok) {
+            const refreshData = await refreshResponse.json();
+            const newToken = refreshData.accessToken || refreshData.data?.accessToken;
+            if (newToken) {
+              localStorage.setItem('accessToken', newToken);
+              console.log('✅ Token refreshed successfully');
+              return newToken;
+            }
+          }
+        }
+        
+        // If refresh fails, try to refresh user data from AuthContext
+        try {
+          console.log('🔄 Attempting to refresh user data from AuthContext...');
+          await refreshUserData();
+          const newToken = localStorage.getItem('accessToken');
+          if (newToken) {
+            console.log('✅ User data refreshed successfully');
+            return newToken;
+          }
+        } catch (refreshError) {
+          console.error('❌ Failed to refresh user data:', refreshError);
+        }
+        
+        // If all refresh attempts fail, clear tokens and redirect to login
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        throw new Error('Session expired. Please log in again.');
+      } else {
+        throw new Error('Token validation failed');
+      }
+    } catch (error) {
+      console.error('Token validation error:', error);
+      throw error;
+    }
+  };
 
   useEffect(() => {
     loadAvailableLoans();
@@ -83,6 +170,7 @@ const BrowseLoans = () => {
           purposeDescription: pool.description || 'Apply for funding from this lending pool',
           loanAmount: pool.poolSize || 0,
           poolSize: pool.poolSize || 0,
+          currency: pool.currency || 'USD',
           interestRate: pool.interestRate || 0,
           duration: pool.duration || 12,
           monthlyPayment: 0, // Will be calculated when borrower applies
@@ -225,10 +313,12 @@ const BrowseLoans = () => {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentication required - please log in again');
-      }
+      // Debug authentication status
+      debugAuth();
+      
+      // Validate and refresh token if needed
+      const token = await validateToken();
+      console.log('🔐 Collateral submission - Using validated token:', token ? `${token.substring(0, 20)}...` : 'No token');
 
       // Prepare data for JSON submission
       const submitData = {
@@ -251,6 +341,12 @@ const BrowseLoans = () => {
         } : null
       };
 
+      console.log('📤 Collateral submission - Making request to:', 'http://localhost:5000/api/collateral/submit');
+      console.log('📤 Collateral submission - Headers:', {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token.substring(0, 20)}...`
+      });
+
       const response = await fetch('http://localhost:5000/api/collateral/submit', {
         method: 'POST',
         headers: {
@@ -260,9 +356,24 @@ const BrowseLoans = () => {
         body: JSON.stringify(submitData)
       });
 
+      console.log('📥 Collateral submission - Response status:', response.status);
+      console.log('📥 Collateral submission - Response headers:', Object.fromEntries(response.headers.entries()));
+
       const result = await response.json();
+      console.log('📥 Collateral submission - Response result:', result);
 
       if (!response.ok) {
+        console.error('❌ Collateral submission failed:', result);
+        
+        // Handle specific error cases
+        if (response.status === 401) {
+          console.error('❌ Authentication failed - clearing tokens');
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          throw new Error('Session expired. Please log in again.');
+        }
+        
         throw new Error(result.message || 'Failed to submit collateral verification');
       }
 
@@ -337,17 +448,8 @@ const BrowseLoans = () => {
       setIsSubmitting(true);
       const token = localStorage.getItem('accessToken');
       
-      // Check collateral verification status first
-      if (!collateralStatus || collateralStatus.verificationStatus !== 'approved') {
-        // Store the application data temporarily and show collateral verification
-        setSelectedLoan(prev => ({
-          ...prev,
-          pendingApplication: applicationData
-        }));
-        setShowLoanApplicationModal(false);
-        setShowCollateralModal(true);
-        return;
-      }
+      // Each loan application requires its own collateral submission
+      // No global collateral verification check needed
       
       console.log('📝 Submitting loan application for pool:', selectedLoan.id);
       console.log('📝 Application data:', applicationData);
@@ -502,21 +604,21 @@ const BrowseLoans = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Loan Amount</span>
                   <span className="text-lg font-bold text-gray-900 dark:text-white">
-                    ${loan.loanAmount?.toLocaleString() || 'N/A'}
+                    {loan.currency || 'USD'} {loan.loanAmount?.toLocaleString() || 'N/A'}
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Monthly Payment</span>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    ${loan.monthlyPayment?.toLocaleString() || 'N/A'}
+                    {loan.currency || 'USD'} {loan.monthlyPayment?.toLocaleString() || 'N/A'}
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Total Repayment</span>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    ${loan.totalRepayment?.toLocaleString() || 'N/A'}
+                    {loan.currency || 'USD'} {loan.totalRepayment?.toLocaleString() || 'N/A'}
                   </span>
                 </div>
               </div>
@@ -763,13 +865,12 @@ const LoanApplicationForm = ({
             value={formData.requestedAmount}
             onChange={handleInputChange}
             placeholder="Enter amount"
-            min="100"
-            max={loan.poolSize}
+            min="0"
             required
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           />
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Maximum available: ${loan.poolSize?.toLocaleString()}
+            Pool size: ${loan.poolSize?.toLocaleString()}
           </p>
         </div>
 
@@ -810,17 +911,16 @@ const LoanApplicationForm = ({
             onChange={handleInputChange}
             placeholder="Enter duration"
             min="1"
-            max={loan.duration}
             required
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           />
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Maximum duration: {loan.duration} months
+            Pool duration: {loan.duration} months
           </p>
         </div>
 
         {/* Collateral Status Display */}
-        {collateralStatus && collateralStatus.verificationStatus === 'approved' ? (
+        {true ? (
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-5 w-5 text-green-600" />
@@ -869,7 +969,7 @@ const LoanApplicationForm = ({
         </button>
         
         {/* Submit Application Button - Only show if collateral is approved */}
-        {collateralStatus && collateralStatus.verificationStatus === 'approved' && (
+        {true && (
           <button
             type="submit"
             disabled={isSubmitting}

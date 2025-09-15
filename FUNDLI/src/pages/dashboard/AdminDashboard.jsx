@@ -13,13 +13,15 @@ import {
   ArrowRight,
   BarChart3,
   Plus,
-  RefreshCw
+  RefreshCw,
+  MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import AdminLoanManagement from '../../components/admin/AdminLoanManagement';
 import AdminCollateralReview from '../../components/admin/AdminCollateralReview';
 import PendingLoansSection from '../../components/common/PendingLoansSection';
 import WalletBalanceCard from '../../components/common/WalletBalanceCard';
+import FeedbackManagement from '../../components/admin/FeedbackManagement';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -33,17 +35,21 @@ const AdminDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [creatingTestData, setCreatingTestData] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [selectedLoanForFeedback, setSelectedLoanForFeedback] = useState(null);
 
   useEffect(() => {
-    // Load real admin dashboard data
-    const loadDashboardData = async () => {
-      try {
-        setIsLoading(true);
-        
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-          throw new Error('Authentication required');
-        }
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
 
         // Fetch admin dashboard statistics
         const response = await fetch('http://localhost:5000/api/admin/dashboard/stats', {
@@ -55,6 +61,8 @@ const AdminDashboard = () => {
         if (response.ok) {
           const result = await response.json();
           const data = result.data;
+          
+          console.log('Admin dashboard data received:', data);
           
           // Update stats with real data
           setStats({
@@ -122,6 +130,7 @@ const AdminDashboard = () => {
       }
     };
 
+  useEffect(() => {
     loadDashboardData();
   }, []);
 
@@ -185,6 +194,14 @@ const AdminDashboard = () => {
             Welcome back, {user?.name}. Here's your platform overview.
           </p>
         </div>
+        <button
+          onClick={loadDashboardData}
+          disabled={isLoading}
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <span>Refresh Data</span>
+        </button>
       </div>
 
       {/* Tab Navigation */}
@@ -219,6 +236,16 @@ const AdminDashboard = () => {
             }`}
           >
             Collateral Verification
+          </button>
+          <button
+            onClick={() => setActiveTab('feedback')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+              activeTab === 'feedback'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            Feedback Management
           </button>
         </nav>
       </div>
@@ -436,6 +463,129 @@ const AdminDashboard = () => {
       {/* Collateral Verification Tab */}
       {activeTab === 'collateral' && (
         <AdminCollateralReview />
+      )}
+
+      {/* Feedback Management Tab */}
+      {activeTab === 'feedback' && (
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                  <MessageSquare className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                    Feedback Management
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Send feedback to borrowers and lenders, manage communication
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/30 rounded-lg p-6 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <MessageSquare className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">Send Feedback</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Communicate with users</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+                  Send feedback to borrowers and lenders about their loan applications, collateral verification, or any other matters.
+                </p>
+                <button
+                  onClick={() => setShowFeedbackModal(true)}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  <span>Send Feedback</span>
+                </button>
+              </div>
+
+              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/30 rounded-lg p-6 border border-green-200 dark:border-green-800">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">View Responses</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Check user replies</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+                  View and manage responses from borrowers and lenders to your feedback messages.
+                </p>
+                <button
+                  onClick={() => {
+                    // This would open a feedback inbox or management interface
+                    alert('Feedback inbox feature coming soon!');
+                  }}
+                  className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
+                >
+                  <CheckCircle className="h-4 w-4" />
+                  <span>View Responses</span>
+                </button>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-900/30 rounded-lg p-6 border border-purple-200 dark:border-purple-800">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+                    <BarChart3 className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">Feedback Analytics</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Track communication</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+                  View analytics and statistics about your feedback communication with users.
+                </p>
+                <button
+                  onClick={() => {
+                    // This would open analytics
+                    alert('Feedback analytics feature coming soon!');
+                  }}
+                  className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  <span>View Analytics</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-yellow-800 dark:text-yellow-200">Quick Access</h4>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                    You can also send feedback directly from the Loan Applications and Collateral Verification tabs by clicking the "Chat Borrower" or "Chat Lender" buttons.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Feedback Modal */}
+      {showFeedbackModal && (
+        <FeedbackManagement
+          loanId="general-feedback"
+          loanData={{
+            purpose: "General Feedback",
+            loanAmount: 0,
+            borrower: { _id: "general", firstName: "General", lastName: "User" },
+            lender: { _id: "general", firstName: "General", lastName: "User" }
+          }}
+          onClose={() => setShowFeedbackModal(false)}
+        />
       )}
     </div>
   );

@@ -30,7 +30,7 @@ FRONTEND_URL=http://localhost:5173
 
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
+RATE_LIMIT_MAX_REQUESTS=1000
 
 # Email Configuration (Optional)
 # EMAIL_HOST=smtp.gmail.com
@@ -40,3 +40,14 @@ RATE_LIMIT_MAX_REQUESTS=100
 
 # Webhook URL (for production)
 # WEBHOOK_URL=https://yourdomain.com/api/payments/webhook
+
+# Cloudinary Configuration (for file uploads)
+# ==========================================
+# Get your keys from: https://cloudinary.com
+# 1. Sign up for a Cloudinary account
+# 2. Go to Dashboard > Settings > API Keys
+# 3. Copy your Cloud Name, API Key, and API Secret
+
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name_here
+CLOUDINARY_API_KEY=your_cloudinary_api_key_here
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret_here

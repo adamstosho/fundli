@@ -25,8 +25,15 @@ const lendingPoolSchema = new mongoose.Schema({
   poolSize: {
     type: Number,
     required: [true, 'Pool size is required'],
-    min: [1000, 'Minimum pool size is $1,000'],
-    max: [10000000, 'Maximum pool size is $10,000,000']
+    min: [0, 'Pool size must be positive'],
+    max: [999999999, 'No practical maximum pool size']
+  },
+  
+  currency: {
+    type: String,
+    default: 'USD',
+    enum: ['USD', 'NGN', 'EUR', 'GBP', 'GHS', 'ZAR'],
+    required: [true, 'Currency is required']
   },
   
   fundedAmount: {
@@ -37,13 +44,13 @@ const lendingPoolSchema = new mongoose.Schema({
   minInvestment: {
     type: Number,
     required: [true, 'Minimum investment is required'],
-    min: [100, 'Minimum investment must be at least $100']
+    min: [0, 'Minimum investment must be non-negative']
   },
   
   maxInvestment: {
     type: Number,
     required: [true, 'Maximum investment is required'],
-    min: [100, 'Maximum investment must be at least $100']
+    min: [0, 'Maximum investment must be non-negative']
   },
   
   // Investment Terms
@@ -51,14 +58,14 @@ const lendingPoolSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'Pool duration is required'],
     min: [1, 'Minimum duration is 1 month'],
-    max: [120, 'Maximum duration is 120 months']
+    max: [999999, 'No practical maximum duration']
   },
   
   interestRate: {
     type: Number,
     required: [true, 'Interest rate is required'],
-    min: [0.01, 'Minimum interest rate is 0.01%'],
-    max: [100, 'Maximum interest rate is 100%']
+    min: [0, 'Interest rate must be non-negative'],
+    max: [1000, 'No practical maximum interest rate']
   },
   
   // Pool Status

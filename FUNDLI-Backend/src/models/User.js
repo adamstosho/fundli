@@ -152,9 +152,9 @@ const userSchema = new mongoose.Schema({
   // Financial Information
   creditScore: {
     type: Number,
-    min: 300,
+    min: 0,
     max: 850,
-    default: 650
+    default: 0
   },
   
   walletBalance: {

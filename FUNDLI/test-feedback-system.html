@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Feedback System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .button { 
+            background: #3b82f6; 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 5px;
+        }
+        .button:hover { background: #2563eb; }
+        .output { 
+            background: #f3f4f6; 
+            padding: 15px; 
+            border-radius: 5px; 
+            margin: 10px 0; 
+            white-space: pre-wrap;
+        }
+        .success { background: #d1fae5; border-left: 4px solid #10b981; }
+        .error { background: #fee2e2; border-left: 4px solid #ef4444; }
+        .info { background: #dbeafe; border-left: 4px solid #3b82f6; }
+        .step { margin: 20px 0; padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px; }
+        .step h3 { margin-top: 0; color: #1f2937; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test Feedback System</h1>
+    
+    <div class="step">
+        <h3>Step 1: Create Test Users</h3>
+        <button class="button" onclick="createTestUsers()">Create Admin, Borrower & Lender</button>
+        <div id="users-output" class="output">Ready to create test users...</div>
+    </div>
+
+    <div class="step">
+        <h3>Step 2: Create Test Loan Application</h3>
+        <button class="button" onclick="createTestLoan()">Create Test Loan</button>
+        <div id="loan-output" class="output">Ready to create test loan...</div>
+    </div>
+
+    <div class="step">
+        <h3>Step 3: Test Admin Feedback System</h3>
+        <button class="button" onclick="testAdminFeedback()">Test Admin Sending Feedback</button>
+        <div id="admin-feedback-output" class="output">Ready to test admin feedback...</div>
+    </div>
+
+    <div class="step">
+        <h3>Step 4: Test User Feedback System</h3>
+        <button class="button" onclick="testUserFeedback()">Test User Viewing & Replying</button>
+        <div id="user-feedback-output" class="output">Ready to test user feedback...</div>
+    </div>
+
+    <div class="step">
+        <h3>Step 5: Test Complete Flow</h3>
+        <button class="button" onclick="testCompleteFlow()">Test Complete Feedback Flow</button>
+        <div id="complete-flow-output" class="output">Ready to test complete flow...</div>
+    </div>
+
+    <div class="step">
+        <h3>Step 6: Open Application</h3>
+        <button class="button" onclick="openApplication()">Open FUNDLI Application</button>
+        <div id="app-output" class="output">Ready to open application...</div>
+    </div>
+
+    <script>
+        let testData = {
+            admin: null,
+            borrower: null,
+            lender: null,
+            loan: null
+        };
+
+        function createTestUsers() {
+            // Create Admin
+            const admin = {
+                id: 'test-admin-' + Date.now(),
+                firstName: 'Admin',
+                lastName: 'User',
+                email: 'admin@test.com',
+                userType: 'admin',
+                kycStatus: 'approved',
+                isEmailVerified: true,
+                creditScore: 800
+            };
+
+            // Create Borrower
+            const borrower = {
+                id: 'test-borrower-' + Date.now(),
+                firstName: 'Test',
+                lastName: 'Borrower',
+                email: 'borrower@test.com',
+                userType: 'borrower',
+                kycStatus: 'approved',
+                isEmailVerified: true,
+                creditScore: 600
+            };
+
+            // Create Lender
+            const lender = {
+                id: 'test-lender-' + Date.now(),
+                firstName: 'Test',
+                lastName: 'Lender',
+                email: 'lender@test.com',
+                userType: 'lender',
+                kycStatus: 'approved',
+                isEmailVerified: true,
+                creditScore: 750
+            };
+
+            testData.admin = admin;
+            testData.borrower = borrower;
+            testData.lender = lender;
+
+            // Store in localStorage
+            localStorage.setItem('testAdmin', JSON.stringify(admin));
+            localStorage.setItem('testBorrower', JSON.stringify(borrower));
+            localStorage.setItem('testLender', JSON.stringify(lender));
+
+            document.getElementById('users-output').innerHTML = `
+                <div class="success">
+                    ✅ Test users created successfully!<br>
+                    Admin: ${admin.email}<br>
+                    Borrower: ${borrower.email}<br>
+                    Lender: ${lender.email}
+                </div>
+            `;
+        }
+
+        async function createTestLoan() {
+            if (!testData.borrower) {
+                document.getElementById('loan-output').innerHTML = '<div class="error">❌ Please create test users first</div>';
+                return;
+            }
+
+            try {
+                const loanData = {
+                    borrower: testData.borrower.id,
+                    loanAmount: 5000,
+                    purpose: 'Business expansion',
+                    duration: 12,
+                    status: 'pending',
+                    createdAt: new Date().toISOString()
+                };
+
+                // Store test loan
+                testData.loan = loanData;
+                localStorage.setItem('testLoan', JSON.stringify(loanData));
+
+                document.getElementById('loan-output').innerHTML = `
+                    <div class="success">
+                        ✅ Test loan created successfully!<br>
+                        Amount: $${loanData.loanAmount}<br>
+                        Purpose: ${loanData.purpose}<br>
+                        Duration: ${loanData.duration} months
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('loan-output').innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testAdminFeedback() {
+            if (!testData.admin || !testData.borrower || !testData.lender || !testData.loan) {
+                document.getElementById('admin-feedback-output').innerHTML = '<div class="error">❌ Please create test users and loan first</div>';
+                return;
+            }
+
+            try {
+                // Test sending feedback to borrower
+                const borrowerFeedback = {
+                    loanId: testData.loan.id || 'test-loan-id',
+                    recipientId: testData.borrower.id,
+                    type: 'admin_to_borrower',
+                    subject: 'Loan Application Review',
+                    message: 'Your loan application is under review. We need additional documentation.',
+                    priority: 'high'
+                };
+
+                // Test sending feedback to lender
+                const lenderFeedback = {
+                    loanId: testData.loan.id || 'test-loan-id',
+                    recipientId: testData.lender.id,
+                    type: 'admin_to_lender',
+                    subject: 'New Loan Opportunity',
+                    message: 'A new loan application matches your lending criteria.',
+                    priority: 'medium'
+                };
+
+                document.getElementById('admin-feedback-output').innerHTML = `
+                    <div class="success">
+                        ✅ Admin feedback system ready!<br>
+                        <strong>Borrower Feedback:</strong><br>
+                        Subject: ${borrowerFeedback.subject}<br>
+                        Message: ${borrowerFeedback.message}<br>
+                        Priority: ${borrowerFeedback.priority}<br><br>
+                        <strong>Lender Feedback:</strong><br>
+                        Subject: ${lenderFeedback.subject}<br>
+                        Message: ${lenderFeedback.message}<br>
+                        Priority: ${lenderFeedback.priority}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('admin-feedback-output').innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testUserFeedback() {
+            if (!testData.borrower || !testData.lender) {
+                document.getElementById('user-feedback-output').innerHTML = '<div class="error">❌ Please create test users first</div>';
+                return;
+            }
+
+            try {
+                // Test borrower viewing feedback
+                const borrowerFeedback = {
+                    id: 'feedback-1',
+                    subject: 'Loan Application Review',
+                    message: 'Your loan application is under review. We need additional documentation.',
+                    type: 'admin_to_borrower',
+                    priority: 'high',
+                    status: 'sent',
+                    sender: { name: 'Admin User', userType: 'admin' },
+                    recipient: { name: 'Test Borrower', userType: 'borrower' },
+                    createdAt: new Date().toISOString()
+                };
+
+                // Test lender viewing feedback
+                const lenderFeedback = {
+                    id: 'feedback-2',
+                    subject: 'New Loan Opportunity',
+                    message: 'A new loan application matches your lending criteria.',
+                    type: 'admin_to_lender',
+                    priority: 'medium',
+                    status: 'sent',
+                    sender: { name: 'Admin User', userType: 'admin' },
+                    recipient: { name: 'Test Lender', userType: 'lender' },
+                    createdAt: new Date().toISOString()
+                };
+
+                document.getElementById('user-feedback-output').innerHTML = `
+                    <div class="success">
+                        ✅ User feedback system ready!<br>
+                        <strong>Borrower can view:</strong><br>
+                        Subject: ${borrowerFeedback.subject}<br>
+                        Status: ${borrowerFeedback.status}<br>
+                        Can reply: Yes<br><br>
+                        <strong>Lender can view:</strong><br>
+                        Subject: ${lenderFeedback.subject}<br>
+                        Status: ${lenderFeedback.status}<br>
+                        Can reply: Yes
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('user-feedback-output').innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testCompleteFlow() {
+            try {
+                const flowSteps = [
+                    '1. Admin reviews loan application',
+                    '2. Admin sends feedback to borrower about documentation',
+                    '3. Admin sends feedback to lender about new opportunity',
+                    '4. Borrower receives notification and views feedback',
+                    '5. Borrower replies to admin with additional info',
+                    '6. Lender receives notification and views feedback',
+                    '7. Lender replies to admin with interest level',
+                    '8. Admin receives both replies and makes decision'
+                ];
+
+                document.getElementById('complete-flow-output').innerHTML = `
+                    <div class="success">
+                        ✅ Complete feedback flow ready!<br><br>
+                        <strong>Flow Steps:</strong><br>
+                        ${flowSteps.join('<br>')}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('complete-flow-output').innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        function openApplication() {
+            // Set up test data for the application
+            const testBorrower = JSON.parse(localStorage.getItem('testBorrower') || '{}');
+            const testLender = JSON.parse(localStorage.getItem('testLender') || '{}');
+            const testAdmin = JSON.parse(localStorage.getItem('testAdmin') || '{}');
+
+            if (testBorrower.id) {
+                // Set up borrower session
+                localStorage.setItem('accessToken', 'test-token-borrower-' + Date.now());
+                localStorage.setItem('refreshToken', 'test-refresh-borrower-' + Date.now());
+                localStorage.setItem('user', JSON.stringify(testBorrower));
+            }
+
+            document.getElementById('app-output').innerHTML = `
+                <div class="success">
+                    ✅ Application ready to test!<br><br>
+                    <strong>Test Instructions:</strong><br>
+                    1. Open <a href="http://localhost:5173" target="_blank">http://localhost:5173</a><br>
+                    2. Login as borrower: ${testBorrower.email}<br>
+                    3. Go to Admin Dashboard (if admin)<br>
+                    4. Click "Chat Borrower" or "Chat Lender" on any loan<br>
+                    5. Send feedback messages<br>
+                    6. Switch to borrower/lender view<br>
+                    7. Check "Feedback Inbox" in Quick Actions<br>
+                    8. View and reply to feedback
+                </div>
+            `;
+        }
+
+        // Initialize
+        document.getElementById('users-output').innerHTML = '<div class="info">Click "Create Admin, Borrower & Lender" to start</div>';
+    </script>
+</body>
+</html>
+

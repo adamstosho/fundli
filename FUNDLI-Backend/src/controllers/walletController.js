@@ -693,13 +693,7 @@ const transferFunds = async (req, res) => {
       });
     }
 
-    // Minimum transfer amount
-    if (transferAmount < 10) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Minimum transfer amount is $10'
-      });
-    }
+    // No minimum transfer amount - unlimited transfers
 
     // Get sender's wallet
     const fromWallet = await Wallet.findOne({ user: fromUserId });
