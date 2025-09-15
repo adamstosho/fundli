@@ -212,6 +212,13 @@ router.post('/loan/:loanId/apply', protect, async (req, res) => {
     totalRepayment = monthlyPayment * numberOfPayments;
     totalInterest = totalRepayment - parseFloat(requestedAmount);
 
+    // Find the most recent collateral verification for this user
+    const Collateral = require('../models/Collateral');
+    const userCollateral = await Collateral.findOne({
+      userId: req.user.id,
+      verificationStatus: 'approved'
+    }).sort({ approvedAt: -1 });
+
     // Create loan application
     console.log('📝 Creating loan application with data:', {
       borrower: req.user.id,
@@ -219,10 +226,12 @@ router.post('/loan/:loanId/apply', protect, async (req, res) => {
       loanAmount: parseFloat(requestedAmount),
       purpose,
       duration: numberOfPayments,
-      status: 'pending'
+      status: 'pending',
+      hasCollateralVerification: !!userCollateral
     });
 
-    const loan = await Loan.create({
+    // Build loan data object
+    const loanData = {
       borrower: req.user.id,
       lendingPool: loanId,
       loanAmount: parseFloat(requestedAmount),
@@ -250,7 +259,24 @@ router.post('/loan/:loanId/apply', protect, async (req, res) => {
         fundedAmount: 0
       },
       submittedAt: new Date()
-    });
+    };
+
+    // Only add collateralVerification if userCollateral exists
+    if (userCollateral) {
+      loanData.collateralVerification = {
+        id: userCollateral._id,
+        type: userCollateral.collateralType,
+        description: userCollateral.description,
+        estimatedValue: userCollateral.estimatedValue,
+        documents: userCollateral.collateralDocuments || [],
+        bankStatement: userCollateral.bankStatement,
+        bvn: userCollateral.bvn,
+        verificationStatus: userCollateral.verificationStatus,
+        approvedAt: userCollateral.approvedAt
+      };
+    }
+
+    const loan = await Loan.create(loanData);
 
     console.log('✅ Loan application created successfully:', {
       id: loan._id,
@@ -405,18 +431,27 @@ router.post('/loan/apply', protect, async (req, res) => {
     totalRepayment = monthlyPayment * numberOfPayments;
     totalInterest = totalRepayment - amount;
 
+    // Find the most recent collateral verification for this user
+    const Collateral = require('../models/Collateral');
+    const userCollateral = await Collateral.findOne({
+      userId: req.user.id,
+      verificationStatus: 'approved'
+    }).sort({ approvedAt: -1 });
+
     // Create loan application with error handling
     console.log('📝 Creating loan application (general) with data:', {
       borrower: req.user.id,
       loanAmount: amount,
       purpose,
       duration: durationMonths,
-      status: 'pending'
+      status: 'pending',
+      hasCollateralVerification: !!userCollateral
     });
 
     let loan;
     try {
-      loan = await Loan.create({
+      // Build loan data object
+      const loanData = {
         borrower: req.user.id,
         loanAmount: amount,
         purpose,
@@ -443,7 +478,24 @@ router.post('/loan/apply', protect, async (req, res) => {
           fundedAmount: 0
         },
         submittedAt: new Date()
-      });
+      };
+
+      // Only add collateralVerification if userCollateral exists
+      if (userCollateral) {
+        loanData.collateralVerification = {
+          id: userCollateral._id,
+          type: userCollateral.collateralType,
+          description: userCollateral.description,
+          estimatedValue: userCollateral.estimatedValue,
+          documents: userCollateral.collateralDocuments || [],
+          bankStatement: userCollateral.bankStatement,
+          bvn: userCollateral.bvn,
+          verificationStatus: userCollateral.verificationStatus,
+          approvedAt: userCollateral.approvedAt
+        };
+      }
+
+      loan = await Loan.create(loanData);
       
       console.log('✅ Loan created successfully:', {
         id: loan._id,
@@ -865,6 +917,107 @@ router.post('/wallet/create', protect, async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to create borrower wallet'
+    });
+  }
+});
+
+// @desc    Get borrower wallet balance with loan statistics
+// @route   GET /api/borrower/wallet/balance-with-stats
+// @access  Private (Borrowers only)
+router.get('/wallet/balance-with-stats', protect, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Check if user is a borrower
+    if (req.user.userType !== 'borrower') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Only borrowers can access borrower wallet statistics'
+      });
+    }
+
+    const wallet = await Wallet.findOne({ user: userId });
+    if (!wallet) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Borrower wallet not found'
+      });
+    }
+
+    // Get loan statistics for this borrower
+    const Loan = require('../models/Loan');
+    const loanStats = await Loan.aggregate([
+      {
+        $match: { borrower: userId }
+      },
+      {
+        $group: {
+          _id: null,
+          totalBorrowed: { $sum: '$loanAmount' },
+          totalRepaid: { $sum: '$amountPaid' },
+          totalRemaining: { $sum: '$amountRemaining' },
+          activeLoans: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'active'] }, 1, 0]
+            }
+          },
+          completedLoans: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'completed'] }, 1, 0]
+            }
+          },
+          pendingLoans: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'pending'] }, 1, 0]
+            }
+          }
+        }
+      }
+    ]);
+
+    const stats = loanStats[0] || {
+      totalBorrowed: 0,
+      totalRepaid: 0,
+      totalRemaining: 0,
+      activeLoans: 0,
+      completedLoans: 0,
+      pendingLoans: 0
+    };
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        wallet: {
+          balance: wallet.balance,
+          currency: wallet.currency,
+          status: wallet.status,
+          totalDeposits: wallet.stats.totalDeposits,
+          totalWithdrawals: wallet.stats.totalWithdrawals,
+          transactionCount: wallet.stats.transactionCount
+        },
+        loanStats: {
+          totalBorrowed: stats.totalBorrowed,
+          totalRepaid: stats.totalRepaid,
+          totalRemaining: stats.totalRemaining,
+          activeLoans: stats.activeLoans,
+          completedLoans: stats.completedLoans,
+          pendingLoans: stats.pendingLoans
+        },
+        recentTransactions: wallet.transactions.slice(-5).map(t => ({
+          type: t.type,
+          amount: t.amount,
+          description: t.description,
+          reference: t.reference,
+          createdAt: t.createdAt
+        }))
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching borrower wallet with stats:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch borrower wallet and loan statistics'
     });
   }
 });

@@ -136,18 +136,20 @@ const AdminLoanManagement = () => {
       
       const endpoint = action === 'approve' 
         ? `http://localhost:5000/api/admin/loan/${selectedApplication?.id}/approve`
-        : `http://localhost:5000/api/admin/loan/${selectedApplication?.id}/reject`;
+        : `http://localhost:5000/api/admin/loans/${selectedApplication?.id}/reject`;
       
       const response = await fetch(endpoint, {
-        method: 'POST',
+        method: action === 'approve' ? 'POST' : 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
+        body: JSON.stringify(action === 'approve' ? {
           action: action,
-          rejectionReason: action === 'reject' ? rejectionReason : undefined,
-          adminNotes: adminNotes || undefined
+          rejectionReason: rejectionReason || '',
+          adminNotes: adminNotes || ''
+        } : {
+          reason: rejectionReason || 'No reason provided'
         })
       });
 
@@ -650,36 +652,149 @@ const AdminLoanManagement = () => {
               )}
 
               {/* Collateral Information */}
-              {selectedApplication.collateral && (
+              {(selectedApplication.collateral || selectedApplication.collateralVerification) && (
                 <div>
                   <h4 className="font-medium text-gray-900 dark:text-white mb-3">Collateral Information</h4>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-3">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Type:</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
-                        {selectedApplication.collateral.type || 'Not specified'}
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Description:</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {selectedApplication.collateral.description || 'No description provided'}
-                      </p>
-                    </div>
-                    
-                    {selectedApplication.collateral.estimatedValue && (
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Estimated Value:</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          ${selectedApplication.collateral.estimatedValue.toLocaleString()}
-                        </p>
+                    {/* Basic Collateral Info */}
+                    {selectedApplication.collateral && (
+                      <>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Type:</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                            {selectedApplication.collateral.type || 'Not specified'}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Description:</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {selectedApplication.collateral.description || 'No description provided'}
+                          </p>
+                        </div>
+                        
+                        {selectedApplication.collateral.estimatedValue && (
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Estimated Value:</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              ${selectedApplication.collateral.estimatedValue.toLocaleString()}
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* Detailed Collateral Verification */}
+                    {selectedApplication.collateralVerification && (
+                      <div className="border-t pt-3 mt-3">
+                        <h5 className="font-medium text-gray-900 dark:text-white mb-2">Verified Collateral Documents</h5>
+                        
+                        <div className="space-y-2">
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Verification Status:</p>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              selectedApplication.collateralVerification.verificationStatus === 'approved' 
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                            }`}>
+                              {selectedApplication.collateralVerification.verificationStatus}
+                            </span>
+                          </div>
+
+                          {selectedApplication.collateralVerification.type && (
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Verified Type:</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                                {selectedApplication.collateralVerification.type}
+                              </p>
+                            </div>
+                          )}
+
+                          {selectedApplication.collateralVerification.description && (
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Verified Description:</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                {selectedApplication.collateralVerification.description}
+                              </p>
+                            </div>
+                          )}
+
+                          {selectedApplication.collateralVerification.estimatedValue && (
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Verified Value:</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                ${selectedApplication.collateralVerification.estimatedValue.toLocaleString()}
+                              </p>
+                            </div>
+                          )}
+
+                          {selectedApplication.collateralVerification.bvn && (
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">BVN:</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                {selectedApplication.collateralVerification.bvn}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Collateral Documents */}
+                          {selectedApplication.collateralVerification.documents && selectedApplication.collateralVerification.documents.length > 0 && (
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Collateral Documents:</p>
+                              <div className="space-y-2">
+                                {selectedApplication.collateralVerification.documents.map((doc, index) => (
+                                  <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-600 rounded p-2">
+                                    <div className="flex items-center space-x-2">
+                                      <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                      <span className="text-sm text-gray-900 dark:text-white">{doc.originalName || doc.fileName}</span>
+                                      <span className="text-xs text-gray-500">({doc.documentType})</span>
+                                    </div>
+                                    {doc.fileUrl && (
+                                      <a 
+                                        href={doc.fileUrl} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:text-blue-800 text-sm underline"
+                                      >
+                                        View Document
+                                      </a>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Bank Statement */}
+                          {selectedApplication.collateralVerification.bankStatement && selectedApplication.collateralVerification.bankStatement.fileUrl && (
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Bank Statement:</p>
+                              <div className="flex items-center justify-between bg-white dark:bg-gray-600 rounded p-2">
+                                <div className="flex items-center space-x-2">
+                                  <FileText className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                  <span className="text-sm text-gray-900 dark:text-white">
+                                    {selectedApplication.collateralVerification.bankStatement.originalName || selectedApplication.collateralVerification.bankStatement.fileName}
+                                  </span>
+                                </div>
+                                <a 
+                                  href={selectedApplication.collateralVerification.bankStatement.fileUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-green-600 hover:text-green-800 text-sm underline"
+                                >
+                                  View Statement
+                                </a>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                     
-                    {selectedApplication.collateral.documents && selectedApplication.collateral.documents.length > 0 && (
+                    {/* Basic Collateral Documents (fallback) */}
+                    {selectedApplication.collateral && selectedApplication.collateral.documents && selectedApplication.collateral.documents.length > 0 && (
                       <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Documents:</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Basic Documents:</p>
                         <div className="space-y-2">
                           {selectedApplication.collateral.documents.map((doc, index) => (
                             <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-600 rounded p-2">

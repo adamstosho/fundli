@@ -216,7 +216,7 @@ const PendingLoansSection = ({ userType, title = "Pending Loans" }) => {
                     {loan.currency || 'USD'} {loan.loanAmount?.toLocaleString()}
                   </h4>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(loan.status)}`}>
-                    {loan.status}
+                    {loan.status === 'active' ? 'Running Loan' : loan.status}
                   </span>
                   {loan.kycStatus && (
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getKycStatusColor(loan.kycStatus)}`}>
@@ -397,21 +397,29 @@ const PendingLoansSection = ({ userType, title = "Pending Loans" }) => {
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">Monthly Payment:</span>
                     <span className="font-medium text-gray-900 dark:text-white">
-                      ${selectedLoan.monthlyPayment?.toLocaleString()}
+                      {selectedLoan.currency || 'USD'} {selectedLoan.monthlyPayment?.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">Total Repayment:</span>
                     <span className="font-medium text-gray-900 dark:text-white">
-                      ${selectedLoan.totalRepayment?.toLocaleString()}
+                      {selectedLoan.currency || 'USD'} {selectedLoan.totalRepayment?.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">Status:</span>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedLoan.status)}`}>
-                      {selectedLoan.status}
+                      {selectedLoan.status === 'active' ? 'Running Loan' : selectedLoan.status}
                     </span>
                   </div>
+                  {selectedLoan.status === 'active' && selectedLoan.endDate && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Due Date:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {new Date(selectedLoan.endDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">Applied:</span>
                     <span className="font-medium text-gray-900 dark:text-white">

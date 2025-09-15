@@ -17,6 +17,7 @@ import {
   Copy,
   Check
 } from 'lucide-react';
+import { refreshWalletAfterTransaction } from '../utils/walletUtils';
 
 const DepositPage = () => {
   const navigate = useNavigate();
@@ -136,10 +137,11 @@ const DepositPage = () => {
         setSuccess(`Deposit successful! $${parseFloat(amount).toLocaleString()} has been added to your wallet.`);
         setIsLoading(false);
         
-        // Refresh wallet data
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+        // Refresh wallet data and trigger wallet balance update event
+        await loadWalletData();
+        
+        // Trigger wallet balance update using utility function
+        refreshWalletAfterTransaction('deposit', parseFloat(amount), true);
         return;
       }
 
@@ -203,10 +205,11 @@ const DepositPage = () => {
         setSuccess(`Bank transfer successful! $${parseFloat(amount).toLocaleString()} has been added to your wallet.`);
         setIsLoading(false);
         
-        // Refresh wallet data
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+        // Refresh wallet data and trigger wallet balance update event
+        await loadWalletData();
+        
+        // Trigger wallet balance update using utility function
+        refreshWalletAfterTransaction('deposit', parseFloat(amount), true);
         return;
       }
 
@@ -286,6 +289,9 @@ Send the exact amount to the number above and include the reference. Your wallet
         
         // Refresh wallet data
         await loadWalletData();
+        
+        // Trigger wallet balance update using utility function
+        refreshWalletAfterTransaction('deposit', parseFloat(amount), true);
         
         // Redirect to wallet page after 3 seconds
         setTimeout(() => {

@@ -25,20 +25,53 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
     const handleWalletUpdate = (event) => {
       const eventUserId = event.detail?.userId;
       const eventUserType = event.detail?.userType;
+      const newBalance = event.detail?.newBalance;
       
       // Only update if the event is for this user or if no user info is provided (backward compatibility)
       if (!eventUserId || eventUserId === user?.id) {
         console.log('Wallet balance update event received for user:', eventUserId, 'current user:', user?.id);
+        
+        // If we have a new balance from the event, update immediately
+        if (newBalance !== undefined) {
+          console.log('Updating wallet balance immediately from event:', newBalance);
+          setWallet(prevWallet => ({
+            ...prevWallet,
+            balance: newBalance,
+            updatedAt: new Date().toISOString()
+          }));
+        }
+        
+        // Also refresh from API to ensure consistency
         loadWalletData();
       }
     };
     
+    // Listen for dashboard refresh events
+    const handleDashboardRefresh = () => {
+      console.log('Dashboard refresh event received, refreshing wallet data');
+      loadWalletData();
+    };
+    
+    // Set up periodic refresh every 30 seconds to ensure balance stays current
+    const periodicRefresh = setInterval(() => {
+      console.log('🔄 Periodic wallet balance refresh');
+      loadWalletData();
+    }, 30000);
+    
     window.addEventListener('walletBalanceUpdated', handleWalletUpdate);
+    window.addEventListener('dashboardRefreshed', handleDashboardRefresh);
     
     return () => {
       window.removeEventListener('walletBalanceUpdated', handleWalletUpdate);
+      window.removeEventListener('dashboardRefreshed', handleDashboardRefresh);
+      clearInterval(periodicRefresh);
     };
   }, [user]);
+
+  // Debug wallet state changes
+  useEffect(() => {
+    console.log('Wallet state changed:', wallet);
+  }, [wallet]);
 
   const loadWalletData = async () => {
     try {
@@ -71,6 +104,8 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
           apiEndpoint = 'http://localhost:5000/api/admin/wallet/balance';
         }
         
+        console.log('🔍 Wallet API endpoint:', apiEndpoint);
+        
         console.log('Using wallet endpoint for user type:', currentUserType, '->', apiEndpoint);
         
         console.log('Trying API endpoint:', apiEndpoint);
@@ -86,6 +121,7 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
           
           // Handle different response structures
           if (data.data && data.data.wallet) {
+            console.log('Setting wallet from wallet object:', data.data.wallet);
             setWallet(data.data.wallet);
           } else if (data.data && typeof data.data.balance !== 'undefined') {
             const walletData = {
@@ -96,8 +132,11 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
               stats: data.data.stats
             };
             console.log('Setting wallet data:', walletData);
+            console.log('Previous wallet state:', wallet);
             setWallet(walletData);
+            console.log('Wallet state updated to:', walletData);
           } else {
+            console.log('Setting wallet from data.data:', data.data);
             setWallet(data.data);
           }
           return; // Success, exit early
@@ -324,6 +363,7 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
         <button
           onClick={(e) => {
             e.stopPropagation();
+            console.log('🔄 Manual wallet refresh triggered');
             loadWalletData();
           }}
           className="ml-2 text-xs text-blue-600 hover:text-blue-800 underline"

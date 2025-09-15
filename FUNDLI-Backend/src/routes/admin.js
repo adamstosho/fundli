@@ -678,6 +678,27 @@ router.put('/loans/:loanId/reject', protect, requireAdmin, async (req, res) => {
 
     await loan.save();
 
+    // Clear collateral verification restrictions for rejected loans
+    try {
+      const Collateral = require('../models/Collateral');
+      // Update any pending collateral verifications for this borrower to allow new submissions
+      await Collateral.updateMany(
+        {
+          userId: loan.borrower,
+          verificationStatus: { $in: ['pending', 'submitted', 'under_review'] }
+        },
+        {
+          verificationStatus: 'rejected',
+          rejectedAt: new Date(),
+          rejectionReason: `Loan application rejected: ${reason}`
+        }
+      );
+      console.log(`✅ Cleared collateral verification restrictions for borrower ${loan.borrower}`);
+    } catch (collateralError) {
+      console.error('Failed to clear collateral restrictions:', collateralError);
+      // Don't fail the entire operation if collateral clearing fails
+    }
+
     res.status(200).json({
       status: 'success',
       message: 'Loan rejected successfully',
@@ -732,6 +753,7 @@ router.get('/loan-applications', protect, requireAdmin, async (req, res) => {
       duration: loan.duration,
       interestRate: loan.interestRate,
       collateral: loan.collateral,
+      collateralVerification: loan.collateralVerification,
       status: loan.status,
       kycStatus: loan.kycStatus,
       createdAt: loan.createdAt,
@@ -874,7 +896,43 @@ router.post('/loan/:id/approve', protect, requireAdmin, async (req, res) => {
           rejectionReason: rejectionReason
         });
 
-        console.log(`📧 Notification sent for loan rejection: ${loan._id}`);
+        // Notify all lenders about loan rejection
+        const lenders = await User.find({ userType: 'lender' });
+        for (const lender of lenders) {
+          await NotificationService.notifyLoanRejectedByAdmin({
+            lenderId: lender._id,
+            lenderName: `${lender.firstName} ${lender.lastName}`,
+            loanId: loan._id,
+            borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+            loanAmount: loan.loanAmount,
+            rejectionReason: rejectionReason
+          });
+        }
+
+        console.log(`📧 Notifications sent for loan rejection: ${loan._id}`);
+      }
+
+      // Clear collateral verification restrictions for rejected loans
+      if (action === 'reject') {
+        try {
+          const Collateral = require('../models/Collateral');
+          // Update any pending collateral verifications for this borrower to allow new submissions
+          await Collateral.updateMany(
+            {
+              userId: loan.borrower._id,
+              verificationStatus: { $in: ['pending', 'submitted', 'under_review'] }
+            },
+            {
+              verificationStatus: 'rejected',
+              rejectedAt: new Date(),
+              rejectionReason: `Loan application rejected: ${rejectionReason}`
+            }
+          );
+          console.log(`✅ Cleared collateral verification restrictions for borrower ${loan.borrower._id}`);
+        } catch (collateralError) {
+          console.error('Failed to clear collateral restrictions:', collateralError);
+          // Don't fail the entire operation if collateral clearing fails
+        }
       }
     } catch (notificationError) {
       console.error('Failed to send loan approval notifications:', notificationError);

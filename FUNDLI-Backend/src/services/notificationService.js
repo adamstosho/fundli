@@ -830,6 +830,32 @@ class NotificationService {
       console.error('Error sending loan rejection notification:', error);
     }
   }
+
+  /**
+   * Notify lender about loan rejection by admin
+   */
+  static async notifyLoanRejectedByAdmin({ lenderId, lenderName, loanId, borrowerName, loanAmount, rejectionReason }) {
+    try {
+      await this.createNotification({
+        recipientId: lenderId,
+        type: 'loan_rejected_by_admin',
+        title: 'Loan Application Rejected',
+        message: `A loan application from ${borrowerName} for $${loanAmount.toLocaleString()} has been rejected by admin. Reason: ${rejectionReason}`,
+        priority: 'normal',
+        actionRequired: false,
+        metadata: {
+          loanId,
+          borrowerName,
+          amount: loanAmount,
+          rejectionReason,
+          action: 'view_loan'
+        }
+      });
+      console.log(`📧 Loan rejection notification sent to lender ${lenderId}`);
+    } catch (error) {
+      console.error('Error sending loan rejection notification to lender:', error);
+    }
+  }
 }
 
 module.exports = NotificationService;

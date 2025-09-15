@@ -117,7 +117,7 @@ const LenderLoanManagement = () => {
       setIsProcessing(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`http://localhost:5000/api/lender/loan/${selectedLoan.id}/accept`, {
+      const response = await fetch(`http://localhost:5000/api/lender/loan/${selectedLoan.id}/invest`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -132,7 +132,9 @@ const LenderLoanManagement = () => {
       if (response.ok) {
         const result = await response.json();
         
-        alert(`Successfully funded loan! $${investmentAmount} has been transferred to ${selectedLoan.borrower.name}.`);
+        console.log('✅ Investment successful:', result);
+        
+        alert(`Successfully invested in loan! $${investmentAmount} has been transferred to ${selectedLoan.borrower.name}.`);
         
         setShowAcceptModal(false);
         setSelectedLoan(null);
@@ -144,16 +146,45 @@ const LenderLoanManagement = () => {
         
         // Refresh dashboard data globally
         if (window.refreshLenderDashboard) {
-          console.log('🔄 Refreshing lender dashboard after loan funding');
+          console.log('🔄 Refreshing lender dashboard after loan investment');
           window.refreshLenderDashboard();
         }
+        
+        // Dispatch wallet balance update event with new balance from response
+        if (result.data?.lenderWallet?.balance !== undefined) {
+          const newBalance = result.data.lenderWallet.balance;
+          window.dispatchEvent(new CustomEvent('walletBalanceUpdated', {
+            detail: { 
+              userId: localStorage.getItem('userId') || 'unknown',
+              userType: 'lender',
+              newBalance: newBalance,
+              transactionType: 'loan_investment'
+            }
+          }));
+          
+          // Update local storage wallet
+          const localWallets = JSON.parse(localStorage.getItem('localWallets') || '{}');
+          localWallets.lender = {
+            ...localWallets.lender,
+            balance: newBalance,
+            updatedAt: new Date().toISOString()
+          };
+          localStorage.setItem('localWallets', JSON.stringify(localWallets));
+          
+          console.log('Updated lender wallet balance from response:', newBalance);
+        }
+        
+        // Trigger dashboard refresh
+        window.dispatchEvent(new CustomEvent('dashboardRefreshed'));
+        
       } else {
         const errorData = await response.json();
-        alert(`Failed to fund loan: ${errorData.message}`);
+        console.error('Investment failed:', errorData);
+        alert(`Failed to invest in loan: ${errorData.message}`);
       }
     } catch (error) {
-      console.error('Error accepting loan:', error);
-      alert('Failed to accept loan application');
+      console.error('Error investing in loan:', error);
+      alert('Failed to invest in loan application');
     } finally {
       setIsProcessing(false);
     }
@@ -208,6 +239,16 @@ const LenderLoanManagement = () => {
       console.log('🔄 Refreshing lender dashboard after payment success');
       window.refreshLenderDashboard();
     }
+    
+    // Dispatch wallet balance update event
+    window.dispatchEvent(new CustomEvent('walletBalanceUpdated', {
+      detail: { 
+        userId: localStorage.getItem('userId') || 'unknown',
+        userType: 'lender',
+        amount: paymentData.amount,
+        transactionType: 'loan_payment'
+      }
+    }));
     
     alert(`Payment successful! ${paymentData.amount} has been transferred to the borrower.`);
   };

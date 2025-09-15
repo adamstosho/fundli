@@ -12,6 +12,7 @@ import {
   Search,
   Users
 } from 'lucide-react';
+import { refreshWalletAfterTransaction } from '../utils/walletUtils';
 
 const TransferPage = () => {
   const navigate = useNavigate();
@@ -179,6 +180,9 @@ const TransferPage = () => {
         
         // Refresh wallet data
         await loadWalletData();
+        
+        // Trigger wallet balance update using utility function
+        refreshWalletAfterTransaction('transfer', transferData.amount, false);
         
         // Redirect to wallet page after 3 seconds
         setTimeout(() => {

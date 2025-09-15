@@ -13,7 +13,9 @@ import {
   EyeOff,
   Trash2,
   Archive,
-  MoreVertical
+  MoreVertical,
+  DollarSign,
+  XCircle
 } from 'lucide-react';
 
 const NotificationsPage = () => {
@@ -24,6 +26,8 @@ const NotificationsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedNotifications, setSelectedNotifications] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [fundingLoan, setFundingLoan] = useState(null);
+  const [rejectingLoan, setRejectingLoan] = useState(null);
 
   useEffect(() => {
     loadNotifications();
@@ -84,6 +88,105 @@ const NotificationsPage = () => {
     setRefreshing(true);
     await loadNotifications();
     setRefreshing(false);
+  };
+
+  const handleFundLoan = async (loanId, loanAmount, borrowerName) => {
+    try {
+      setFundingLoan(loanId);
+      const token = localStorage.getItem('accessToken');
+      
+      // Check if user has sufficient balance
+      const walletResponse = await fetch('http://localhost:5000/api/wallet', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (walletResponse.ok) {
+        const walletData = await walletResponse.json();
+        const wallet = walletData.data;
+        
+        if (wallet.balance < loanAmount) {
+          alert(`Insufficient balance. Required: ₦${loanAmount.toLocaleString()}, Available: ₦${wallet.balance.toLocaleString()}`);
+          return;
+        }
+      }
+      
+      // Confirm funding
+      const confirmed = window.confirm(
+        `Are you sure you want to fund this loan?\n\n` +
+        `Amount: ₦${loanAmount.toLocaleString()}\n` +
+        `Borrower: ${borrowerName}`
+      );
+      
+      if (!confirmed) return;
+      
+      const response = await fetch(`http://localhost:5000/api/loans/${loanId}/accept`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          paymentReference: `FUND_${loanId}_${Date.now()}`,
+          amount: loanAmount
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert(`Loan funded successfully! ${result.message}`);
+        await loadNotifications(); // Refresh notifications
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to fund loan: ${errorData.message}`);
+      }
+    } catch (error) {
+      console.error('Error funding loan:', error);
+      alert('Failed to fund loan. Please try again.');
+    } finally {
+      setFundingLoan(null);
+    }
+  };
+
+  const handleRejectLoan = async (loanId, borrowerName) => {
+    try {
+      setRejectingLoan(loanId);
+      
+      const rejectionReason = prompt(
+        `Please provide a reason for rejecting this loan application from ${borrowerName}:`
+      );
+      
+      if (!rejectionReason || rejectionReason.trim() === '') {
+        alert('Rejection reason is required.');
+        return;
+      }
+      
+      const token = localStorage.getItem('accessToken');
+      
+      const response = await fetch(`http://localhost:5000/api/loans/${loanId}/reject`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          rejectionReason: rejectionReason.trim()
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert(`Loan rejected successfully. ${result.message}`);
+        await loadNotifications(); // Refresh notifications
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to reject loan: ${errorData.message}`);
+      }
+    } catch (error) {
+      console.error('Error rejecting loan:', error);
+      alert('Failed to reject loan. Please try again.');
+    } finally {
+      setRejectingLoan(null);
+    }
   };
 
   const markAsRead = async (notificationId) => {
@@ -376,6 +479,35 @@ const NotificationsPage = () => {
                           <span className="capitalize">{notification.type}</span>
                         )}
                       </div>
+                      
+                      {/* Action buttons for loan approval notifications */}
+                      {notification.type === 'loan_approval' && notification.metadata?.loanId && (
+                        <div className="flex items-center space-x-2 mt-3">
+                          <button
+                            onClick={() => handleFundLoan(
+                              notification.metadata.loanId,
+                              notification.metadata.amount,
+                              notification.metadata.borrowerName || 'Borrower'
+                            )}
+                            disabled={fundingLoan === notification.metadata.loanId}
+                            className="flex items-center space-x-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs rounded-md transition-colors"
+                          >
+                            <DollarSign className="h-3 w-3" />
+                            <span>{fundingLoan === notification.metadata.loanId ? 'Funding...' : 'Fund Loan'}</span>
+                          </button>
+                          <button
+                            onClick={() => handleRejectLoan(
+                              notification.metadata.loanId,
+                              notification.metadata.borrowerName || 'Borrower'
+                            )}
+                            disabled={rejectingLoan === notification.metadata.loanId}
+                            className="flex items-center space-x-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white text-xs rounded-md transition-colors"
+                          >
+                            <XCircle className="h-3 w-3" />
+                            <span>{rejectingLoan === notification.metadata.loanId ? 'Rejecting...' : 'Reject Loan'}</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                   

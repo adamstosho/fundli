@@ -378,6 +378,10 @@ const BorrowerDashboard = () => {
               setSuccessMessage('');
               setIsLoading(true);
               loadDashboardData();
+              
+              // Also trigger wallet balance refresh
+              console.log('🔄 Dashboard refresh triggered, refreshing wallet balance');
+              window.dispatchEvent(new CustomEvent('dashboardRefreshed'));
             }}
             disabled={isLoading}
             className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors text-sm font-medium"

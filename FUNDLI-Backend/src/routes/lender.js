@@ -232,11 +232,16 @@ router.get('/loan-applications', protect, async (req, res) => {
   }
 });
 
-// @desc    Invest in a loan application
+// @desc    Invest in a loan application (with immediate wallet deduction)
 // @route   POST /api/lender/loan/:id/invest
 // @access  Private (Lenders only)
 router.post('/loan/:id/invest', protect, async (req, res) => {
   try {
+    console.log('🚀 Investment request received:');
+    console.log('📋 Loan ID:', req.params.id);
+    console.log('📋 Request body:', req.body);
+    console.log('📋 User:', req.user.email, req.user.userType);
+    
     const { investmentAmount, notes } = req.body;
 
     // Check if user is a lender
@@ -278,6 +283,15 @@ router.post('/loan/:id/invest', protect, async (req, res) => {
     const currentInvestments = loan.fundingProgress?.investors || [];
     const totalInvested = currentInvestments.reduce((sum, inv) => sum + (inv.amount || 0), 0);
     const remainingAmount = loan.loanAmount - totalInvested;
+    
+    // Ensure fundingProgress exists
+    if (!loan.fundingProgress) {
+      loan.fundingProgress = {
+        fundedAmount: 0,
+        investors: [],
+        targetAmount: loan.loanAmount
+      };
+    }
 
     if (investmentAmount > remainingAmount) {
       return res.status(400).json({
@@ -285,6 +299,116 @@ router.post('/loan/:id/invest', protect, async (req, res) => {
         message: `Investment amount exceeds remaining loan amount. Maximum: $${remainingAmount.toLocaleString()}`
       });
     }
+
+    // Get lender wallet and check balance
+    const lenderWallet = await Wallet.findOne({ user: req.user.id });
+    if (!lenderWallet) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Lender wallet not found'
+      });
+    }
+
+    // Check if lender has sufficient balance
+    if (lenderWallet.balance < parseFloat(investmentAmount)) {
+      return res.status(400).json({
+        status: 'error',
+        message: `Insufficient wallet balance. Available: $${lenderWallet.balance.toLocaleString()}, Required: $${parseFloat(investmentAmount).toLocaleString()}`,
+        data: {
+          availableBalance: lenderWallet.balance,
+          requiredAmount: parseFloat(investmentAmount),
+          shortfall: parseFloat(investmentAmount) - lenderWallet.balance
+        }
+      });
+    }
+
+    console.log(`💰 Investing in loan ${req.params.id}: Lender ${req.user.email} investing $${parseFloat(investmentAmount)}`);
+    console.log(`📊 Lender balance before: $${lenderWallet.balance.toLocaleString()}`);
+
+    // Get borrower wallet
+    const borrowerWallet = await Wallet.findOne({ user: loan.borrower._id });
+    if (!borrowerWallet) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Borrower wallet not found'
+      });
+    }
+
+    console.log(`📊 Borrower balance before: $${borrowerWallet.balance.toLocaleString()}`);
+
+    // Generate unique transaction references for lender and borrower
+    const baseReference = `INVEST_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    const lenderReference = `${baseReference}_LENDER_${req.user.id.toString().substring(0, 8)}`;
+    const borrowerReference = `${baseReference}_BORROWER_${loan.borrower._id.toString().substring(0, 8)}`;
+
+    // Create lender transaction
+    const lenderTransaction = {
+      type: 'withdrawal', // Changed from 'loan_funding' to 'withdrawal' (valid enum value)
+      amount: parseFloat(investmentAmount),
+      currency: lenderWallet.currency,
+      description: `Invested in loan for ${loan.borrower.firstName} ${loan.borrower.lastName} - ${loan.purpose}`,
+      reference: lenderReference,
+      status: 'completed',
+      loanId: loan._id,
+      metadata: {
+        borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+        borrowerEmail: loan.borrower.email,
+        loanPurpose: loan.purpose,
+        loanAmount: loan.loanAmount,
+        investmentAmount: parseFloat(investmentAmount),
+        transactionType: 'loan_investment',
+        notes: notes || '',
+        relatedTransaction: borrowerReference
+      },
+      createdAt: new Date()
+    };
+
+    // Create borrower transaction
+    const borrowerTransaction = {
+      type: 'loan_disbursement',
+      amount: parseFloat(investmentAmount),
+      currency: borrowerWallet.currency,
+      description: `Loan disbursement from ${req.user.firstName} ${req.user.lastName} - ${loan.purpose}`,
+      reference: borrowerReference,
+      status: 'completed',
+      loanId: loan._id,
+      metadata: {
+        lenderName: `${req.user.firstName} ${req.user.lastName}`,
+        lenderEmail: req.user.email,
+        loanPurpose: loan.purpose,
+        loanAmount: loan.loanAmount,
+        disbursedAmount: parseFloat(investmentAmount),
+        transactionType: 'loan_disbursement',
+        relatedTransaction: lenderReference
+      },
+      createdAt: new Date()
+    };
+
+    // Update lender wallet (subtract amount)
+    try {
+      lenderWallet.updateBalance(parseFloat(investmentAmount), 'withdrawal');
+      lenderWallet.addTransaction(lenderTransaction);
+      await lenderWallet.save();
+      console.log(`✅ Lender wallet updated successfully`);
+    } catch (walletError) {
+      console.error('❌ Error updating lender wallet:', walletError);
+      throw new Error(`Failed to update lender wallet: ${walletError.message}`);
+    }
+
+    // Update borrower wallet (add amount)
+    try {
+      borrowerWallet.updateBalance(parseFloat(investmentAmount), 'deposit');
+      borrowerWallet.addTransaction(borrowerTransaction);
+      await borrowerWallet.save();
+      console.log(`✅ Borrower wallet updated successfully`);
+    } catch (walletError) {
+      console.error('❌ Error updating borrower wallet:', walletError);
+      throw new Error(`Failed to update borrower wallet: ${walletError.message}`);
+    }
+
+    console.log(`✅ Wallet updates completed:`);
+    console.log(`📊 Lender balance after: $${lenderWallet.balance.toLocaleString()}`);
+    console.log(`📊 Borrower balance after: $${borrowerWallet.balance.toLocaleString()}`);
 
     // Add investment to loan
     const newInvestment = {
@@ -295,17 +419,37 @@ router.post('/loan/:id/invest', protect, async (req, res) => {
     };
 
     // Update loan with new investment
+    console.log(`📝 Updating loan ${req.params.id} with investment:`, newInvestment);
+    console.log(`📊 Total invested before: ${totalInvested}, Adding: ${parseFloat(investmentAmount)}`);
+    
     const updatedLoan = await Loan.findByIdAndUpdate(
       req.params.id,
       {
         $push: { 'fundingProgress.investors': newInvestment },
         $inc: { 'fundingProgress.fundedAmount': parseFloat(investmentAmount) },
         $set: { 
-          status: (totalInvested + parseFloat(investmentAmount)) >= loan.loanAmount ? 'funded' : 'approved'
+          status: (totalInvested + parseFloat(investmentAmount)) >= loan.loanAmount ? 'funded' : 'approved',
+          fundedAt: (totalInvested + parseFloat(investmentAmount)) >= loan.loanAmount ? new Date() : undefined,
+          fundedBy: (totalInvested + parseFloat(investmentAmount)) >= loan.loanAmount ? req.user.id : undefined
         }
       },
       { new: true }
     );
+    
+    console.log(`✅ Loan updated successfully. New status: ${updatedLoan.status}`);
+
+    // Update lender's investment statistics
+    try {
+      await req.user.updateInvestmentStats(
+        loan._id,
+        parseFloat(investmentAmount),
+        `${loan.borrower.firstName} ${loan.borrower.lastName}`
+      );
+      console.log(`📈 Updated investment stats for lender ${req.user.email}`);
+    } catch (investmentError) {
+      console.error('Failed to update investment stats:', investmentError);
+      // Don't fail the entire transaction if investment stats update fails
+    }
 
     res.status(200).json({
       status: 'success',
@@ -315,18 +459,50 @@ router.post('/loan/:id/invest', protect, async (req, res) => {
           id: updatedLoan._id,
           status: updatedLoan.status,
           totalInvested: updatedLoan.fundingProgress.fundedAmount,
-          remainingAmount: loan.loanAmount - updatedLoan.fundingProgress.fundedAmount
+          remainingAmount: loan.loanAmount - updatedLoan.fundingProgress.fundedAmount,
+          fundedAt: updatedLoan.fundedAt,
+          fundedBy: updatedLoan.fundedBy
         },
-        investment: newInvestment
+        investment: newInvestment,
+        lenderWallet: {
+          balance: lenderWallet.balance,
+          currency: lenderWallet.currency,
+          transactionReference: lenderReference
+        },
+        borrowerWallet: {
+          balance: borrowerWallet.balance,
+          currency: borrowerWallet.currency,
+          transactionReference: borrowerReference
+        },
+        lenderInvestmentStats: {
+          totalInvested: req.user.investmentStats?.totalInvested || 0,
+          totalLoansFunded: req.user.investmentStats?.totalLoansFunded || 0,
+          averageInvestmentAmount: req.user.investmentStats?.averageInvestmentAmount || 0,
+          lastInvestmentDate: req.user.investmentStats?.lastInvestmentDate
+        },
+        transaction: {
+          lenderReference: lenderReference,
+          borrowerReference: borrowerReference,
+          amount: parseFloat(investmentAmount),
+          status: 'completed',
+          timestamp: new Date().toISOString()
+        }
       }
     });
 
   } catch (error) {
-    console.error('Loan investment error:', error);
+    console.error('❌ Loan investment error:', error);
+    console.error('❌ Error stack:', error.stack);
+    console.error('❌ Error details:', {
+      message: error.message,
+      name: error.name,
+      code: error.code
+    });
     res.status(500).json({
       status: 'error',
       message: 'Failed to process loan investment',
-      error: error.message
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
@@ -570,14 +746,21 @@ router.post('/loan/:id/fund', protect, async (req, res) => {
     wallet.addTransaction(transaction);
     await wallet.save();
 
-    // Update loan status
+    // Calculate loan dates
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + loan.duration);
+
+    // Update loan status to 'active' and set dates
     const updatedLoan = await Loan.findByIdAndUpdate(
       req.params.id,
       {
-        status: 'funded',
+        status: 'active',
         fundedAt: new Date(),
         fundedBy: userId,
-        fundedAmount: amount
+        fundedAmount: amount,
+        startDate: startDate,
+        endDate: endDate
       },
       { new: true }
     );
@@ -782,7 +965,12 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
     if (lenderWallet.balance < parseFloat(investmentAmount)) {
       return res.status(400).json({
         status: 'error',
-        message: `Insufficient wallet balance. Available: $${lenderWallet.balance.toLocaleString()}, Required: $${parseFloat(investmentAmount).toLocaleString()}`
+        message: `Insufficient wallet balance. Available: $${lenderWallet.balance.toLocaleString()}, Required: $${parseFloat(investmentAmount).toLocaleString()}`,
+        data: {
+          availableBalance: lenderWallet.balance,
+          requiredAmount: parseFloat(investmentAmount),
+          shortfall: parseFloat(investmentAmount) - lenderWallet.balance
+        }
       });
     }
 
@@ -808,14 +996,17 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
       type: 'loan_funding',
       amount: parseFloat(investmentAmount),
       currency: lenderWallet.currency,
-      description: `Funded loan for ${loan.borrower.firstName} ${loan.borrower.lastName}`,
+      description: `Funded loan for ${loan.borrower.firstName} ${loan.borrower.lastName} - ${loan.purpose}`,
       reference: reference,
       status: 'completed',
       loanId: loan._id,
       metadata: {
         borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
         borrowerEmail: loan.borrower.email,
-        loanPurpose: loan.purpose
+        loanPurpose: loan.purpose,
+        loanAmount: loan.loanAmount,
+        investmentAmount: parseFloat(investmentAmount),
+        transactionType: 'loan_funding'
       },
       createdAt: new Date()
     };
@@ -825,14 +1016,17 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
       type: 'loan_disbursement',
       amount: parseFloat(investmentAmount),
       currency: borrowerWallet.currency,
-      description: `Loan disbursement for ${loan.purpose}`,
+      description: `Loan disbursement for ${loan.purpose} from ${req.user.firstName} ${req.user.lastName}`,
       reference: reference,
       status: 'completed',
       loanId: loan._id,
       metadata: {
         lenderName: `${req.user.firstName} ${req.user.lastName}`,
         lenderEmail: req.user.email,
-        loanPurpose: loan.purpose
+        loanPurpose: loan.purpose,
+        loanAmount: loan.loanAmount,
+        disbursedAmount: parseFloat(investmentAmount),
+        transactionType: 'loan_disbursement'
       },
       createdAt: new Date()
     };
@@ -898,14 +1092,21 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
       // Don't fail the entire transaction if notifications fail
     }
 
-    // Update loan status (from approved to funded)
+    // Calculate loan dates
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + loan.duration);
+
+    // Update loan status (from approved to active)
     const updatedLoan = await Loan.findByIdAndUpdate(
       req.params.id,
       {
-        status: 'funded',
+        status: 'active',
         fundedBy: req.user.id,
         fundedAmount: parseFloat(investmentAmount),
-        fundedAt: new Date()
+        fundedAt: new Date(),
+        startDate: startDate,
+        endDate: endDate
       },
       { new: true }
     );
@@ -1310,6 +1511,76 @@ router.get('/investment-stats', protect, async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to fetch investment statistics'
+    });
+  }
+});
+
+// @desc    Get wallet balance with investment statistics
+// @route   GET /api/lender/wallet/balance-with-stats
+// @access  Private (Lenders only)
+router.get('/wallet/balance-with-stats', protect, async (req, res) => {
+  try {
+    // Check if user is a lender
+    if (req.user.userType !== 'lender') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Only lenders can access lender wallet statistics'
+      });
+    }
+
+    const wallet = await Wallet.findOne({ user: req.user.id });
+    if (!wallet) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Lender wallet not found'
+      });
+    }
+
+    // Get user with investment stats
+    const user = await User.findById(req.user.id).select('investmentStats firstName lastName email');
+    
+    // Initialize investment stats if they don't exist
+    if (!user.investmentStats) {
+      user.investmentStats = {
+        totalInvested: 0,
+        totalLoansFunded: 0,
+        averageInvestmentAmount: 0,
+        investmentHistory: []
+      };
+      await user.save();
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        wallet: {
+          balance: wallet.balance,
+          currency: wallet.currency,
+          status: wallet.status,
+          totalDeposits: wallet.stats.totalDeposits,
+          totalWithdrawals: wallet.stats.totalWithdrawals,
+          transactionCount: wallet.stats.transactionCount
+        },
+        investmentStats: {
+          totalInvested: user.investmentStats.totalInvested,
+          totalLoansFunded: user.investmentStats.totalLoansFunded,
+          averageInvestmentAmount: user.investmentStats.averageInvestmentAmount,
+          lastInvestmentDate: user.investmentStats.lastInvestmentDate
+        },
+        recentTransactions: wallet.transactions.slice(-5).map(t => ({
+          type: t.type,
+          amount: t.amount,
+          description: t.description,
+          reference: t.reference,
+          createdAt: t.createdAt
+        }))
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching wallet balance with stats:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch wallet balance and statistics'
     });
   }
 });

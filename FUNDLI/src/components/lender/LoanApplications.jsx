@@ -122,8 +122,8 @@ const LoanApplications = () => {
       setIsProcessing(true);
       const token = localStorage.getItem('accessToken');
       
-      // First, accept the loan application
-      const response = await fetch(`http://localhost:5000/api/lender/loan/${selectedApplication.id}/accept`, {
+      // First, invest in the loan application
+      const response = await fetch(`http://localhost:5000/api/lender/loan/${selectedApplication.id}/invest`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -147,9 +147,17 @@ const LoanApplications = () => {
           const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
           userInfo.walletBalance = result.data.lenderWallet.balance;
           localStorage.setItem('userInfo', JSON.stringify(userInfo));
+          
+          // Update local wallet storage
+          const localWallets = JSON.parse(localStorage.getItem('localWallets') || '{}');
+          if (localWallets.lender) {
+            localWallets.lender.balance = result.data.lenderWallet.balance;
+            localWallets.lender.updatedAt = new Date().toISOString();
+            localStorage.setItem('localWallets', JSON.stringify(localWallets));
+          }
         }
         
-        alert(`Successfully funded loan! $${investmentAmount} has been transferred to ${selectedApplication.borrower.name}.`);
+        alert(`Successfully invested in loan! $${investmentAmount} has been transferred to ${selectedApplication.borrower.name}.`);
         
         // Clear form data
         setShowAcceptModal(false);
@@ -174,13 +182,16 @@ const LoanApplications = () => {
         window.dispatchEvent(new CustomEvent('walletBalanceUpdated', { 
           detail: { userId: user.id, userType: 'lender' } 
         }));
+        
+        // Trigger dashboard refresh
+        window.dispatchEvent(new CustomEvent('dashboardRefreshed'));
       } else {
         const errorData = await response.json();
-        alert(`Failed to fund loan: ${errorData.message}`);
+        alert(`Failed to invest in loan: ${errorData.message}`);
       }
     } catch (error) {
-      console.error('Error accepting loan:', error);
-      alert('Failed to accept loan application');
+      console.error('Error investing in loan:', error);
+      alert('Failed to invest in loan application');
     } finally {
       setIsProcessing(false);
     }

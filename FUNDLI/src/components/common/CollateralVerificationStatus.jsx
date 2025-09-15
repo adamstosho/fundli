@@ -23,6 +23,12 @@ const CollateralVerificationStatus = ({ userId, userType = 'borrower', onReapply
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       if (!token) return;
 
+      // Only load collateral status for borrowers
+      if (userType !== 'borrower') {
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch('http://localhost:5000/api/collateral/status', {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -114,6 +120,25 @@ const CollateralVerificationStatus = ({ userId, userType = 'borrower', onReapply
   }
 
   if (!verificationStatus) {
+    // Show different content based on user type
+    if (userType === 'lender') {
+      return (
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center space-x-3">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            <div>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                Lender Account
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                You can fund loans and manage investments
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="flex items-center space-x-3">

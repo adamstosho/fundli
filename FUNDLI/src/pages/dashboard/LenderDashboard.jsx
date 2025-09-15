@@ -196,6 +196,21 @@ const LenderDashboard = () => {
         // Set my pools data
         setMyPools(myPools);
 
+        // Dispatch dashboard refresh event for wallet components
+        window.dispatchEvent(new CustomEvent('dashboardRefreshed', {
+          detail: { userId: user.id, userType: user.userType }
+        }));
+        
+        // Dispatch wallet balance update event with current stats
+        window.dispatchEvent(new CustomEvent('walletBalanceUpdated', {
+          detail: { 
+            userId: user.id, 
+            userType: user.userType,
+            totalInvested: investmentStats.totalInvested,
+            activeInvestments: activeLoans.length
+          }
+        }));
+
         // Process chart data
         if (chartDataResponse.ok) {
           const chartDataResult = await chartDataResponse.json();

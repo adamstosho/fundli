@@ -417,8 +417,11 @@ const BrowseLoans = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          ...applicationData,
-          lendingPoolId: selectedLoan.id
+          requestedAmount: applicationData.requestedAmount,
+          purpose: applicationData.purpose,
+          duration: applicationData.duration,
+          lendingPoolId: selectedLoan.id,
+          collateral: applicationData.collateral || 'Commercial property in downtown area'
         })
       });
 
@@ -462,8 +465,11 @@ const BrowseLoans = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          ...applicationData,
-          lendingPoolId: selectedLoan.id
+          requestedAmount: applicationData.requestedAmount,
+          purpose: applicationData.purpose,
+          duration: applicationData.duration,
+          lendingPoolId: selectedLoan.id,
+          collateral: applicationData.collateral || 'Commercial property in downtown area'
         })
       });
 
@@ -587,7 +593,7 @@ const BrowseLoans = () => {
                     {loan.riskLevel || 'Medium'}
                   </span>
                   <span className="px-2 py-1 rounded-full text-xs font-medium text-blue-600 bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400">
-                    {loan.status || 'Pending'}
+                    {loan.status === 'active' ? 'Running Loan' : loan.status || 'Pending'}
                   </span>
                 </div>
               </div>

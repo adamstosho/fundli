@@ -178,8 +178,8 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
       const token = localStorage.getItem('accessToken');
       const fundingAmount = parseFloat(paymentData.amount);
       
-      // Step 1: Process the loan funding
-      const fundingResponse = await fetch(`http://localhost:5000/api/lender/loan/${loanApplication.id}/accept`, {
+      // Step 1: Process the loan investment
+      const fundingResponse = await fetch(`http://localhost:5000/api/lender/loan/${loanApplication.id}/invest`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -187,8 +187,7 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
         },
         body: JSON.stringify({
           investmentAmount: fundingAmount,
-          notes: paymentData.notes,
-          borrowerId: loanApplication.borrower.id // Include borrower ID for balance transfer
+          notes: paymentData.notes
         })
       });
 
@@ -213,9 +212,14 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
           updateLocalWallet('lender', newBalance);
         }
         
+        // Update user info in localStorage with new wallet balance
+        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+        userInfo.walletBalance = fundingResult.data?.lenderWallet?.balance || (walletBalance - fundingAmount);
+        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        
         // Trigger wallet balance update events for this user only
         window.dispatchEvent(new CustomEvent('walletBalanceUpdated', { 
-          detail: { userId: user.id, userType: 'lender' } 
+          detail: { userId: user.id, userType: 'lender', newBalance: fundingResult.data?.lenderWallet?.balance || (walletBalance - fundingAmount) } 
         }));
         
         // Trigger dashboard refresh

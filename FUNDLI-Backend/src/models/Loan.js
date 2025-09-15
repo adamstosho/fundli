@@ -100,6 +100,39 @@ const loanSchema = new mongoose.Schema({
     }]
   },
   
+  // Collateral Verification Reference
+  collateralVerification: {
+    type: {
+      id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Collateral'
+      },
+      type: String,
+      description: String,
+      estimatedValue: Number,
+      documents: [{
+        fileName: String,
+        originalName: String,
+        fileUrl: String,
+        fileSize: Number,
+        mimeType: String,
+        documentType: String,
+        uploadDate: Date
+      }],
+      bankStatement: {
+        fileName: String,
+        originalName: String,
+        fileUrl: String,
+        fileSize: Number,
+        mimeType: String,
+        uploadDate: Date
+      },
+      bvn: String,
+      verificationStatus: String,
+      approvedAt: Date
+    }
+  },
+  
   // Loan Status and Progress
   status: {
     type: String,
@@ -124,7 +157,8 @@ const loanSchema = new mongoose.Schema({
         ref: 'User'
       },
       amount: Number,
-      investedAt: Date
+      investedAt: Date,
+      notes: String
     }],
     targetAmount: {
       type: Number,

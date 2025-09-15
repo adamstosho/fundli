@@ -75,10 +75,26 @@ const submitCollateralVerification = async (req, res) => {
     });
 
     if (existingCollateral) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'You already have a collateral verification submission pending review. Please wait for it to be approved before submitting another one.'
+      // Check if the user has any rejected loans - if so, allow new collateral submission
+      const Loan = require('../models/Loan');
+      const hasRejectedLoan = await Loan.findOne({
+        borrower: userId,
+        status: 'rejected',
+        createdAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } // Within last 7 days
       });
+
+      if (!hasRejectedLoan) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'You already have a collateral verification submission pending review. Please wait for it to be approved before submitting another one.'
+        });
+      } else {
+        console.log(`✅ User ${userId} has a rejected loan, allowing new collateral submission`);
+        // Update the existing collateral to allow new submission
+        existingCollateral.verificationStatus = 'rejected';
+        existingCollateral.rejectedAt = new Date();
+        await existingCollateral.save();
+      }
     }
 
     // Process uploaded files with Cloudinary
