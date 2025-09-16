@@ -1360,14 +1360,19 @@ router.get('/loan/:id/details', protect, async (req, res) => {
       });
     }
 
-    // Check if user has access to this loan (either funded it or invested in it)
-    const hasAccess = loan.fundedBy?.toString() === req.user.id.toString() ||
-                     loan.fundingProgress?.investors?.some(inv => inv.user.toString() === req.user.id.toString());
-
-    if (!hasAccess) {
+    // Check if user is a lender (all lenders can view loan details for investment decisions)
+    if (req.user.userType !== 'lender') {
       return res.status(403).json({
         status: 'error',
-        message: 'You do not have access to this loan'
+        message: 'Only lenders can view loan details'
+      });
+    }
+
+    // Additional check: Only allow access to approved or pending loans for investment
+    if (loan.status !== 'pending' && loan.status !== 'approved') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'This loan is no longer available for viewing'
       });
     }
 
