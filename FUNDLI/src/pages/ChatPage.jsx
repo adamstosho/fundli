@@ -16,7 +16,7 @@ const ChatPage = () => {
   const loadCurrentUser = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('http://localhost:5000/api/users/profile', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/users/profile', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

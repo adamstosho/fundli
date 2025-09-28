@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = 'https://fundli-hjqn.vercel.app/api';
 
 async function testAdminToLenderFlow() {
   try {

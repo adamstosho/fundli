@@ -1,7 +1,7 @@
 // Test script to create a loan and check if it appears in lender dashboard
 const axios = require('axios');
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://fundli-hjqn.vercel.app/api';
 
 async function testLoanFlow() {
   try {

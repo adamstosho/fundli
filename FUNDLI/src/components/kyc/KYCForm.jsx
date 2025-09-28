@@ -23,7 +23,7 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
       setIsLoadingBanks(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch('http://localhost:5000/api/borrower/banks', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/borrower/banks', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

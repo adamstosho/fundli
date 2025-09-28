@@ -240,7 +240,7 @@
             
             <div class="code-block">
 <strong>1. Create Feedback (Admin only):</strong>
-POST http://localhost:5000/api/feedback
+POST https://fundli-hjqn.vercel.app/api/feedback
 Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
 Body: {
   "recipient": "USER_ID",
@@ -252,13 +252,13 @@ Body: {
 
             <div class="code-block">
 <strong>2. Get User Feedback:</strong>
-GET http://localhost:5000/api/feedback/user/USER_ID
+GET https://fundli-hjqn.vercel.app/api/feedback/user/USER_ID
 Headers: Authorization: Bearer YOUR_TOKEN
             </div>
 
             <div class="code-block">
 <strong>3. Reply to Feedback:</strong>
-POST http://localhost:5000/api/feedback/FEEDBACK_ID/reply
+POST https://fundli-hjqn.vercel.app/api/feedback/FEEDBACK_ID/reply
 Headers: Authorization: Bearer YOUR_TOKEN
 Body: {
   "message": "This is my reply to the feedback"
@@ -267,7 +267,7 @@ Body: {
 
             <div class="code-block">
 <strong>4. Mark as Read:</strong>
-PUT http://localhost:5000/api/feedback/FEEDBACK_ID/read
+PUT https://fundli-hjqn.vercel.app/api/feedback/FEEDBACK_ID/read
 Headers: Authorization: Bearer YOUR_TOKEN
             </div>
         </div>

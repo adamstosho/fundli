@@ -31,7 +31,7 @@ const KYCManagement = () => {
       setIsLoading(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch('http://localhost:5000/api/lender/loan-applications', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/lender/loan-applications', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -54,7 +54,7 @@ const KYCManagement = () => {
     try {
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`http://localhost:5000/api/lender/borrower/${borrowerId}/kyc`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/lender/borrower/${borrowerId}/kyc`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -82,7 +82,7 @@ const KYCManagement = () => {
       setIsProcessing(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`http://localhost:5000/api/lender/borrower/${selectedBorrower.id}/kyc/approve`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/lender/borrower/${selectedBorrower.id}/kyc/approve`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

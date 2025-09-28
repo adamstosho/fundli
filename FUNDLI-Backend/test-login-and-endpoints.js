@@ -10,7 +10,7 @@ async function testLoginAndEndpoints() {
     // Try to login with test lender
     try {
       console.log('🔐 Attempting login with test lender...');
-      const loginResponse = await axios.post('http://localhost:5000/api/auth/login', {
+      const loginResponse = await axios.post('https://fundli-hjqn.vercel.app/api/auth/login', {
         email: 'lender@test.com',
         password: 'TestPassword123!'
       });
@@ -23,7 +23,7 @@ async function testLoginAndEndpoints() {
       // Try to create a test lender first
       try {
         console.log('👤 Creating test lender...');
-        const registerResponse = await axios.post('http://localhost:5000/api/auth/register', {
+        const registerResponse = await axios.post('https://fundli-hjqn.vercel.app/api/auth/register', {
           firstName: 'Test',
           lastName: 'Lender',
           email: 'lender@test.com',
@@ -48,7 +48,7 @@ async function testLoginAndEndpoints() {
     // Test lender loan applications endpoint
     try {
       console.log('🔍 Testing /api/lender/loan-applications...');
-      const response = await axios.get('http://localhost:5000/api/lender/loan-applications', {
+      const response = await axios.get('https://fundli-hjqn.vercel.app/api/lender/loan-applications', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -62,7 +62,7 @@ async function testLoginAndEndpoints() {
     // Test lender notifications endpoint
     try {
       console.log('🔍 Testing /api/lender/notifications...');
-      const response = await axios.get('http://localhost:5000/api/lender/notifications', {
+      const response = await axios.get('https://fundli-hjqn.vercel.app/api/lender/notifications', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

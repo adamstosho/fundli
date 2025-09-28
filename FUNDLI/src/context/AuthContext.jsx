@@ -242,7 +242,7 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('verifyTokenWithBackend - Verifying token with backend');
       
-      const response = await fetch('http://localhost:5000/api/auth/verify-token', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/auth/verify-token', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -279,7 +279,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error('No refresh token available');
       }
 
-      const response = await fetch('http://localhost:5000/api/auth/refresh-token', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/auth/refresh-token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -570,7 +570,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch('http://localhost:5000/api/users/profile', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/users/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -629,7 +629,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch('http://localhost:5000/api/users/profile', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/users/profile', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -667,7 +667,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch('http://localhost:5000/api/users/profile-picture', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/users/profile-picture', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -716,13 +716,13 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Check if token is valid by making a test request
-      console.log('KYC submission - Making request to:', 'http://localhost:5000/api/users/kyc');
+      console.log('KYC submission - Making request to:', 'https://fundli-hjqn.vercel.app/api/users/kyc');
       console.log('KYC submission - Headers:', {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token.substring(0, 20)}...`
       });
 
-      const response = await fetch('http://localhost:5000/api/users/kyc', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/users/kyc', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -741,7 +741,7 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         // Refresh user data from backend to get the latest information
         try {
-          const userResponse = await fetch('http://localhost:5000/api/auth/me', {
+          const userResponse = await fetch('https://fundli-hjqn.vercel.app/api/auth/me', {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -834,7 +834,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch('http://localhost:5000/api/auth/me', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

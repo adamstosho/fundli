@@ -95,7 +95,7 @@ const UserManagement = () => {
         queryParams.append('kycStatus', kycStatusFilter);
       }
 
-      const response = await fetch(`http://localhost:5000/api/admin/users?${queryParams.toString()}`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/admin/users?${queryParams.toString()}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -178,7 +178,7 @@ const UserManagement = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`http://localhost:5000/api/admin/users/${user._id}`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/admin/users/${user._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -209,7 +209,7 @@ const UserManagement = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`http://localhost:5000/api/admin/users/${user._id}`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/admin/users/${user._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

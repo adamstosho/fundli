@@ -13,7 +13,7 @@ All users (lender, admin, borrower) are showing the same wallet balance because:
 ### Frontend Issue:
 ```javascript
 // ALL users call the same endpoint
-const response = await fetch('http://localhost:5000/api/wallet', {
+const response = await fetch('https://fundli-hjqn.vercel.app/api/wallet', {
   headers: { 'Authorization': `Bearer ${token}` }
 });
 ```
@@ -35,11 +35,11 @@ I've updated the frontend to use user-type-specific endpoints:
 ```javascript
 // Now uses different endpoints based on user type
 if (currentUserType === 'lender') {
-  apiEndpoint = 'http://localhost:5000/api/lender/wallet/balance';
+  apiEndpoint = 'https://fundli-hjqn.vercel.app/api/lender/wallet/balance';
 } else if (currentUserType === 'borrower') {
-  apiEndpoint = 'http://localhost:5000/api/borrower/wallet/balance';
+  apiEndpoint = 'https://fundli-hjqn.vercel.app/api/borrower/wallet/balance';
 } else if (currentUserType === 'admin') {
-  apiEndpoint = 'http://localhost:5000/api/admin/wallet/balance';
+  apiEndpoint = 'https://fundli-hjqn.vercel.app/api/admin/wallet/balance';
 }
 ```
 
@@ -301,7 +301,7 @@ walletSchema.index({ userId: 1, userType: 1 }, { unique: true });
 Open browser dev tools and look for these logs:
 ```
 Loading wallet for user type: lender
-Using API endpoint: http://localhost:5000/api/lender/wallet/balance
+Using API endpoint: https://fundli-hjqn.vercel.app/api/lender/wallet/balance
 PaymentModal - Loading wallet balance for user type: lender
 PaymentModal - Wallet balance response: {...}
 ```

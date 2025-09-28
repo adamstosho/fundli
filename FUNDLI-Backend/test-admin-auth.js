@@ -38,7 +38,7 @@ async function testAdminAuth() {
     
     // Test API call
     const axios = require('axios');
-    const response = await axios.get('http://localhost:5000/api/feedback', {
+    const response = await axios.get('https://fundli-hjqn.vercel.app/api/feedback', {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

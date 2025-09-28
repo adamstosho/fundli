@@ -52,7 +52,7 @@ const AdminDashboard = () => {
       }
 
         // Fetch admin dashboard statistics
-        const response = await fetch('http://localhost:5000/api/admin/dashboard/stats', {
+        const response = await fetch('https://fundli-hjqn.vercel.app/api/admin/dashboard/stats', {
           headers: {
             'Authorization': `Bearer ${token}`
           }

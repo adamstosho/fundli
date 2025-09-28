@@ -39,7 +39,7 @@ When you access `/payback/68ce2e505180ea8932507e64`, check the browser console f
 🔍 PayBackPage loaded with loanId: 68ce2e505180ea8932507e64
 🔍 Location state: { loan: {...} }
 🔍 Fetching loan data for loanId: 68ce2e505180ea8932507e64
-🔍 API URL: http://localhost:5000/api/loans/68ce2e505180ea8932507e64
+🔍 API URL: https://fundli-hjqn.vercel.app/api/loans/68ce2e505180ea8932507e64
 🔍 Loan API response status: 404
 ❌ Loan API error: 404 Not Found
 ```
@@ -52,7 +52,7 @@ When you access `/payback/68ce2e505180ea8932507e64`, check the browser console f
 ### **3. Test API Directly:**
 You can test the API directly by making a request to:
 ```
-GET http://localhost:5000/api/loans/68ce2e505180ea8932507e64
+GET https://fundli-hjqn.vercel.app/api/loans/68ce2e505180ea8932507e64
 Authorization: Bearer YOUR_TOKEN
 ```
 
@@ -92,7 +92,7 @@ Ensure the user has access to the loan:
 🔍 PayBackPage loaded with loanId: 68ce2e505180ea8932507e64
 🔍 Location state: { loan: {...} }
 🔍 Fetching loan data for loanId: 68ce2e505180ea8932507e64
-🔍 API URL: http://localhost:5000/api/loans/68ce2e505180ea8932507e64
+🔍 API URL: https://fundli-hjqn.vercel.app/api/loans/68ce2e505180ea8932507e64
 🔍 Loan API response status: 200
 🔍 Loan API response data: { status: "success", data: { loan: {...} } }
 ```
@@ -102,7 +102,7 @@ Ensure the user has access to the loan:
 🔍 PayBackPage loaded with loanId: 68ce2e505180ea8932507e64
 🔍 Location state: { loan: {...} }
 🔍 Fetching loan data for loanId: 68ce2e505180ea8932507e64
-🔍 API URL: http://localhost:5000/api/loans/68ce2e505180ea8932507e64
+🔍 API URL: https://fundli-hjqn.vercel.app/api/loans/68ce2e505180ea8932507e64
 🔍 Loan API response status: 404
 ❌ Loan API error: 404 Not Found
 ❌ Loan API error data: { status: "error", message: "Loan not found" }

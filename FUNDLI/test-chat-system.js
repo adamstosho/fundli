@@ -1,7 +1,7 @@
 // Test script to verify chat system functionality
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://fundli-hjqn.vercel.app/api';
 
 async function testChatSystem() {
   try {

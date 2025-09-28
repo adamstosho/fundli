@@ -21,10 +21,10 @@ const APITestComponent = () => {
 
       // Test each endpoint
       const endpoints = [
-        { name: 'investment-stats', url: 'http://localhost:5000/api/lender/investment-stats' },
-        { name: 'funded-loans', url: 'http://localhost:5000/api/lender/funded-loans' },
-        { name: 'my-pools', url: 'http://localhost:5000/api/pools/my-pools' },
-        { name: 'dashboard-charts', url: 'http://localhost:5000/api/lender/dashboard-charts' }
+        { name: 'investment-stats', url: 'https://fundli-hjqn.vercel.app/api/lender/investment-stats' },
+        { name: 'funded-loans', url: 'https://fundli-hjqn.vercel.app/api/lender/funded-loans' },
+        { name: 'my-pools', url: 'https://fundli-hjqn.vercel.app/api/pools/my-pools' },
+        { name: 'dashboard-charts', url: 'https://fundli-hjqn.vercel.app/api/lender/dashboard-charts' }
       ];
 
       for (const endpoint of endpoints) {

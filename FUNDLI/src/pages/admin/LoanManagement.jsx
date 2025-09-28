@@ -43,7 +43,7 @@ const LoanManagement = () => {
           throw new Error('Authentication required');
         }
 
-        const response = await fetch(`http://localhost:5000/api/admin/loans?page=${currentPage}&limit=${loansPerPage}`, {
+        const response = await fetch(`https://fundli-hjqn.vercel.app/api/admin/loans?page=${currentPage}&limit=${loansPerPage}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -117,8 +117,8 @@ const LoanManagement = () => {
       }
 
       const endpoint = action === 'approve' 
-        ? `http://localhost:5000/api/admin/loans/${loanId}/approve`
-        : `http://localhost:5000/api/admin/loans/${loanId}/reject`;
+        ? `https://fundli-hjqn.vercel.app/api/admin/loans/${loanId}/approve`
+        : `https://fundli-hjqn.vercel.app/api/admin/loans/${loanId}/reject`;
 
       const body = action === 'approve' 
         ? JSON.stringify({ notes: reason || 'Approved by Admin' })

@@ -38,10 +38,10 @@ const WalletPage = () => {
       const token = localStorage.getItem('accessToken');
       
       const [walletResponse, transactionsResponse] = await Promise.all([
-        fetch('http://localhost:5000/api/wallet', {
+        fetch('https://fundli-hjqn.vercel.app/api/wallet', {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        fetch('http://localhost:5000/api/wallet/transactions', {
+        fetch('https://fundli-hjqn.vercel.app/api/wallet/transactions', {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       ]);

@@ -15,7 +15,7 @@ const CollateralManagement = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('http://localhost:5000/api/collateral/admin/pending', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/collateral/admin/pending', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

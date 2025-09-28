@@ -123,7 +123,7 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
       });
 
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('http://localhost:5000/api/collateral/verify', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/collateral/verify', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

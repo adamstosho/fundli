@@ -9,7 +9,7 @@ const testAdminChatCreation = async () => {
     const adminToken = 'your-admin-token'; // Replace with actual admin token
     const lenderId = 'your-lender-id'; // Replace with actual lender ID
     
-    const createResponse = await fetch('http://localhost:5000/api/chat/chats/admin/' + lenderId, {
+    const createResponse = await fetch('https://fundli-hjqn.vercel.app/api/chat/chats/admin/' + lenderId, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${adminToken}`,
@@ -33,7 +33,7 @@ const testAdminChatCreation = async () => {
       
       const lenderToken = 'your-lender-token'; // Replace with actual lender token
       
-      const getChatsResponse = await fetch('http://localhost:5000/api/chat/chats', {
+      const getChatsResponse = await fetch('https://fundli-hjqn.vercel.app/api/chat/chats', {
         headers: { 'Authorization': `Bearer ${lenderToken}` }
       });
 
@@ -69,7 +69,7 @@ const testAdminChatCreation = async () => {
       // Step 3: Test message sending
       console.log('\n📋 Step 3: Testing message sending');
       
-      const messageResponse = await fetch(`http://localhost:5000/api/chat/chats/${chatData.data.chat.id}/messages`, {
+      const messageResponse = await fetch(`https://fundli-hjqn.vercel.app/api/chat/chats/${chatData.data.chat.id}/messages`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${adminToken}`,

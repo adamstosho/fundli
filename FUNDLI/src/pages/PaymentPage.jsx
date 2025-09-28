@@ -31,7 +31,7 @@ const PaymentPage = () => {
       setIsLoading(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`http://localhost:5000/api/loans/${loanId}`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/loans/${loanId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -72,7 +72,7 @@ const PaymentPage = () => {
       }
 
       // First, create a payment intent on the backend
-      const response = await fetch('http://localhost:5000/api/payments/create-intent', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/payments/create-intent', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -134,7 +134,7 @@ const PaymentPage = () => {
     try {
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch('http://localhost:5000/api/payments/verify', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/payments/verify', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

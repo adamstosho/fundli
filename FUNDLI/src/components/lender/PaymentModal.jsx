@@ -50,7 +50,7 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
       
       // Try backend first
       try {
-        const response = await fetch('http://localhost:5000/api/lender/wallet/balance', {
+        const response = await fetch('https://fundli-hjqn.vercel.app/api/lender/wallet/balance', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -179,7 +179,7 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
       const fundingAmount = parseFloat(paymentData.amount);
       
       // Step 1: Process the loan investment
-      const fundingResponse = await fetch(`http://localhost:5000/api/lender/loan/${loanApplication.id}/invest`, {
+      const fundingResponse = await fetch(`https://fundli-hjqn.vercel.app/api/lender/loan/${loanApplication.id}/invest`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -268,7 +268,7 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
   const rollbackLoanFunding = async (loanId, amount) => {
     try {
       const token = localStorage.getItem('accessToken');
-      await fetch(`http://localhost:5000/api/lender/loan/${loanId}/rollback`, {
+      await fetch(`https://fundli-hjqn.vercel.app/api/lender/loan/${loanId}/rollback`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -340,7 +340,7 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
       // Try to send notifications to backend, but don't fail if it doesn't work
       try {
         // Send borrower notification
-        const borrowerResponse = await fetch('http://localhost:5000/api/notifications/create', {
+        const borrowerResponse = await fetch('https://fundli-hjqn.vercel.app/api/notifications/create', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -356,7 +356,7 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
         }
 
         // Send admin notification
-        const adminResponse = await fetch('http://localhost:5000/api/notifications/create', {
+        const adminResponse = await fetch('https://fundli-hjqn.vercel.app/api/notifications/create', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,

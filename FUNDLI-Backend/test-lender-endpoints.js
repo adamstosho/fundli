@@ -6,7 +6,7 @@ async function testLenderEndpoints() {
     
     // Test if server is running
     try {
-      const healthResponse = await axios.get('http://localhost:5000/api/health');
+      const healthResponse = await axios.get('https://fundli-hjqn.vercel.app/api/health');
       console.log('✅ Server is running:', healthResponse.status);
     } catch (error) {
       console.log('❌ Server health check failed:', error.message);
@@ -16,7 +16,7 @@ async function testLenderEndpoints() {
     // Test lender loan applications endpoint
     try {
       console.log('🔍 Testing /api/lender/loan-applications...');
-      const response = await axios.get('http://localhost:5000/api/lender/loan-applications', {
+      const response = await axios.get('https://fundli-hjqn.vercel.app/api/lender/loan-applications', {
         headers: {
           'Authorization': 'Bearer test-token'
         }
@@ -30,7 +30,7 @@ async function testLenderEndpoints() {
     // Test lender notifications endpoint
     try {
       console.log('🔍 Testing /api/lender/notifications...');
-      const response = await axios.get('http://localhost:5000/api/lender/notifications', {
+      const response = await axios.get('https://fundli-hjqn.vercel.app/api/lender/notifications', {
         headers: {
           'Authorization': 'Bearer test-token'
         }
@@ -44,7 +44,7 @@ async function testLenderEndpoints() {
     // Test admin loans endpoint
     try {
       console.log('🔍 Testing /api/admin/loans...');
-      const response = await axios.get('http://localhost:5000/api/admin/loans', {
+      const response = await axios.get('https://fundli-hjqn.vercel.app/api/admin/loans', {
         headers: {
           'Authorization': 'Bearer test-token'
         }

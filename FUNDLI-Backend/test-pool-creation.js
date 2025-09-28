@@ -52,7 +52,7 @@ async function testPoolCreation() {
     
     console.log('Creating pool with data:', poolData);
     
-    const response = await axios.post('http://localhost:5000/api/pools', poolData, {
+    const response = await axios.post('https://fundli-hjqn.vercel.app/api/pools', poolData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

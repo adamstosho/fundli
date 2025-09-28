@@ -5,7 +5,7 @@ async function testLoanAcceptance() {
     console.log('Testing loan acceptance endpoint...');
     
     const loanId = '68c184e2e2a0e5fa25ece076';
-    const url = `http://localhost:5000/api/lender/loan/${loanId}/accept`;
+    const url = `https://fundli-hjqn.vercel.app/api/lender/loan/${loanId}/accept`;
     
     const requestBody = {
       investmentAmount: 1000,

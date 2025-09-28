@@ -26,7 +26,7 @@ const ChatList = ({ onSelectChat, selectedChatId }) => {
     try {
       setIsLoading(true);
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('http://localhost:5000/api/chat/chats', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/chat/chats', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

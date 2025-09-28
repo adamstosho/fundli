@@ -38,7 +38,7 @@ const LoanApplication = () => {
       const token = localStorage.getItem('accessToken');
       if (!token) return;
 
-      const response = await fetch('http://localhost:5000/api/collateral/status', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/collateral/status', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -106,7 +106,7 @@ const LoanApplication = () => {
       
       // Collateral validation is handled by backend - we provide default collateral if needed
       
-      const response = await fetch('http://localhost:5000/api/borrower/loan/apply', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/borrower/loan/apply', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -188,10 +188,10 @@ const LoanApplication = () => {
         } : null
       };
 
-      console.log('Sending request to:', 'http://localhost:5000/api/collateral/submit');
+      console.log('Sending request to:', 'https://fundli-hjqn.vercel.app/api/collateral/submit');
       console.log('Request payload size:', JSON.stringify(submitData).length, 'bytes');
       
-      const response = await fetch('http://localhost:5000/api/collateral/submit', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/collateral/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

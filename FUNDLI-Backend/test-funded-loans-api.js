@@ -5,7 +5,7 @@ async function testFundedLoansAPI() {
     console.log('🔍 Testing funded loans API...');
     
     // First, let's try to login as a lender
-    const loginResponse = await axios.post('http://localhost:5000/api/auth/login', {
+    const loginResponse = await axios.post('https://fundli-hjqn.vercel.app/api/auth/login', {
       email: 'lender@test.com',
       password: 'TestPassword123!'
     });
@@ -14,7 +14,7 @@ async function testFundedLoansAPI() {
     const token = loginResponse.data.data.token;
     
     // Now test the funded loans endpoint
-    const fundedLoansResponse = await axios.get('http://localhost:5000/api/lender/funded-loans', {
+    const fundedLoansResponse = await axios.get('https://fundli-hjqn.vercel.app/api/lender/funded-loans', {
       headers: {
         'Authorization': `Bearer ${token}`
       }

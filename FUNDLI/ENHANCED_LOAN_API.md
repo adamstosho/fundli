@@ -387,13 +387,13 @@ CREATE TABLE transactions (
 ### Test Complete Acceptance Flow:
 ```bash
 # 1. Accept loan
-curl -X POST http://localhost:5000/api/lender/loan/loan_123/accept \
+curl -X POST https://fundli-hjqn.vercel.app/api/lender/loan/loan_123/accept \
   -H "Authorization: Bearer <lender_token>" \
   -H "Content-Type: application/json" \
   -d '{"investmentAmount": 5000, "notes": "Great business plan"}'
 
 # 2. Fund loan
-curl -X POST http://localhost:5000/api/lender/loan/loan_123/fund \
+curl -X POST https://fundli-hjqn.vercel.app/api/lender/loan/loan_123/fund \
   -H "Authorization: Bearer <lender_token>" \
   -H "Content-Type: application/json" \
   -d '{"amount": 5000, "paymentMethod": "bank_transfer", "notes": "Funding completed"}'
@@ -401,7 +401,7 @@ curl -X POST http://localhost:5000/api/lender/loan/loan_123/fund \
 
 ### Test Rejection Flow:
 ```bash
-curl -X POST http://localhost:5000/api/lender/loan/loan_123/reject \
+curl -X POST https://fundli-hjqn.vercel.app/api/lender/loan/loan_123/reject \
   -H "Authorization: Bearer <lender_token>" \
   -H "Content-Type: application/json" \
   -d '{"reason": "Insufficient credit history"}'

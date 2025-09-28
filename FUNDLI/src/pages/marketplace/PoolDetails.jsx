@@ -24,7 +24,7 @@ const PoolDetails = () => {
           throw new Error('Authentication required');
         }
 
-        const response = await fetch(`http://localhost:5000/api/pools/${id}`, {
+        const response = await fetch(`https://fundli-hjqn.vercel.app/api/pools/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

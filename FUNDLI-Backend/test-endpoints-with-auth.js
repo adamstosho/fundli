@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = 'https://fundli-hjqn.vercel.app/api';
 
 // Test the collateral endpoints with a mock admin token
 async function testCollateralEndpointsWithAuth() {

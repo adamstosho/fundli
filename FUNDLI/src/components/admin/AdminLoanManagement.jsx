@@ -59,7 +59,7 @@ const AdminLoanManagement = () => {
       console.log('Loading loan applications...');
       
       // Use the admin loans endpoint to get ALL loans
-      const response = await fetch(`http://localhost:5000/api/admin/loans`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/admin/loans`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -101,7 +101,7 @@ const AdminLoanManagement = () => {
   const handleViewDetails = async (application) => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:5000/api/loans/${application.id}`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/loans/${application.id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -166,8 +166,8 @@ const AdminLoanManagement = () => {
       const token = localStorage.getItem('accessToken');
       
       const endpoint = action === 'approve' 
-        ? `http://localhost:5000/api/admin/loan/${selectedApplication?.id}/approve`
-        : `http://localhost:5000/api/admin/loans/${selectedApplication?.id}/reject`;
+        ? `https://fundli-hjqn.vercel.app/api/admin/loan/${selectedApplication?.id}/approve`
+        : `https://fundli-hjqn.vercel.app/api/admin/loans/${selectedApplication?.id}/reject`;
       
       const response = await fetch(endpoint, {
         method: action === 'approve' ? 'POST' : 'PUT',

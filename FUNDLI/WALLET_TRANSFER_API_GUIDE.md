@@ -568,7 +568,7 @@ app.post('/api/lender/loan/:loanId/fund', async (req, res) => {
 ### Test Wallet Transfer
 ```bash
 # Test successful transfer
-curl -X POST http://localhost:5000/api/wallet/transfer \
+curl -X POST https://fundli-hjqn.vercel.app/api/wallet/transfer \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -582,7 +582,7 @@ curl -X POST http://localhost:5000/api/wallet/transfer \
   }'
 
 # Test insufficient balance
-curl -X POST http://localhost:5000/api/wallet/transfer \
+curl -X POST https://fundli-hjqn.vercel.app/api/wallet/transfer \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -596,7 +596,7 @@ curl -X POST http://localhost:5000/api/wallet/transfer \
 
 ### Test Wallet Balance
 ```bash
-curl -X GET http://localhost:5000/api/wallet/balance \
+curl -X GET https://fundli-hjqn.vercel.app/api/wallet/balance \
   -H "Authorization: Bearer <token>"
 ```
 

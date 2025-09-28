@@ -124,7 +124,7 @@ const CreatePool = () => {
       console.log('Creating pool with data:', poolData);
 
       // Send the request to the backend
-      const response = await fetch('http://localhost:5000/api/pools', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/pools', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -162,7 +162,7 @@ const CreatePool = () => {
             if (newToken) {
               console.log('Token refreshed, retrying pool creation...');
               // Retry the request with the new token
-              const retryResponse = await fetch('http://localhost:5000/api/pools', {
+              const retryResponse = await fetch('https://fundli-hjqn.vercel.app/api/pools', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',

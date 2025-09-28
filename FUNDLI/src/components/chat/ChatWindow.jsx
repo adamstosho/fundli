@@ -120,7 +120,7 @@ const ChatWindow = ({ chat, onBack, currentUser }) => {
       console.log('🔍 Chat ID:', chat._id);
       
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:5000/api/chat/chats/${chat._id}/messages`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/chat/chats/${chat._id}/messages`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -175,7 +175,7 @@ const ChatWindow = ({ chat, onBack, currentUser }) => {
     try {
       const token = localStorage.getItem('accessToken');
       console.log('📖 Marking messages as read for chat:', chat._id);
-      await fetch(`http://localhost:5000/api/chat/chats/${chat._id}/read`, {
+      await fetch(`https://fundli-hjqn.vercel.app/api/chat/chats/${chat._id}/read`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -197,7 +197,7 @@ const ChatWindow = ({ chat, onBack, currentUser }) => {
       });
       
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:5000/api/chat/chats/${chat._id}/messages`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/chat/chats/${chat._id}/messages`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -274,7 +274,7 @@ const ChatWindow = ({ chat, onBack, currentUser }) => {
       const base64Data = base64.split(',')[1];
 
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:5000/api/chat/chats/${chat._id}/files`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/chat/chats/${chat._id}/files`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -1,7 +1,7 @@
 const axios = require('axios');
 require('dotenv').config();
 
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = 'https://fundli-hjqn.vercel.app/api';
 
 async function testLoanStatusChange() {
   console.log('🔄 Testing Loan Status Change Flow...\n');

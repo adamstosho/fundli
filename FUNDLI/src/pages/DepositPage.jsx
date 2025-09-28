@@ -41,7 +41,7 @@ const DepositPage = () => {
   const loadWalletData = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('http://localhost:5000/api/wallet', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/wallet', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -83,7 +83,7 @@ const DepositPage = () => {
         paymentMethod: paymentMethod
       });
       
-      const response = await fetch('http://localhost:5000/api/wallet/deposit', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/wallet/deposit', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -270,7 +270,7 @@ Send the exact amount to the number above and include the reference. Your wallet
       setIsVerifying(true);
       
       const token = localStorage.getItem('accessToken');
-      const verifyResponse = await fetch('http://localhost:5000/api/wallet/verify-deposit', {
+      const verifyResponse = await fetch('https://fundli-hjqn.vercel.app/api/wallet/verify-deposit', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

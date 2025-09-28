@@ -52,11 +52,11 @@ const NotificationsPage = () => {
       // Use different endpoints based on user type
       let endpoint;
       if (user.userType === 'lender') {
-        endpoint = 'http://localhost:5000/api/lender/notifications';
+        endpoint = 'https://fundli-hjqn.vercel.app/api/lender/notifications';
       } else if (user.userType === 'admin') {
-        endpoint = 'http://localhost:5000/api/admin/notifications';
+        endpoint = 'https://fundli-hjqn.vercel.app/api/admin/notifications';
       } else {
-        endpoint = 'http://localhost:5000/api/notifications';
+        endpoint = 'https://fundli-hjqn.vercel.app/api/notifications';
       }
       
       console.log('🔔 Loading notifications for user type:', user.userType);
@@ -101,7 +101,7 @@ const NotificationsPage = () => {
       const token = localStorage.getItem('accessToken');
       
       // Check if user has sufficient balance
-      const walletResponse = await fetch('http://localhost:5000/api/wallet', {
+      const walletResponse = await fetch('https://fundli-hjqn.vercel.app/api/wallet', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -124,7 +124,7 @@ const NotificationsPage = () => {
       
       if (!confirmed) return;
       
-      const response = await fetch(`http://localhost:5000/api/loans/${loanId}/accept`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/loans/${loanId}/accept`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -167,7 +167,7 @@ const NotificationsPage = () => {
       
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`http://localhost:5000/api/loans/${loanId}/reject`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/loans/${loanId}/reject`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -197,7 +197,7 @@ const NotificationsPage = () => {
   const markAsRead = async (notificationId) => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/notifications/${notificationId}/read`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -219,7 +219,7 @@ const NotificationsPage = () => {
   const markAsUnread = async (notificationId) => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}/unread`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/notifications/${notificationId}/unread`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -241,7 +241,7 @@ const NotificationsPage = () => {
   const deleteNotification = async (notificationId) => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/notifications/${notificationId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -257,7 +257,7 @@ const NotificationsPage = () => {
   const markAllAsRead = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('http://localhost:5000/api/notifications/mark-all-read', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/notifications/mark-all-read', {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}` }
       });

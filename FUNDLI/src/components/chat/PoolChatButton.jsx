@@ -13,7 +13,7 @@ const PoolChatButton = ({ pool, currentUser, onStartChat }) => {
       
       // Create or get chat for the lending pool
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:5000/api/chat/chats/pool/${pool.id}`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/chat/chats/pool/${pool.id}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

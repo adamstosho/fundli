@@ -280,7 +280,7 @@ ADD COLUMN accepted_at TIMESTAMP NULL;
 
 ### Test Accept Loan
 ```bash
-curl -X POST http://localhost:5000/api/lender/loan/loan_123/accept \
+curl -X POST https://fundli-hjqn.vercel.app/api/lender/loan/loan_123/accept \
   -H "Authorization: Bearer <lender_token>" \
   -H "Content-Type: application/json" \
   -d '{"investmentAmount": 5000, "notes": "Great business plan"}'
@@ -288,7 +288,7 @@ curl -X POST http://localhost:5000/api/lender/loan/loan_123/accept \
 
 ### Test Reject Loan
 ```bash
-curl -X POST http://localhost:5000/api/lender/loan/loan_123/reject \
+curl -X POST https://fundli-hjqn.vercel.app/api/lender/loan/loan_123/reject \
   -H "Authorization: Bearer <lender_token>" \
   -H "Content-Type: application/json" \
   -d '{"reason": "Insufficient credit history"}'
@@ -296,7 +296,7 @@ curl -X POST http://localhost:5000/api/lender/loan/loan_123/reject \
 
 ### Test Get Notifications
 ```bash
-curl -X GET http://localhost:5000/api/notifications \
+curl -X GET https://fundli-hjqn.vercel.app/api/notifications \
   -H "Authorization: Bearer <borrower_token>"
 ```
 

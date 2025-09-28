@@ -15,7 +15,7 @@ console.log('============================\n');
 // Check if backend is running
 function checkBackend() {
   try {
-    const response = execSync('curl -s http://localhost:5000/api/health', { encoding: 'utf8' });
+    const response = execSync('curl -s https://fundli-hjqn.vercel.app/api/health', { encoding: 'utf8' });
     const health = JSON.parse(response);
     console.log('✅ Backend Server: RUNNING');
     console.log(`   Database: ${health.database}`);
@@ -50,7 +50,7 @@ function checkFrontend() {
 // Test login functionality
 function testLogin() {
   try {
-    const response = execSync('curl -s -X POST http://localhost:5000/api/auth/login -H "Content-Type: application/json" -d \'{"email":"test@fundli.com","password":"TestPassword123"}\'', { encoding: 'utf8' });
+    const response = execSync('curl -s -X POST https://fundli-hjqn.vercel.app/api/auth/login -H "Content-Type: application/json" -d \'{"email":"test@fundli.com","password":"TestPassword123"}\'', { encoding: 'utf8' });
     const loginResult = JSON.parse(response);
     
     if (loginResult.status === 'success') {
@@ -115,7 +115,7 @@ function main() {
     console.log('   User Type: Borrower');
     console.log('\n🌐 Access URLs:');
     console.log('   Frontend: http://localhost:5173');
-    console.log('   Backend API: http://localhost:5000/api');
+    console.log('   Backend API: https://fundli-hjqn.vercel.app/api');
     console.log('\n🚀 You\'re all set to present gloriously!');
   } else {
     console.log('⚠️  Some issues need to be resolved before presentation');

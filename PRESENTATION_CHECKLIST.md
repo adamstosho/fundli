@@ -13,7 +13,7 @@
 ### **Demo Preparation**
 - [ ] Browser bookmarks ready:
   - [ ] http://localhost:5173 (Frontend)
-  - [ ] http://localhost:5000/api/health (Backend health check)
+  - [ ] https://fundli-hjqn.vercel.app/api/health (Backend health check)
 - [ ] Test user logged in and ready
 - [ ] Admin features accessible (if needed)
 - [ ] Mobile responsiveness test ready
@@ -170,8 +170,8 @@ User Type: Borrower
 ### **Access URLs**
 ```
 Frontend: http://localhost:5173
-Backend: http://localhost:5000/api
-Health Check: http://localhost:5000/api/health
+Backend: https://fundli-hjqn.vercel.app/api
+Health Check: https://fundli-hjqn.vercel.app/api/health
 ```
 
 ### **Key Features to Highlight**

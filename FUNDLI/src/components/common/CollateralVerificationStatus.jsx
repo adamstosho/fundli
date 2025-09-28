@@ -29,7 +29,7 @@ const CollateralVerificationStatus = ({ userId, userType = 'borrower', onReapply
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/collateral/status', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/collateral/status', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

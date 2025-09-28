@@ -25,7 +25,7 @@ const ReferralPage = () => {
 
         // Try to fetch real referral data from the API
         try {
-          const response = await fetch('http://localhost:5000/api/referrals/stats', {
+          const response = await fetch('https://fundli-hjqn.vercel.app/api/referrals/stats', {
             headers: {
               'Authorization': `Bearer ${token}`
             }

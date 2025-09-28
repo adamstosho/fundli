@@ -25,7 +25,7 @@ const WithdrawPage = () => {
   const loadWallet = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      const res = await fetch('http://localhost:5000/api/wallet', {
+      const res = await fetch('https://fundli-hjqn.vercel.app/api/wallet', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -41,7 +41,7 @@ const WithdrawPage = () => {
     try {
       setIsLoadingBanks(true);
       const token = localStorage.getItem('accessToken');
-      const res = await fetch('http://localhost:5000/api/borrower/banks', {
+      const res = await fetch('https://fundli-hjqn.vercel.app/api/borrower/banks', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -72,7 +72,7 @@ const WithdrawPage = () => {
       }
 
       const token = localStorage.getItem('accessToken');
-      const res = await fetch('http://localhost:5000/api/wallet/withdraw', {
+      const res = await fetch('https://fundli-hjqn.vercel.app/api/wallet/withdraw', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

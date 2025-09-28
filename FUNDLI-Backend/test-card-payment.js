@@ -18,11 +18,11 @@ const testCardPayment = async () => {
 
     // Step 1: Register and login
     console.log('1️⃣ Registering test user...');
-    const registerResponse = await axios.post('http://localhost:5000/api/auth/register', testUser);
+    const registerResponse = await axios.post('https://fundli-hjqn.vercel.app/api/auth/register', testUser);
     console.log('✅ User registered');
 
     console.log('\n2️⃣ Logging in...');
-    const loginResponse = await axios.post('http://localhost:5000/api/auth/login', {
+    const loginResponse = await axios.post('https://fundli-hjqn.vercel.app/api/auth/login', {
       email: testUser.email,
       password: testUser.password
     });
@@ -31,7 +31,7 @@ const testCardPayment = async () => {
 
     // Step 2: Create wallet
     console.log('\n3️⃣ Creating wallet...');
-    const createWalletResponse = await axios.post('http://localhost:5000/api/wallet/create', {}, {
+    const createWalletResponse = await axios.post('https://fundli-hjqn.vercel.app/api/wallet/create', {}, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     console.log('✅ Wallet created');
@@ -39,7 +39,7 @@ const testCardPayment = async () => {
     // Step 3: Test card payment initialization
     console.log('\n4️⃣ Testing card payment initialization...');
     try {
-      const depositResponse = await axios.post('http://localhost:5000/api/wallet/deposit', {
+      const depositResponse = await axios.post('https://fundli-hjqn.vercel.app/api/wallet/deposit', {
         amount: 1000,
         currency: 'NGN',
         paymentMethod: 'card'

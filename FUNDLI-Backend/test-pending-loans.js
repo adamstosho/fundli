@@ -1,7 +1,7 @@
 // Test script to verify pending loans functionality for all user types
 const axios = require('axios');
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://fundli-hjqn.vercel.app/api';
 
 async function testPendingLoansFlow() {
   try {

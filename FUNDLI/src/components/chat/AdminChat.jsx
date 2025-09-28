@@ -121,7 +121,7 @@ const AdminChat = ({
       });
 
       // Create or get admin chat
-      const chatResponse = await fetch(`http://localhost:5000/api/chat/chats/admin/${targetUserId}`, {
+      const chatResponse = await fetch(`https://fundli-hjqn.vercel.app/api/chat/chats/admin/${targetUserId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -189,7 +189,7 @@ const AdminChat = ({
   const loadMessages = async (chatId) => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:5000/api/chat/chats/${chatId}/messages`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/chat/chats/${chatId}/messages`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -209,7 +209,7 @@ const AdminChat = ({
   const markAsRead = async (chatId) => {
     try {
       const token = localStorage.getItem('accessToken');
-      await fetch(`http://localhost:5000/api/chat/chats/${chatId}/read`, {
+      await fetch(`https://fundli-hjqn.vercel.app/api/chat/chats/${chatId}/read`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -224,7 +224,7 @@ const AdminChat = ({
     try {
       setIsSending(true);
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:5000/api/chat/chats/${chat.id}/messages`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/chat/chats/${chat.id}/messages`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -290,7 +290,7 @@ const AdminChat = ({
       const base64Data = base64.split(',')[1];
 
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:5000/api/chat/chats/${chat.id}/files`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/chat/chats/${chat.id}/files`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

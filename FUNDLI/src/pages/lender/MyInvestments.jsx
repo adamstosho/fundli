@@ -48,7 +48,7 @@ const MyInvestments = () => {
 
       console.log('🔍 Loading funded loans for lender:', user?.email);
 
-      const response = await fetch('http://localhost:5000/api/lender/funded-loans', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/lender/funded-loans', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

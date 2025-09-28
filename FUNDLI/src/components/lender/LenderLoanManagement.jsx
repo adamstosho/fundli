@@ -57,7 +57,7 @@ const LenderLoanManagement = () => {
       const token = localStorage.getItem('accessToken');
       
       // Load pending loans
-      const pendingResponse = await fetch('http://localhost:5000/api/lender/loan-applications', {
+      const pendingResponse = await fetch('https://fundli-hjqn.vercel.app/api/lender/loan-applications', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -69,7 +69,7 @@ const LenderLoanManagement = () => {
       }
 
       // Load funded loans
-      const fundedResponse = await fetch('http://localhost:5000/api/lender/funded-loans', {
+      const fundedResponse = await fetch('https://fundli-hjqn.vercel.app/api/lender/funded-loans', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -91,7 +91,7 @@ const LenderLoanManagement = () => {
   const handleViewDetails = async (loan) => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:5000/api/lender/loan/${loan.id}/details`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/lender/loan/${loan.id}/details`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -117,7 +117,7 @@ const LenderLoanManagement = () => {
       setIsProcessing(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`http://localhost:5000/api/lender/loan/${selectedLoan.id}/invest`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/lender/loan/${selectedLoan.id}/invest`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -200,7 +200,7 @@ const LenderLoanManagement = () => {
       setIsProcessing(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`http://localhost:5000/api/lender/loan/${selectedLoan.id}/reject`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/lender/loan/${selectedLoan.id}/reject`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

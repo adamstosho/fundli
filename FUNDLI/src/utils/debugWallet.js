@@ -21,7 +21,7 @@ const debugWalletLoading = () => {
 
   // Test API endpoint
   console.log('\n2️⃣ Testing API endpoint...');
-  fetch('http://localhost:5000/api/wallet', {
+  fetch('https://fundli-hjqn.vercel.app/api/wallet', {
     headers: { 'Authorization': `Bearer ${token}` }
   })
   .then(response => {
@@ -72,7 +72,7 @@ const debugWalletLoading = () => {
 
   // Check network connectivity
   console.log('\n4️⃣ Network connectivity check:');
-  fetch('http://localhost:5000/api/health')
+  fetch('https://fundli-hjqn.vercel.app/api/health')
     .then(response => {
       if (response.ok) {
         console.log('✅ Backend server is reachable');

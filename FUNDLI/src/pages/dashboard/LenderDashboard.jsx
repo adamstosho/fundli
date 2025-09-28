@@ -82,19 +82,19 @@ const LenderDashboard = () => {
           chartDataResponse,
           myPoolsResponse
         ] = await Promise.all([
-          fetch('http://localhost:5000/api/lender/investment-stats', {
+          fetch('https://fundli-hjqn.vercel.app/api/lender/investment-stats', {
             headers: { 'Authorization': `Bearer ${token}` }
           }),
-          fetch('http://localhost:5000/api/lender/funded-loans', {
+          fetch('https://fundli-hjqn.vercel.app/api/lender/funded-loans', {
             headers: { 'Authorization': `Bearer ${token}` }
           }),
-          fetch('http://localhost:5000/api/lender/loan-applications', {
+          fetch('https://fundli-hjqn.vercel.app/api/lender/loan-applications', {
             headers: { 'Authorization': `Bearer ${token}` }
           }),
-          fetch('http://localhost:5000/api/lender/dashboard-charts', {
+          fetch('https://fundli-hjqn.vercel.app/api/lender/dashboard-charts', {
             headers: { 'Authorization': `Bearer ${token}` }
           }),
-          fetch('http://localhost:5000/api/pools/my-pools', {
+          fetch('https://fundli-hjqn.vercel.app/api/pools/my-pools', {
             headers: { 'Authorization': `Bearer ${token}` }
           })
         ]);

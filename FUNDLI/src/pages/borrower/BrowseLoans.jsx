@@ -60,7 +60,7 @@ const BrowseLoans = () => {
       }
 
       // Test token with a simple API call
-      const response = await fetch('http://localhost:5000/api/auth/verify-token', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/auth/verify-token', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -75,7 +75,7 @@ const BrowseLoans = () => {
         // Try to refresh the token
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          const refreshResponse = await fetch('http://localhost:5000/api/auth/refresh-token', {
+          const refreshResponse = await fetch('https://fundli-hjqn.vercel.app/api/auth/refresh-token', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -131,7 +131,7 @@ const BrowseLoans = () => {
       const token = localStorage.getItem('accessToken');
       if (!token) return;
 
-      const response = await fetch('http://localhost:5000/api/collateral/status', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/collateral/status', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -155,7 +155,7 @@ const BrowseLoans = () => {
       console.log('🔑 Token exists:', !!token);
       
       // Fetch lending pools (created by lenders) that borrowers can apply to
-      const response = await fetch('http://localhost:5000/api/pools', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/pools', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -226,7 +226,7 @@ const BrowseLoans = () => {
       const token = localStorage.getItem('accessToken');
       
       // Check if user has sufficient balance
-      const walletResponse = await fetch('http://localhost:5000/api/wallet', {
+      const walletResponse = await fetch('https://fundli-hjqn.vercel.app/api/wallet', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -252,7 +252,7 @@ const BrowseLoans = () => {
       
       setIsSubmitting(true);
       
-      const response = await fetch(`http://localhost:5000/api/loans/${loan.id}/accept`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/loans/${loan.id}/accept`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -292,7 +292,7 @@ const BrowseLoans = () => {
       });
       
       // Submit KYC first
-      const kycResponse = await fetch('http://localhost:5000/api/borrower/kyc', {
+      const kycResponse = await fetch('https://fundli-hjqn.vercel.app/api/borrower/kyc', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -354,13 +354,13 @@ const BrowseLoans = () => {
         } : null
       };
 
-      console.log('📤 Collateral submission - Making request to:', 'http://localhost:5000/api/collateral/submit');
+      console.log('📤 Collateral submission - Making request to:', 'https://fundli-hjqn.vercel.app/api/collateral/submit');
       console.log('📤 Collateral submission - Headers:', {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token.substring(0, 20)}...`
       });
 
-      const response = await fetch('http://localhost:5000/api/collateral/submit', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/collateral/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -423,7 +423,7 @@ const BrowseLoans = () => {
       console.log('📝 Application data:', applicationData);
       
       // Apply to lending pool using the borrower loan application endpoint
-      const response = await fetch(`http://localhost:5000/api/borrower/loan/${selectedLoan.id}/apply`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/borrower/loan/${selectedLoan.id}/apply`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -472,7 +472,7 @@ const BrowseLoans = () => {
       console.log('📝 Application data:', applicationData);
       
       // Apply to lending pool using the borrower loan application endpoint
-      const response = await fetch(`http://localhost:5000/api/borrower/loan/${selectedLoan.id}/apply`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/borrower/loan/${selectedLoan.id}/apply`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

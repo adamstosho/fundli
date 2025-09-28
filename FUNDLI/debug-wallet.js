@@ -21,7 +21,7 @@ const debugWallet = () => {
   
   // Test wallet API
   console.log('\n2️⃣ Testing Wallet API:');
-  fetch('http://localhost:5000/api/wallet', {
+  fetch('https://fundli-hjqn.vercel.app/api/wallet', {
     headers: { 'Authorization': `Bearer ${token}` }
   })
   .then(response => {
@@ -36,7 +36,7 @@ const debugWallet = () => {
       
       if (data.message.includes('Wallet not found')) {
         console.log('💡 Creating wallet...');
-        return fetch('http://localhost:5000/api/wallet/create', {
+        return fetch('https://fundli-hjqn.vercel.app/api/wallet/create', {
           method: 'POST',
           headers: { 
             'Authorization': `Bearer ${token}`,

@@ -55,7 +55,7 @@ async function testProperToken() {
     
     // Test the token by making a simple API call first
     try {
-      const testResponse = await axios.get('http://localhost:5000/api/feedback/user/' + borrower._id, {
+      const testResponse = await axios.get('https://fundli-hjqn.vercel.app/api/feedback/user/' + borrower._id, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -75,7 +75,7 @@ async function testProperToken() {
     
     console.log('Sending reply with data:', replyData);
     
-    const response = await axios.post(`http://localhost:5000/api/feedback/${feedback._id}/reply`, replyData, {
+    const response = await axios.post(`https://fundli-hjqn.vercel.app/api/feedback/${feedback._id}/reply`, replyData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

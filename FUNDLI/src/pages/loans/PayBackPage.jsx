@@ -58,9 +58,9 @@ const PayBackPage = () => {
     try {
       const token = localStorage.getItem('accessToken');
       console.log('🔍 Fetching loan data for loanId:', loanId);
-      console.log('🔍 API URL:', `http://localhost:5000/api/loans/${loanId}`);
+      console.log('🔍 API URL:', `https://fundli-hjqn.vercel.app/api/loans/${loanId}`);
       
-      const response = await fetch(`http://localhost:5000/api/loans/${loanId}`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/loans/${loanId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -97,7 +97,7 @@ const PayBackPage = () => {
   const fetchWalletBalance = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('http://localhost:5000/api/wallet', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/wallet', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -148,10 +148,10 @@ const PayBackPage = () => {
       }
 
       // Make repayment API call using Paystack-integrated route
-      console.log('🔍 Making repayment API call to:', `http://localhost:5000/api/borrower/repay-loan/${loanId}`);
+      console.log('🔍 Making repayment API call to:', `https://fundli-hjqn.vercel.app/api/borrower/repay-loan/${loanId}`);
       console.log('🔍 Request body:', { installmentNumber: null });
       
-      const response = await fetch(`http://localhost:5000/api/borrower/repay-loan/${loanId}`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/borrower/repay-loan/${loanId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

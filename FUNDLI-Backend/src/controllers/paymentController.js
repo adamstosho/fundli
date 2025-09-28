@@ -171,7 +171,7 @@ const verifyPayment = async (req, res) => {
 
       // Call the loan acceptance endpoint
       const acceptResponse = await axios.post(
-        `http://localhost:5000/api/loans/${loanId}/accept`,
+        `https://fundli-hjqn.vercel.app/api/loans/${loanId}/accept`,
         {
           paymentReference: reference,
           amount: paymentData.amount / 100 // Convert back from kobo

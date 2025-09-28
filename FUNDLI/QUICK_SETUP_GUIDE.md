@@ -41,7 +41,7 @@ app.use('/api/wallet', require('./routes/wallet'));
 
 **Test Loan Funding:**
 ```bash
-curl -X POST http://localhost:5000/api/lender/loan/{loanId}/fund \
+curl -X POST https://fundli-hjqn.vercel.app/api/lender/loan/{loanId}/fund \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -54,13 +54,13 @@ curl -X POST http://localhost:5000/api/lender/loan/{loanId}/fund \
 
 **Test Wallet Balance:**
 ```bash
-curl -X GET http://localhost:5000/api/lender/wallet/balance \
+curl -X GET https://fundli-hjqn.vercel.app/api/lender/wallet/balance \
   -H "Authorization: Bearer <token>"
 ```
 
 **Test Notifications:**
 ```bash
-curl -X GET http://localhost:5000/api/notifications \
+curl -X GET https://fundli-hjqn.vercel.app/api/notifications \
   -H "Authorization: Bearer <token>"
 ```
 

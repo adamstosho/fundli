@@ -45,7 +45,7 @@ const TransferPage = () => {
   const loadWalletData = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('http://localhost:5000/api/wallet', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/wallet', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -62,7 +62,7 @@ const TransferPage = () => {
     try {
       const token = localStorage.getItem('accessToken');
       console.log('Loading approved borrowers...');
-      const response = await fetch('http://localhost:5000/api/wallet/approved-borrowers', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/wallet/approved-borrowers', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -189,7 +189,7 @@ const TransferPage = () => {
       setRecipient(null);
 
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:5000/api/users/search?email=${encodeURIComponent(recipientEmail)}`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/users/search?email=${encodeURIComponent(recipientEmail)}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -285,7 +285,7 @@ const TransferPage = () => {
         recipient: transferData.recipient
       });
       
-      const response = await fetch('http://localhost:5000/api/wallet/transfer', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/wallet/transfer', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

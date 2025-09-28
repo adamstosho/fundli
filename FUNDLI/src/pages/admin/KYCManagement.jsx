@@ -177,7 +177,7 @@ const KYCManagement = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch('http://localhost:5000/api/admin/kyc/approved', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/admin/kyc/approved', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -225,7 +225,7 @@ const KYCManagement = () => {
         search: search || ''
       });
 
-      const url = `http://localhost:5000/api/admin/kyc/all?${params.toString()}`;
+      const url = `https://fundli-hjqn.vercel.app/api/admin/kyc/all?${params.toString()}`;
 
       const response = await fetch(url, {
         headers: {
@@ -316,7 +316,7 @@ const KYCManagement = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`http://localhost:5000/api/admin/kyc/${userId}/approve`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/admin/kyc/${userId}/approve`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -365,7 +365,7 @@ const KYCManagement = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`http://localhost:5000/api/admin/kyc/${userId}/reject`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/admin/kyc/${userId}/reject`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -438,7 +438,7 @@ const KYCManagement = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`http://localhost:5000/api/admin/kyc/${kyc._id}/details`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/admin/kyc/${kyc._id}/details`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -519,7 +519,7 @@ const KYCManagement = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch('http://localhost:5000/api/admin/kyc/pending', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/admin/kyc/pending', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

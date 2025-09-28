@@ -1,7 +1,7 @@
 console.log('🔍 Testing admin-to-lender flow...');
 
 // Test 1: Check if we can make API calls
-fetch('http://localhost:5000/api/health')
+fetch('https://fundli-hjqn.vercel.app/api/health')
   .then(response => {
     console.log('✅ Backend is running:', response.status);
     return testFlow();
@@ -17,7 +17,7 @@ async function testFlow() {
     // Create or login borrower
     let borrowerToken = null;
     try {
-      const borrowerResponse = await fetch('http://localhost:5000/api/auth/register', {
+      const borrowerResponse = await fetch('https://fundli-hjqn.vercel.app/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -36,7 +36,7 @@ async function testFlow() {
         console.log('✅ Borrower created, token:', borrowerToken ? 'Yes' : 'No');
       } else {
         // Try login
-        const loginResponse = await fetch('http://localhost:5000/api/auth/login', {
+        const loginResponse = await fetch('https://fundli-hjqn.vercel.app/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -61,7 +61,7 @@ async function testFlow() {
     // Create or login lender
     let lenderToken = null;
     try {
-      const lenderResponse = await fetch('http://localhost:5000/api/auth/register', {
+      const lenderResponse = await fetch('https://fundli-hjqn.vercel.app/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -80,7 +80,7 @@ async function testFlow() {
         console.log('✅ Lender created, token:', lenderToken ? 'Yes' : 'No');
       } else {
         // Try login
-        const loginResponse = await fetch('http://localhost:5000/api/auth/login', {
+        const loginResponse = await fetch('https://fundli-hjqn.vercel.app/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -103,7 +103,7 @@ async function testFlow() {
     // Create or login admin
     let adminToken = null;
     try {
-      const adminResponse = await fetch('http://localhost:5000/api/auth/register', {
+      const adminResponse = await fetch('https://fundli-hjqn.vercel.app/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -122,7 +122,7 @@ async function testFlow() {
         console.log('✅ Admin created, token:', adminToken ? 'Yes' : 'No');
       } else {
         // Try login
-        const loginResponse = await fetch('http://localhost:5000/api/auth/login', {
+        const loginResponse = await fetch('https://fundli-hjqn.vercel.app/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -145,7 +145,7 @@ async function testFlow() {
     console.log('\n📝 Step 2: Testing loan creation...');
     let loanId = null;
     if (borrowerToken) {
-      const loanResponse = await fetch('http://localhost:5000/api/borrower/loan/apply', {
+      const loanResponse = await fetch('https://fundli-hjqn.vercel.app/api/borrower/loan/apply', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -178,7 +178,7 @@ async function testFlow() {
 
     console.log('\n🔍 Step 3: Testing lender dashboard before approval...');
     if (lenderToken) {
-      const lenderDashboardResponse = await fetch('http://localhost:5000/api/lender/loan-applications', {
+      const lenderDashboardResponse = await fetch('https://fundli-hjqn.vercel.app/api/lender/loan-applications', {
         headers: { 'Authorization': `Bearer ${lenderToken}` }
       });
       
@@ -198,7 +198,7 @@ async function testFlow() {
 
     console.log('\n✅ Step 4: Testing loan approval...');
     if (loanId && adminToken) {
-      const approvalResponse = await fetch(`http://localhost:5000/api/admin/loan/${loanId}/approve`, {
+      const approvalResponse = await fetch(`https://fundli-hjqn.vercel.app/api/admin/loan/${loanId}/approve`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -224,7 +224,7 @@ async function testFlow() {
 
     console.log('\n🔍 Step 5: Testing lender dashboard after approval...');
     if (lenderToken) {
-      const lenderDashboardResponse = await fetch('http://localhost:5000/api/lender/loan-applications', {
+      const lenderDashboardResponse = await fetch('https://fundli-hjqn.vercel.app/api/lender/loan-applications', {
         headers: { 'Authorization': `Bearer ${lenderToken}` }
       });
       
@@ -244,7 +244,7 @@ async function testFlow() {
 
     console.log('\n🔔 Step 6: Testing lender notifications after approval...');
     if (lenderToken) {
-      const notificationsResponse = await fetch('http://localhost:5000/api/lender/notifications', {
+      const notificationsResponse = await fetch('https://fundli-hjqn.vercel.app/api/lender/notifications', {
         headers: { 'Authorization': `Bearer ${lenderToken}` }
       });
       

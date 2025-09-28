@@ -59,7 +59,7 @@ async function testBackendKYC() {
   console.log('4️⃣ Testing Backend KYC Endpoint...');
   
   try {
-    const response = await axios.post('http://localhost:5000/api/borrower/kyc', testData, {
+    const response = await axios.post('https://fundli-hjqn.vercel.app/api/borrower/kyc', testData, {
       headers: {
         'Content-Type': 'application/json'
       },

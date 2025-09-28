@@ -37,11 +37,11 @@ const PendingLoansSection = ({ userType, title = "Pending Loans" }) => {
       
       let endpoint;
       if (userType === 'borrower') {
-        endpoint = 'http://localhost:5000/api/loans/pending/borrower';
+        endpoint = 'https://fundli-hjqn.vercel.app/api/loans/pending/borrower';
       } else if (userType === 'lender') {
-        endpoint = 'http://localhost:5000/api/lender/loan-applications';
+        endpoint = 'https://fundli-hjqn.vercel.app/api/lender/loan-applications';
       } else if (userType === 'admin') {
-        endpoint = 'http://localhost:5000/api/admin/loans';
+        endpoint = 'https://fundli-hjqn.vercel.app/api/admin/loans';
       } else {
         throw new Error('Invalid user type');
       }
@@ -118,7 +118,7 @@ const PendingLoansSection = ({ userType, title = "Pending Loans" }) => {
       setIsProcessing(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`http://localhost:5000/api/loans/${selectedLoan.id}/reject`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/loans/${selectedLoan.id}/reject`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

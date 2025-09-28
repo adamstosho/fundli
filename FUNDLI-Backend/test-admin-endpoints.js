@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = 'https://fundli-hjqn.vercel.app/api';
 
 // Test function to check admin endpoints
 async function testAdminEndpoints() {

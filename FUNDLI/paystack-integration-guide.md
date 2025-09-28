@@ -41,7 +41,7 @@ User clicks "Pay Back" → PayBackPage → Paystack API → Lender receives paym
 ### **PayBackPage API Call:**
 ```javascript
 // Updated to use Paystack-integrated route
-const response = await fetch(`http://localhost:5000/api/borrower/repay-loan/${loanId}`, {
+const response = await fetch(`https://fundli-hjqn.vercel.app/api/borrower/repay-loan/${loanId}`, {
   method: 'POST',
   headers: {
     'Authorization': `Bearer ${token}`,

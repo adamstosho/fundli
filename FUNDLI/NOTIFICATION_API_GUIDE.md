@@ -395,7 +395,7 @@ await createBulkNotifications(notifications);
 ### Test Notification Creation
 ```bash
 # Test single notification
-curl -X POST http://localhost:5000/api/notifications/create \
+curl -X POST https://fundli-hjqn.vercel.app/api/notifications/create \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -410,7 +410,7 @@ curl -X POST http://localhost:5000/api/notifications/create \
   }'
 
 # Test bulk notifications
-curl -X POST http://localhost:5000/api/notifications/bulk-create \
+curl -X POST https://fundli-hjqn.vercel.app/api/notifications/bulk-create \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{

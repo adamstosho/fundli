@@ -93,15 +93,15 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
       // Try backend first, fallback to local storage
       try {
         // Use user-type-specific API endpoints
-        let apiEndpoint = 'http://localhost:5000/api/wallet';
+        let apiEndpoint = 'https://fundli-hjqn.vercel.app/api/wallet';
         
         // Use specific endpoints based on user type
         if (currentUserType === 'lender') {
-          apiEndpoint = 'http://localhost:5000/api/lender/wallet/balance';
+          apiEndpoint = 'https://fundli-hjqn.vercel.app/api/lender/wallet/balance';
         } else if (currentUserType === 'borrower') {
-          apiEndpoint = 'http://localhost:5000/api/borrower/wallet/balance';
+          apiEndpoint = 'https://fundli-hjqn.vercel.app/api/borrower/wallet/balance';
         } else if (currentUserType === 'admin') {
-          apiEndpoint = 'http://localhost:5000/api/admin/wallet/balance';
+          apiEndpoint = 'https://fundli-hjqn.vercel.app/api/admin/wallet/balance';
         }
         
         console.log('🔍 Wallet API endpoint:', apiEndpoint);

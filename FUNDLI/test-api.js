@@ -7,7 +7,7 @@ const testAPI = async () => {
     console.log('Testing API endpoints...');
     
     // Test investment stats endpoint
-    const investmentStatsResponse = await fetch('http://localhost:5000/api/lender/investment-stats', {
+    const investmentStatsResponse = await fetch('https://fundli-hjqn.vercel.app/api/lender/investment-stats', {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     console.log('Investment Stats Response:', investmentStatsResponse.status);
@@ -17,7 +17,7 @@ const testAPI = async () => {
     }
     
     // Test funded loans endpoint
-    const fundedLoansResponse = await fetch('http://localhost:5000/api/lender/funded-loans', {
+    const fundedLoansResponse = await fetch('https://fundli-hjqn.vercel.app/api/lender/funded-loans', {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     console.log('Funded Loans Response:', fundedLoansResponse.status);
@@ -27,7 +27,7 @@ const testAPI = async () => {
     }
     
     // Test chart data endpoint
-    const chartDataResponse = await fetch('http://localhost:5000/api/lender/dashboard-charts', {
+    const chartDataResponse = await fetch('https://fundli-hjqn.vercel.app/api/lender/dashboard-charts', {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     console.log('Chart Data Response:', chartDataResponse.status);
@@ -37,7 +37,7 @@ const testAPI = async () => {
     }
     
     // Test pools endpoint
-    const poolsResponse = await fetch('http://localhost:5000/api/pools/my-pools', {
+    const poolsResponse = await fetch('https://fundli-hjqn.vercel.app/api/pools/my-pools', {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     console.log('Pools Response:', poolsResponse.status);

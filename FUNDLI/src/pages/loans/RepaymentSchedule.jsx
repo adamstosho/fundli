@@ -41,7 +41,7 @@ const RepaymentSchedule = () => {
       console.log('🔍 Loading repayment schedule...');
       
       // Fetch repayment schedule from API
-      const response = await fetch('http://localhost:5000/api/loans/repayment-schedule', {
+      const response = await fetch('https://fundli-hjqn.vercel.app/api/loans/repayment-schedule', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

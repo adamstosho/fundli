@@ -34,7 +34,7 @@ const Marketplace = () => {
         }
 
         console.log('Making API call to /api/pools...');
-        const response = await fetch('http://localhost:5000/api/pools', {
+        const response = await fetch('https://fundli-hjqn.vercel.app/api/pools', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -55,7 +55,7 @@ const Marketplace = () => {
         if (user?.userType === 'lender') {
           try {
             console.log('Fetching user investments...');
-            const investmentsResponse = await fetch('http://localhost:5000/api/lender/funded-loans', {
+            const investmentsResponse = await fetch('https://fundli-hjqn.vercel.app/api/lender/funded-loans', {
               headers: {
                 'Authorization': `Bearer ${token}`
               }
@@ -157,7 +157,7 @@ const Marketplace = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`http://localhost:5000/api/pools/${deleteModal.loanId}`, {
+      const response = await fetch(`https://fundli-hjqn.vercel.app/api/pools/${deleteModal.loanId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
