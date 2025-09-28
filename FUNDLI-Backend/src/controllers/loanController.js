@@ -354,16 +354,16 @@ const getLoanStats = async (req, res) => {
         $group: {
           _id: null,
           totalLoans: { $sum: 1 },
-          totalBorrowed: { $sum: '$loanAmount' },
-          totalRepaid: { $sum: '$amountPaid' },
+          totalBorrowed: { $sum: 1 },
+          totalRepaid: { $sum: null },
           activeLoans: {
             $sum: {
-              $cond: [{ $eq: ['$status', 'active'] }, 1, 0]
+              $cond: [{ $eq: [null, 'active'] }, 1, 0]
             }
           },
           pendingLoans: {
             $sum: {
-              $cond: [{ $eq: ['$status', 'pending'] }, 1, 0]
+              $cond: [{ $eq: [null, 'pending'] }, 1, 0]
             }
           }
         }

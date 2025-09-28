@@ -276,7 +276,7 @@ lendingPoolSchema.methods.addInvestment = function(userId, amount) {
     throw new Error('Investment would exceed pool size');
   }
   
-  const expectedReturn = amount * (1 + (this.interestRate / 100) * (this.duration / 12));
+  const expectedReturn = amount * (1 + (this.interestRate / 100));
   
   this.investors.push({
     user: userId,

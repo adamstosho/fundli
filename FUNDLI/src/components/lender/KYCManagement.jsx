@@ -120,10 +120,10 @@ const KYCManagement = () => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      'kyc_pending': { color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400', text: 'KYC Pending' },
-      'pending': { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400', text: 'Pending' },
-      'approved': { color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400', text: 'Approved' },
-      'rejected': { color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400', text: 'Rejected' }
+      'kyc_pending': { color: 'bg-warning/20 text-warning dark:bg-warning/20 dark:text-warning/50', text: 'KYC Pending' },
+      'pending': { color: 'bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-400', text: 'Pending' },
+      'approved': { color: 'bg-success/20 text-success dark:bg-success/20 dark:text-success/50', text: 'Approved' },
+      'rejected': { color: 'bg-error/20 text-error dark:bg-error/20 dark:text-error/50', text: 'Rejected' }
     };
 
     const config = statusConfig[status] || statusConfig.pending;
@@ -137,16 +137,16 @@ const KYCManagement = () => {
   const getKYCStatusBadge = (kycStatus, kycVerified) => {
     if (kycVerified) {
       return (
-        <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
+        <span className="px-2 py-1 rounded-full text-xs font-medium bg-success/20 text-success dark:bg-success/20 dark:text-success/50">
           Verified
         </span>
       );
     }
 
     const statusConfig = {
-      'pending': { color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400', text: 'Pending' },
-      'approved': { color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400', text: 'Approved' },
-      'rejected': { color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400', text: 'Rejected' }
+      'pending': { color: 'bg-warning/20 text-warning dark:bg-warning/20 dark:text-warning/50', text: 'Pending' },
+      'approved': { color: 'bg-success/20 text-success dark:bg-success/20 dark:text-success/50', text: 'Approved' },
+      'rejected': { color: 'bg-error/20 text-error dark:bg-error/20 dark:text-error/50', text: 'Rejected' }
     };
 
     const config = statusConfig[kycStatus] || statusConfig.pending;
@@ -170,66 +170,66 @@ const KYCManagement = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-2xl font-bold text-secondary-900 dark:text-white">
             KYC Management
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-neutral-600 dark:text-neutral-400 mt-1">
             Review and manage borrower KYC verifications
           </p>
         </div>
         
         <div className="flex space-x-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+            <div className="text-2xl font-bold text-warning dark:text-warning/50">
               {loanApplications.filter(loan => loan.kycStatus === 'pending').length}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Pending KYC</div>
+            <div className="text-sm text-neutral-600 dark:text-neutral-400">Pending KYC</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+            <div className="text-2xl font-bold text-success dark:text-success/50">
               {loanApplications.filter(loan => loan.kycStatus === 'verified').length}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Verified</div>
+            <div className="text-sm text-neutral-600 dark:text-neutral-400">Verified</div>
           </div>
         </div>
       </div>
 
       {/* Loan Applications Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg shadow overflow-hidden">
+        <div className="px-6 py-4 border-b border-neutral-200 dark:border-secondary-700">
+          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
             Loan Applications ({loanApplications.length})
           </h3>
         </div>
         
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+            <thead className="bg-neutral-50 dark:bg-neutral-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Borrower
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Loan Details
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   KYC Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Loan Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="bg-white dark:bg-secondary-800 divide-y divide-gray-200 dark:divide-gray-700">
               {loanApplications.map((loan) => (
                 <motion.tr
                   key={loan.id}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="hover:bg-neutral-50 dark:hover:bg-neutral-700"
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -237,10 +237,10 @@ const KYCManagement = () => {
                         <User className="h-4 w-4 text-primary-600 dark:text-primary-400" />
                       </div>
                       <div className="ml-3">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        <div className="text-sm font-medium text-secondary-900 dark:text-white">
                           {loan.borrower.name}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                        <div className="text-sm text-neutral-500 dark:text-neutral-400">
                           {loan.borrower.email}
                         </div>
                       </div>
@@ -248,12 +248,12 @@ const KYCManagement = () => {
                   </td>
                   
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">
+                    <div className="text-sm text-secondary-900 dark:text-white">
                       <div className="flex items-center space-x-2">
-                        <DollarSign className="h-4 w-4 text-gray-400" />
+                        <DollarSign className="h-4 w-4 text-neutral-400" />
                         <span className="font-medium">${loan.loanAmount.toLocaleString()}</span>
                       </div>
-                      <div className="text-gray-500 dark:text-gray-400 mt-1">
+                      <div className="text-neutral-500 dark:text-neutral-400 mt-1">
                         {loan.purpose} • {loan.duration} months
                       </div>
                     </div>
@@ -284,7 +284,7 @@ const KYCManagement = () => {
                               setApprovalAction('approve');
                               setShowApprovalModal(true);
                             }}
-                            className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300"
+                            className="text-success dark:text-success/50 hover:text-success dark:hover:text-success/40"
                             title="Approve KYC"
                           >
                             <CheckCircle className="h-4 w-4" />
@@ -295,7 +295,7 @@ const KYCManagement = () => {
                               setApprovalAction('reject');
                               setShowApprovalModal(true);
                             }}
-                            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                            className="text-error dark:text-error/50 hover:text-error dark:hover:text-error/40"
                             title="Reject KYC"
                           >
                             <XCircle className="h-4 w-4" />
@@ -312,8 +312,8 @@ const KYCManagement = () => {
         
         {loanApplications.length === 0 && (
           <div className="text-center py-12">
-            <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">No loan applications found</p>
+            <Shield className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
+            <p className="text-neutral-500 dark:text-neutral-400">No loan applications found</p>
           </div>
         )}
       </div>
@@ -324,15 +324,15 @@ const KYCManagement = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-secondary-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                 KYC Details - {selectedBorrower.firstName} {selectedBorrower.lastName}
               </h3>
               <button
                 onClick={() => setShowKYCModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
               >
                 <XCircle className="h-6 w-6" />
               </button>
@@ -340,33 +340,33 @@ const KYCManagement = () => {
 
             <div className="space-y-6">
               {/* KYC Status */}
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+              <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">KYC Status</span>
+                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">KYC Status</span>
                   {getKYCStatusBadge(selectedBorrower.kycStatus, selectedBorrower.kycVerified)}
                 </div>
               </div>
 
               {/* BVN Information */}
               {selectedBorrower.kycData?.bvn && (
-                <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-3">BVN Verification</h4>
+                <div className="border border-neutral-200 dark:border-secondary-700 rounded-lg p-4">
+                  <h4 className="font-medium text-secondary-900 dark:text-white mb-3">BVN Verification</h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="text-gray-500 dark:text-gray-400">BVN Number:</span>
-                      <p className="text-gray-900 dark:text-white font-medium">
+                      <span className="text-neutral-500 dark:text-neutral-400">BVN Number:</span>
+                      <p className="text-secondary-900 dark:text-white font-medium">
                         {selectedBorrower.kycData.bvn.number}
                       </p>
                     </div>
                     <div>
-                      <span className="text-gray-500 dark:text-gray-400">Status:</span>
-                      <p className="text-gray-900 dark:text-white font-medium">
+                      <span className="text-neutral-500 dark:text-neutral-400">Status:</span>
+                      <p className="text-secondary-900 dark:text-white font-medium">
                         {selectedBorrower.kycData.bvn.verified ? 'Verified' : 'Not Verified'}
                       </p>
                     </div>
                     <div>
-                      <span className="text-gray-500 dark:text-gray-400">Verified At:</span>
-                      <p className="text-gray-900 dark:text-white font-medium">
+                      <span className="text-neutral-500 dark:text-neutral-400">Verified At:</span>
+                      <p className="text-secondary-900 dark:text-white font-medium">
                         {selectedBorrower.kycData.bvn.verifiedAt ? 
                           new Date(selectedBorrower.kycData.bvn.verifiedAt).toLocaleDateString() : 'N/A'
                         }
@@ -378,30 +378,30 @@ const KYCManagement = () => {
 
               {/* Bank Account Information */}
               {selectedBorrower.kycData?.bankAccount && (
-                <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-3">Bank Account Verification</h4>
+                <div className="border border-neutral-200 dark:border-secondary-700 rounded-lg p-4">
+                  <h4 className="font-medium text-secondary-900 dark:text-white mb-3">Bank Account Verification</h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="text-gray-500 dark:text-gray-400">Bank:</span>
-                      <p className="text-gray-900 dark:text-white font-medium">
+                      <span className="text-neutral-500 dark:text-neutral-400">Bank:</span>
+                      <p className="text-secondary-900 dark:text-white font-medium">
                         {selectedBorrower.kycData.bankAccount.bankName}
                       </p>
                     </div>
                     <div>
-                      <span className="text-gray-500 dark:text-gray-400">Account Number:</span>
-                      <p className="text-gray-900 dark:text-white font-medium">
+                      <span className="text-neutral-500 dark:text-neutral-400">Account Number:</span>
+                      <p className="text-secondary-900 dark:text-white font-medium">
                         {selectedBorrower.kycData.bankAccount.accountNumber}
                       </p>
                     </div>
                     <div>
-                      <span className="text-gray-500 dark:text-gray-400">Account Name:</span>
-                      <p className="text-gray-900 dark:text-white font-medium">
+                      <span className="text-neutral-500 dark:text-neutral-400">Account Name:</span>
+                      <p className="text-secondary-900 dark:text-white font-medium">
                         {selectedBorrower.kycData.bankAccount.accountName}
                       </p>
                     </div>
                     <div>
-                      <span className="text-gray-500 dark:text-gray-400">Status:</span>
-                      <p className="text-gray-900 dark:text-white font-medium">
+                      <span className="text-neutral-500 dark:text-neutral-400">Status:</span>
+                      <p className="text-secondary-900 dark:text-white font-medium">
                         {selectedBorrower.kycData.bankAccount.verified ? 'Verified' : 'Not Verified'}
                       </p>
                     </div>
@@ -411,19 +411,19 @@ const KYCManagement = () => {
 
               {/* Submission Details */}
               {selectedBorrower.kycData?.submittedAt && (
-                <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-3">Submission Details</h4>
+                <div className="border border-neutral-200 dark:border-secondary-700 rounded-lg p-4">
+                  <h4 className="font-medium text-secondary-900 dark:text-white mb-3">Submission Details</h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="text-gray-500 dark:text-gray-400">Submitted At:</span>
-                      <p className="text-gray-900 dark:text-white font-medium">
+                      <span className="text-neutral-500 dark:text-neutral-400">Submitted At:</span>
+                      <p className="text-secondary-900 dark:text-white font-medium">
                         {new Date(selectedBorrower.kycData.submittedAt).toLocaleDateString()}
                       </p>
                     </div>
                     {selectedBorrower.kycData.reviewedAt && (
                       <div>
-                        <span className="text-gray-500 dark:text-gray-400">Reviewed At:</span>
-                        <p className="text-gray-900 dark:text-white font-medium">
+                        <span className="text-neutral-500 dark:text-neutral-400">Reviewed At:</span>
+                        <p className="text-secondary-900 dark:text-white font-medium">
                           {new Date(selectedBorrower.kycData.reviewedAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -441,7 +441,7 @@ const KYCManagement = () => {
                       setShowApprovalModal(true);
                     }}
                     disabled={isProcessing}
-                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center"
+                    className="flex-1 px-4 py-2 bg-success hover:bg-success disabled:bg-success/50 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center"
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Approve KYC
@@ -453,7 +453,7 @@ const KYCManagement = () => {
                       setShowApprovalModal(true);
                     }}
                     disabled={isProcessing}
-                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center"
+                    className="flex-1 px-4 py-2 bg-error hover:bg-error disabled:bg-error/50 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center"
                   >
                     <XCircle className="h-4 w-4 mr-2" />
                     Reject KYC
@@ -471,26 +471,26 @@ const KYCManagement = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4"
+            className="bg-white dark:bg-secondary-800 rounded-lg p-6 max-w-md w-full mx-4"
           >
             <div className="text-center mb-6">
               <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
                 approvalAction === 'approve' 
-                  ? 'bg-green-100 dark:bg-green-900/20' 
-                  : 'bg-red-100 dark:bg-red-900/20'
+                  ? 'bg-success/20 dark:bg-success/20' 
+                  : 'bg-error/20 dark:bg-error/20'
               }`}>
                 {approvalAction === 'approve' ? (
-                  <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+                  <CheckCircle className="h-8 w-8 text-success dark:text-success/50" />
                 ) : (
-                  <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+                  <XCircle className="h-8 w-8 text-error dark:text-error/50" />
                 )}
               </div>
               
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-2">
                 {approvalAction === 'approve' ? 'Approve KYC' : 'Reject KYC'}
               </h3>
               
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-neutral-600 dark:text-neutral-400">
                 {approvalAction === 'approve' 
                   ? 'Are you sure you want to approve this borrower\'s KYC verification?' 
                   : 'Are you sure you want to reject this borrower\'s KYC verification?'
@@ -500,7 +500,7 @@ const KYCManagement = () => {
 
             {approvalAction === 'reject' && (
               <div className="mb-6">
-                <label htmlFor="rejectionReason" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="rejectionReason" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Reason for Rejection
                 </label>
                 <textarea
@@ -508,7 +508,7 @@ const KYCManagement = () => {
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
                   rows="3"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-neutral-700 text-secondary-900 dark:text-neutral-100"
                   placeholder="Please provide a reason for rejection..."
                 />
               </div>
@@ -518,7 +518,7 @@ const KYCManagement = () => {
               <button
                 onClick={() => setShowApprovalModal(false)}
                 disabled={isProcessing}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Cancel
               </button>
@@ -528,8 +528,8 @@ const KYCManagement = () => {
                 disabled={isProcessing}
                 className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center ${
                   approvalAction === 'approve' 
-                    ? 'bg-green-600 hover:bg-green-700 disabled:bg-green-400' 
-                    : 'bg-red-600 hover:bg-red-700 disabled:bg-red-400'
+                    ? 'bg-success hover:bg-success disabled:bg-success/50' 
+                    : 'bg-error hover:bg-error disabled:bg-error/50'
                 }`}
               >
                 {isProcessing ? (

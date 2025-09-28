@@ -5,6 +5,8 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
 require('dotenv').config();
 
 // Set default JWT_SECRET if not provided
@@ -35,6 +37,8 @@ const twoFactorRoutes = require('./routes/twoFactor');
 const matchingRoutes = require('./routes/matching');
 const pushNotificationRoutes = require('./routes/pushNotifications');
 const feedbackRoutes = require('./routes/feedback');
+const chatRoutes = require('./routes/chat');
+const repaymentNotificationRoutes = require('./routes/repaymentNotifications');
 
 const { errorHandler } = require('./middleware/errorHandler');
 const { connectDB } = require('./config/database');
@@ -42,6 +46,15 @@ const { createRequestLogger } = require('./utils/logger');
 const cronService = require('./services/cronService');
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.NODE_ENV === 'production' 
+      ? process.env.FRONTEND_URL 
+      : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
+    methods: ['GET', 'POST']
+  }
+});
 const PORT = process.env.PORT || 5000;
 
 // Security middleware
@@ -129,6 +142,8 @@ app.use('/api/2fa', twoFactorRoutes);
 app.use('/api/matching', matchingRoutes);
 app.use('/api/push-notifications', pushNotificationRoutes);
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/repayment-notifications', repaymentNotificationRoutes);
 
 // 404 handler for undefined routes
 app.use('*', (req, res) => {
@@ -152,11 +167,25 @@ const startServer = async () => {
       console.log('⚠️  Server starting without database connection');
     }
     
-    app.listen(PORT, '0.0.0.0', () => {
+    // Initialize WebRTC signaling service
+    const WebRTCSignalingService = require('./services/webrtcSignalingService');
+    new WebRTCSignalingService(io);
+    console.log('✅ WebRTC signaling service initialized');
+
+    // Initialize Chat Socket.IO service
+    const ChatSocketService = require('./services/chatSocketService');
+    new ChatSocketService(io);
+    console.log('✅ Chat Socket.IO service initialized');
+
+    // Make Socket.IO instance available to routes
+    app.set('io', io);
+
+    server.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Fundli Backend Server running on port ${PORT}`);
       console.log(`📱 Environment: ${process.env.NODE_ENV}`);
       console.log(`🔗 Health Check: http://localhost:${PORT}/health`);
       console.log(`🌐 Server accessible on: http://0.0.0.0:${PORT}`);
+      console.log(`📞 WebRTC signaling server ready`);
       
       // Start cron jobs only if database is connected
       if (dbConnected) {

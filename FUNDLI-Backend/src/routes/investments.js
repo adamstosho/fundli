@@ -181,8 +181,8 @@ router.post('/', protect, async (req, res) => {
       category = investmentTarget.category || 'personal';
     }
 
-    // Calculate expected return
-    const expectedReturn = (amount * interestRate * duration) / (100 * 12); // Monthly calculation
+    // Calculate expected return (flat rate for entire duration)
+    const expectedReturn = (amount * interestRate) / 100;
 
     // Calculate maturity date
     const maturityDate = new Date();
@@ -337,6 +337,53 @@ router.post('/:id/payment', protect, async (req, res) => {
 
     // Mark payment as received
     await investment.markPaymentReceived(paymentId, amount, date ? new Date(date) : new Date());
+
+    // Send notification to lender about payment received
+    try {
+      const NotificationService = require('../services/notificationService');
+      const User = require('../models/User');
+      
+      // Get lender information
+      const lender = await User.findById(investment.lenderId);
+      if (lender) {
+        await NotificationService.notifyRepaymentReceived({
+          lenderId: lender._id,
+          lenderName: `${lender.firstName} ${lender.lastName}`,
+          loanId: investment.loanId,
+          borrowerName: `${req.user.firstName} ${req.user.lastName}`,
+          repaymentAmount: amount,
+          loanAmount: investment.amount
+        });
+        
+        console.log(`📧 Payment received notification sent to lender ${lender._id}`);
+      }
+    } catch (notificationError) {
+      console.error('Error sending lender payment notification:', notificationError);
+      // Don't fail the payment if notifications fail
+    }
+
+    // Send notification to admins about investment payment
+    try {
+      const NotificationService = require('../services/notificationService');
+      const User = require('../models/User');
+      
+      // Get lender information
+      const lender = await User.findById(investment.lenderId);
+      if (lender) {
+        await NotificationService.notifyAdminLoanRepayment({
+          loanId: investment.loanId,
+          borrowerName: `${req.user.firstName} ${req.user.lastName}`,
+          lenderName: `${lender.firstName} ${lender.lastName}`,
+          repaymentAmount: amount,
+          loanAmount: investment.amount
+        });
+        
+        console.log(`📧 Investment payment notification sent to admins: ${investment.loanId}`);
+      }
+    } catch (notificationError) {
+      console.error('Error sending admin investment payment notification:', notificationError);
+      // Don't fail the payment if notifications fail
+    }
 
     res.status(200).json({
       status: 'success',

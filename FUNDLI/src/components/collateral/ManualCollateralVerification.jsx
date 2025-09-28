@@ -173,33 +173,33 @@ const ManualCollateralVerification = ({ onSubmit, onCancel, isSubmitting }) => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        <h2 className="text-2xl font-bold text-secondary-900 dark:text-white mb-2">
           Collateral Verification
         </h2>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-neutral-600 dark:text-neutral-400">
           Upload documents to verify your collateral ownership and provide financial information
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Collateral Information */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-            <FileText className="h-5 w-5 mr-2 text-blue-600" />
+        <div className="bg-white dark:bg-secondary-800 rounded-lg p-6 shadow-sm border border-neutral-200 dark:border-secondary-700">
+          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4 flex items-center">
+            <FileText className="h-5 w-5 mr-2 text-primary-600" />
             Collateral Information
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Collateral Type *
               </label>
               <select
                 name="collateralType"
                 value={formData.collateralType}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                  errors.collateralType ? 'border-red-500' : 'border-gray-300'
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-primary-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white ${
+                  errors.collateralType ? 'border-error' : 'border-neutral-300'
                 }`}
               >
                 <option value="">Select collateral type</option>
@@ -210,12 +210,12 @@ const ManualCollateralVerification = ({ onSubmit, onCancel, isSubmitting }) => {
                 ))}
               </select>
               {errors.collateralType && (
-                <p className="mt-1 text-sm text-red-600">{errors.collateralType}</p>
+                <p className="mt-1 text-sm text-error">{errors.collateralType}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Estimated Value (₦) *
               </label>
               <input
@@ -224,18 +224,18 @@ const ManualCollateralVerification = ({ onSubmit, onCancel, isSubmitting }) => {
                 value={formData.estimatedValue}
                 onChange={handleInputChange}
                 placeholder="Enter estimated value"
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                  errors.estimatedValue ? 'border-red-500' : 'border-gray-300'
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-primary-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white ${
+                  errors.estimatedValue ? 'border-error' : 'border-neutral-300'
                 }`}
               />
               {errors.estimatedValue && (
-                <p className="mt-1 text-sm text-red-600">{errors.estimatedValue}</p>
+                <p className="mt-1 text-sm text-error">{errors.estimatedValue}</p>
               )}
             </div>
           </div>
 
           <div className="mt-6">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
               Description *
             </label>
             <textarea
@@ -244,29 +244,29 @@ const ManualCollateralVerification = ({ onSubmit, onCancel, isSubmitting }) => {
               onChange={handleInputChange}
               rows={4}
               placeholder="Describe your collateral in detail..."
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                errors.description ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-primary-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white ${
+                errors.description ? 'border-error' : 'border-neutral-300'
               }`}
             />
             {errors.description && (
-              <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+              <p className="mt-1 text-sm text-error">{errors.description}</p>
             )}
           </div>
         </div>
 
         {/* Collateral Documents Upload */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-            <Upload className="h-5 w-5 mr-2 text-green-600" />
+        <div className="bg-white dark:bg-secondary-800 rounded-lg p-6 shadow-sm border border-neutral-200 dark:border-secondary-700">
+          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4 flex items-center">
+            <Upload className="h-5 w-5 mr-2 text-success" />
             Collateral Ownership Proof
           </h3>
           
           <div className="mb-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
               Upload documents that prove ownership of your collateral (title deeds, registration papers, purchase receipts, etc.)
             </p>
             
-            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
+            <div className="border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-lg p-6 text-center">
               <input
                 type="file"
                 multiple
@@ -279,34 +279,34 @@ const ManualCollateralVerification = ({ onSubmit, onCancel, isSubmitting }) => {
                 htmlFor="collateral-documents"
                 className="cursor-pointer flex flex-col items-center"
               >
-                <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <Upload className="h-8 w-8 text-neutral-400 mb-2" />
+                <span className="text-sm text-neutral-600 dark:text-neutral-400">
                   Click to upload collateral documents
                 </span>
-                <span className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                <span className="text-xs text-neutral-500 dark:text-neutral-500 mt-1">
                   PDF, JPG, PNG up to 10MB each
                 </span>
               </label>
             </div>
             
             {errors.collateralDocuments && (
-              <p className="mt-2 text-sm text-red-600">{errors.collateralDocuments}</p>
+              <p className="mt-2 text-sm text-error">{errors.collateralDocuments}</p>
             )}
           </div>
 
           {/* Uploaded Documents */}
           {collateralDocuments.length > 0 && (
             <div className="space-y-3">
-              <h4 className="font-medium text-gray-900 dark:text-white">Uploaded Documents:</h4>
+              <h4 className="font-medium text-secondary-900 dark:text-white">Uploaded Documents:</h4>
               {collateralDocuments.map((doc, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div key={index} className="flex items-center justify-between p-3 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
                   <div className="flex items-center space-x-3">
-                    <FileText className="h-5 w-5 text-blue-600" />
+                    <FileText className="h-5 w-5 text-primary-600" />
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      <p className="text-sm font-medium text-secondary-900 dark:text-white">
                         {doc.name}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">
                         {formatFileSize(doc.size)}
                       </p>
                     </div>
@@ -316,7 +316,7 @@ const ManualCollateralVerification = ({ onSubmit, onCancel, isSubmitting }) => {
                     <select
                       value={documentTypes[index] || 'other'}
                       onChange={(e) => updateDocumentType(index, e.target.value)}
-                      className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-600 dark:text-white"
+                      className="text-xs px-2 py-1 border border-neutral-300 dark:border-neutral-600 rounded dark:bg-neutral-600 dark:text-white"
                     >
                       {documentTypeOptions.map(option => (
                         <option key={option.value} value={option.value}>
@@ -328,7 +328,7 @@ const ManualCollateralVerification = ({ onSubmit, onCancel, isSubmitting }) => {
                     <button
                       type="button"
                       onClick={() => removeCollateralDocument(index)}
-                      className="text-red-600 hover:text-red-800"
+                      className="text-error hover:text-error"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -340,15 +340,15 @@ const ManualCollateralVerification = ({ onSubmit, onCancel, isSubmitting }) => {
         </div>
 
         {/* Bank Statement and BVN */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-            <CreditCard className="h-5 w-5 mr-2 text-purple-600" />
+        <div className="bg-white dark:bg-secondary-800 rounded-lg p-6 shadow-sm border border-neutral-200 dark:border-secondary-700">
+          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4 flex items-center">
+            <CreditCard className="h-5 w-5 mr-2 text-accent-600" />
             Financial Information
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 BVN (Bank Verification Number) *
               </label>
               <input
@@ -358,23 +358,23 @@ const ManualCollateralVerification = ({ onSubmit, onCancel, isSubmitting }) => {
                 onChange={handleInputChange}
                 placeholder="Enter your 11-digit BVN"
                 maxLength={11}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                  errors.bvn ? 'border-red-500' : 'border-gray-300'
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-primary-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white ${
+                  errors.bvn ? 'border-error' : 'border-neutral-300'
                 }`}
               />
               {errors.bvn && (
-                <p className="mt-1 text-sm text-red-600">{errors.bvn}</p>
+                <p className="mt-1 text-sm text-error">{errors.bvn}</p>
               )}
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
                 Your BVN is required for identity verification
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Bank Statement *
               </label>
-              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
+              <div className="border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-lg p-4 text-center">
                 <input
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
@@ -386,17 +386,17 @@ const ManualCollateralVerification = ({ onSubmit, onCancel, isSubmitting }) => {
                   htmlFor="bank-statement"
                   className="cursor-pointer flex flex-col items-center"
                 >
-                  <Upload className="h-6 w-6 text-gray-400 mb-2" />
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                  <Upload className="h-6 w-6 text-neutral-400 mb-2" />
+                  <span className="text-sm text-neutral-600 dark:text-neutral-400">
                     Upload bank statement
                   </span>
-                  <span className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                  <span className="text-xs text-neutral-500 dark:text-neutral-500 mt-1">
                     Last 3-6 months
                   </span>
                 </label>
               </div>
               {errors.bankStatement && (
-                <p className="mt-2 text-sm text-red-600">{errors.bankStatement}</p>
+                <p className="mt-2 text-sm text-error">{errors.bankStatement}</p>
               )}
             </div>
           </div>
@@ -404,14 +404,14 @@ const ManualCollateralVerification = ({ onSubmit, onCancel, isSubmitting }) => {
           {/* Uploaded Bank Statement */}
           {bankStatement && (
             <div className="mt-4">
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <FileText className="h-5 w-5 text-purple-600" />
+                  <FileText className="h-5 w-5 text-accent-600" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    <p className="text-sm font-medium text-secondary-900 dark:text-white">
                       {bankStatement.name}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
                       {formatFileSize(bankStatement.size)}
                     </p>
                   </div>
@@ -420,7 +420,7 @@ const ManualCollateralVerification = ({ onSubmit, onCancel, isSubmitting }) => {
                 <button
                   type="button"
                   onClick={removeBankStatement}
-                  className="text-red-600 hover:text-red-800"
+                  className="text-error hover:text-error"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -430,14 +430,14 @@ const ManualCollateralVerification = ({ onSubmit, onCancel, isSubmitting }) => {
         </div>
 
         {/* Important Notice */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+        <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-4">
           <div className="flex items-start space-x-3">
-            <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+            <AlertCircle className="h-5 w-5 text-primary-600 dark:text-primary-400 mt-0.5" />
             <div>
-              <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+              <h4 className="text-sm font-medium text-primary-800 dark:text-primary-200">
                 Important Notice
               </h4>
-              <ul className="mt-2 text-sm text-blue-700 dark:text-blue-300 space-y-1">
+              <ul className="mt-2 text-sm text-primary-700 dark:text-primary-300 space-y-1">
                 <li>• All documents will be reviewed by our admin team</li>
                 <li>• Processing may take 1-3 business days</li>
                 <li>• You will be notified via email once reviewed</li>
@@ -452,14 +452,14 @@ const ManualCollateralVerification = ({ onSubmit, onCancel, isSubmitting }) => {
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            className="px-6 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-primary-400 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
           >
             {isSubmitting ? (
               <>

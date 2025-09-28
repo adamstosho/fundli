@@ -2,6 +2,9 @@ const cron = require('node-cron');
 const repaymentService = require('./repaymentService');
 const escrowService = require('./escrowService');
 const creditScoreService = require('./creditScoreService');
+const NotificationService = require('./notificationService');
+const Loan = require('../models/Loan');
+const User = require('../models/User');
 const logger = require('../utils/logger');
 
 class CronService {
@@ -99,6 +102,87 @@ class CronService {
         });
       } catch (error) {
         logger.error('Credit score updates failed', { error: error.message });
+      }
+    });
+
+    // Check for repayment due notifications daily at 9 AM
+    this.scheduleJob('check-repayment-due', '0 9 * * *', async () => {
+      try {
+        logger.info('Running repayment due notification check');
+        
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        // Find loans due today or in the next 7 days
+        const loansDueSoon = await Loan.find({
+          status: 'active',
+          endDate: {
+            $gte: today,
+            $lte: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000) // Next 7 days
+          }
+        }).populate('borrower', 'firstName lastName email')
+          .populate('fundedBy', 'firstName lastName email');
+
+        logger.info(`Found ${loansDueSoon.length} loans due for repayment`);
+
+        let notificationsSent = 0;
+
+        for (const loan of loansDueSoon) {
+          try {
+            // Calculate days until due
+            const daysUntilDue = Math.ceil((loan.endDate - today) / (1000 * 60 * 60 * 24));
+            
+            // Only send notification if it's due today or in the next 3 days
+            if (daysUntilDue <= 3) {
+              // Get the lender who funded this loan
+              const lender = loan.fundedBy;
+              if (lender) {
+                await NotificationService.notifyRepaymentDue({
+                  lenderId: lender._id,
+                  lenderName: `${lender.firstName} ${lender.lastName}`,
+                  loanId: loan._id,
+                  borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+                  loanAmount: loan.loanAmount,
+                  dueDate: loan.endDate,
+                  daysUntilDue: daysUntilDue
+                });
+                
+                notificationsSent++;
+                logger.info(`Repayment due notification sent to lender ${lender._id} for loan ${loan._id}`);
+              }
+
+              // Also send notification to admins about loan due for repayment
+              try {
+                await NotificationService.notifyAdminLoanDueForRepayment({
+                  loanId: loan._id,
+                  borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+                  lenderName: `${lender.firstName} ${lender.lastName}`,
+                  loanAmount: loan.loanAmount,
+                  dueDate: loan.endDate,
+                  daysUntilDue: daysUntilDue
+                });
+                
+                logger.info(`Repayment due notification sent to admins for loan ${loan._id}`);
+              } catch (adminNotificationError) {
+                logger.error(`Error sending admin repayment due notification for loan ${loan._id}`, {
+                  error: adminNotificationError.message
+                });
+              }
+            }
+          } catch (notificationError) {
+            logger.error(`Error sending repayment due notification for loan ${loan._id}`, {
+              error: notificationError.message
+            });
+          }
+        }
+
+        logger.info('Repayment due notification check completed', {
+          loansChecked: loansDueSoon.length,
+          notificationsSent: notificationsSent
+        });
+      } catch (error) {
+        logger.error('Repayment due notification check failed', { error: error.message });
       }
     });
 
@@ -299,7 +383,7 @@ class CronService {
             {
               $group: {
                 _id: null,
-                totalAmount: { $sum: '$amount' }
+                totalAmount: { $sum: 1 }
               }
             }
           ])

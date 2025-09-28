@@ -159,7 +159,7 @@ class EscrowService {
           await emailService.sendEmail({
             to: lender.email,
             subject: 'Escrow Funding Confirmed - Fundli',
-            text: `Your escrow account has been funded with $${escrow.amount}. The funds will be released to the borrower once all conditions are met.`,
+            text: `Your escrow account has been funded with ₦${escrow.amount}. The funds will be released to the borrower once all conditions are met.`,
             html: this.generateEscrowFundingEmailHTML(lender.firstName, escrow.amount)
           });
         }
@@ -447,7 +447,7 @@ class EscrowService {
       const stats = await Escrow.getEscrowStats();
       const totalEscrows = await Escrow.countDocuments();
       const totalAmount = await Escrow.aggregate([
-        { $group: { _id: null, total: { $sum: '$amount' } } }
+        { $group: { _id: null, total: { $sum: 1 } } }
       ]);
 
       return {
@@ -520,7 +520,7 @@ class EscrowService {
         await emailService.sendEmail({
           to: borrower.email,
           subject: 'Loan Funds Released - Fundli',
-          text: `Your loan funds of $${escrow.amount} have been released to your wallet.`,
+          text: `Your loan funds of ₦${escrow.amount} have been released to your wallet.`,
           html: this.generateFundsReleasedEmailHTML(borrower.firstName, escrow.amount)
         });
       }
@@ -530,7 +530,7 @@ class EscrowService {
         await emailService.sendEmail({
           to: lender.email,
           subject: 'Escrow Funds Released - Fundli',
-          text: `Your escrow funds of $${escrow.amount} have been released to the borrower.`,
+          text: `Your escrow funds of ₦${escrow.amount} have been released to the borrower.`,
           html: this.generateEscrowReleasedEmailHTML(lender.firstName, escrow.amount)
         });
       }
@@ -554,7 +554,7 @@ class EscrowService {
         await emailService.sendEmail({
           to: lender.email,
           subject: 'Escrow Funds Refunded - Fundli',
-          text: `Your escrow funds of $${escrow.amount} have been refunded to your wallet.`,
+          text: `Your escrow funds of ₦${escrow.amount} have been refunded to your wallet.`,
           html: this.generateEscrowRefundedEmailHTML(lender.firstName, escrow.amount, escrow.refundReason)
         });
       }
@@ -595,7 +595,7 @@ class EscrowService {
             <h2>Hello ${name},</h2>
             <p>Your escrow account has been successfully funded.</p>
             <div class="amount-box">
-              <h3>$${amount}</h3>
+              <h3>₦${amount}</h3>
               <p>Funds will be released to the borrower once all conditions are met.</p>
             </div>
             <p>You will be notified when the funds are released.</p>
@@ -638,7 +638,7 @@ class EscrowService {
             <h2>Hello ${name},</h2>
             <p>Great news! Your loan funds have been released.</p>
             <div class="amount-box">
-              <h3>$${amount}</h3>
+              <h3>₦${amount}</h3>
               <p>Funds are now available in your wallet.</p>
             </div>
             <p>You can now use these funds for your intended purpose.</p>
@@ -681,7 +681,7 @@ class EscrowService {
             <h2>Hello ${name},</h2>
             <p>Your escrow funds have been released to the borrower.</p>
             <div class="amount-box">
-              <h3>$${amount}</h3>
+              <h3>₦${amount}</h3>
               <p>Funds have been transferred to the borrower's wallet.</p>
             </div>
             <p>The loan is now active and repayments will begin according to the schedule.</p>
@@ -725,7 +725,7 @@ class EscrowService {
             <h2>Hello ${name},</h2>
             <p>Your escrow funds have been refunded.</p>
             <div class="amount-box">
-              <h3>$${amount}</h3>
+              <h3>₦${amount}</h3>
               <p>Funds have been returned to your wallet.</p>
             </div>
             <div class="reason-box">

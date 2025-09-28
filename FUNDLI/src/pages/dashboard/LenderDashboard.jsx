@@ -162,13 +162,21 @@ const LenderDashboard = () => {
           : 0;
         
         setStats({
-          totalInvested: investmentStats.totalInvested,
+          totalInvested: investmentStats.totalInvested || 0,
           activeInvestments: activeLoans.length,
-          totalReturns,
+          totalReturns: totalReturns || 0,
           averageROI: parseFloat(averageROI.toFixed(1))
         });
 
-        setRecentInvestments(fundedLoans);
+        // Format recent investments for display
+        const formattedInvestments = fundedLoans.map(loan => ({
+          ...loan,
+          borrower: loan.borrower?.name || 'Unknown Borrower',
+          amount: loan.fundedAmount || 0,
+          roi: loan.interestRate || 0,
+          nextPayment: loan.nextPaymentDate || new Date()
+        }));
+        setRecentInvestments(formattedInvestments);
         
         // Calculate portfolio breakdown from real data
         const breakdown = {};
@@ -183,9 +191,9 @@ const LenderDashboard = () => {
         
         const portfolioData = Object.entries(breakdown).map(([category, data]) => ({
           category,
-          amount: data.amount,
-          percentage: investmentStats.totalInvested > 0 ? Math.round((data.amount / investmentStats.totalInvested) * 100) : 0,
-          color: 'bg-blue-500'
+          amount: data.amount || 0,
+          percentage: (investmentStats.totalInvested || 0) > 0 ? Math.round(((data.amount || 0) / (investmentStats.totalInvested || 1)) * 100) : 0,
+          color: 'bg-primary-500'
         }));
         
         setPortfolioBreakdown(portfolioData);
@@ -206,7 +214,7 @@ const LenderDashboard = () => {
           detail: { 
             userId: user.id, 
             userType: user.userType,
-            totalInvested: investmentStats.totalInvested,
+            totalInvested: investmentStats.totalInvested || 0,
             activeInvestments: activeLoans.length
           }
         }));
@@ -294,6 +302,13 @@ const LenderDashboard = () => {
       color: 'from-secondary-500 to-secondary-600'
     },
     {
+      title: 'My Investments',
+      description: 'View your funded loans and returns',
+      icon: DollarSign,
+      href: '/lender/investments',
+      color: 'from-success-500 to-success-600'
+    },
+    {
       title: 'Portfolio Analytics',
       description: 'View detailed performance metrics',
       icon: BarChart3,
@@ -315,24 +330,24 @@ const LenderDashboard = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900 dark:text-white">
             Welcome back, {user?.name?.split(' ')[0]}!
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-neutral-600 dark:text-neutral-400 mt-1">
             Here's your investment portfolio overview
           </p>
         </div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
+      <div className="border-b border-neutral-200 dark:border-secondary-700">
         <nav className="-mb-px flex space-x-8 overflow-x-auto">
           <button
             onClick={() => setActiveTab('overview')}
             className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
               activeTab === 'overview'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
             }`}
           >
             Portfolio Overview
@@ -341,8 +356,8 @@ const LenderDashboard = () => {
             onClick={() => setActiveTab('applications')}
             className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
               activeTab === 'applications'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
             }`}
           >
             Loan Applications
@@ -351,8 +366,8 @@ const LenderDashboard = () => {
             onClick={() => setActiveTab('management')}
             className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
               activeTab === 'management'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
             }`}
           >
             Loan Management
@@ -369,19 +384,19 @@ const LenderDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+          className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Total Invested
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                ${stats.totalInvested.toLocaleString()}
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">
+                ${(stats.totalInvested || 0).toLocaleString()}
               </p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-              <DollarSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center">
+              <DollarSign className="h-6 w-6 text-primary-600 dark:text-primary-400" />
             </div>
           </div>
         </motion.div>
@@ -390,19 +405,19 @@ const LenderDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+          className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Active Investments
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                 {stats.activeInvestments}
               </p>
             </div>
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-              <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
+            <div className="w-12 h-12 bg-success/20 dark:bg-success/20 rounded-lg flex items-center justify-center">
+              <Users className="h-6 w-6 text-success dark:text-success/50" />
             </div>
           </div>
         </motion.div>
@@ -411,15 +426,15 @@ const LenderDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+          className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Total Returns
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                ${stats.totalReturns.toLocaleString()}
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">
+                ${(stats.totalReturns || 0).toLocaleString()}
               </p>
             </div>
             <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center">
@@ -432,19 +447,19 @@ const LenderDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+          className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Average ROI
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                 {stats.averageROI}%
               </p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
-              <Target className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+            <div className="w-12 h-12 bg-accent-100 dark:bg-accent-900/20 rounded-lg flex items-center justify-center">
+              <Target className="h-6 w-6 text-accent-600 dark:text-accent-400" />
             </div>
           </div>
         </motion.div>
@@ -462,7 +477,7 @@ const LenderDashboard = () => {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+        <h2 className="text-xl font-semibold text-secondary-900 dark:text-white mb-4">
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -475,18 +490,18 @@ const LenderDashboard = () => {
             >
               <Link
                 to={action.href}
-                className="block bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200 group"
+                className="block bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200 group"
               >
                 <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
                   <action.icon className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-2">
                   {action.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-4">
                   {action.description}
                 </p>
-                <div className="flex items-center text-blue-600 dark:text-blue-400 font-medium text-sm group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                <div className="flex items-center text-primary-600 dark:text-primary-400 font-medium text-sm group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
                   Get Started
                   <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
                 </div>
@@ -503,13 +518,13 @@ const LenderDashboard = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+          className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
         >
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
               Portfolio Breakdown
             </h3>
-            <PieChart className="h-5 w-5 text-gray-400" />
+            <PieChart className="h-5 w-5 text-neutral-400" />
           </div>
           
           <div className="space-y-4">
@@ -517,15 +532,15 @@ const LenderDashboard = () => {
               <div key={item.category} className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className={`w-4 h-4 rounded-full ${item.color}`} />
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  <span className="text-sm font-medium text-secondary-900 dark:text-white">
                     {item.category}
                   </span>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    ${item.amount.toLocaleString()}
+                  <p className="text-sm font-medium text-secondary-900 dark:text-white">
+                    ${(item.amount || 0).toLocaleString()}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500">
+                  <p className="text-xs text-neutral-500 dark:text-neutral-500">
                     {item.percentage}%
                   </p>
                 </div>
@@ -539,15 +554,15 @@ const LenderDashboard = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.7 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+          className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
         >
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
               Recent Investments
             </h3>
             <Link
               to="/marketplace/browse"
-              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+              className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
             >
               View All
             </Link>
@@ -555,18 +570,18 @@ const LenderDashboard = () => {
           
           <div className="space-y-4">
             {recentInvestments.map((investment) => (
-              <div key={investment.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div key={investment.id} className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-secondary-800 rounded-lg">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
-                    <h4 className="font-medium text-gray-900 dark:text-white">
-                      ${investment.amount.toLocaleString()}
+                    <h4 className="font-medium text-secondary-900 dark:text-white">
+                      ${(investment.amount || 0).toLocaleString()}
                     </h4>
                     <span className="badge-success">Active</span>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
                     {investment.borrower} - {investment.purpose}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                  <p className="text-xs text-neutral-500 dark:text-neutral-500 mt-1">
                     ROI: {investment.roi}% | Next payment: {new Date(investment.nextPayment).toLocaleDateString()}
                   </p>
                 </div>
@@ -574,7 +589,7 @@ const LenderDashboard = () => {
                   <p className="text-sm font-medium text-success">
                     +{investment.roi}%
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500">
+                  <p className="text-xs text-neutral-500 dark:text-neutral-500">
                     ROI
                   </p>
                 </div>
@@ -592,7 +607,7 @@ const LenderDashboard = () => {
         className="card p-6"
       >
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
             KYC Management
           </h3>
           <Link
@@ -608,10 +623,10 @@ const LenderDashboard = () => {
           <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <Shield className="h-8 w-8 text-primary-600 dark:text-primary-400" />
           </div>
-          <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          <h4 className="text-lg font-medium text-secondary-900 dark:text-white mb-2">
             Review Borrower KYC Applications
           </h4>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-neutral-600 dark:text-neutral-400 mb-4">
             Manage and approve borrower KYC verifications to enable loan processing
           </p>
           <Link
@@ -631,7 +646,7 @@ const LenderDashboard = () => {
         className="card p-6"
       >
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
             My Lending Pools
           </h3>
           <Link
@@ -646,35 +661,35 @@ const LenderDashboard = () => {
         {myPools.length > 0 ? (
           <div className="space-y-4">
             {myPools.map((pool) => (
-              <div key={pool.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div key={pool.id} className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-secondary-800 rounded-lg">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
-                    <h4 className="font-medium text-gray-900 dark:text-white">
+                    <h4 className="font-medium text-secondary-900 dark:text-white">
                       {pool.name}
                     </h4>
                     <span className={`badge-${pool.status === 'active' ? 'success' : 'warning'}`}>
                       {pool.status}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">
                     {pool.description}
                   </p>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                     <div>
-                      <p className="text-gray-500 dark:text-gray-500">Pool Size</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{pool.currency || 'USD'} {pool.poolSize.toLocaleString()}</p>
+                      <p className="text-neutral-500 dark:text-neutral-500">Pool Size</p>
+                      <p className="font-medium text-secondary-900 dark:text-white">{pool.currency || 'USD'} {(pool.poolSize || 0).toLocaleString()}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500 dark:text-gray-500">Interest Rate</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{pool.interestRate}%</p>
+                      <p className="text-neutral-500 dark:text-neutral-500">Interest Rate</p>
+                      <p className="font-medium text-secondary-900 dark:text-white">{pool.interestRate}%</p>
                     </div>
                     <div>
-                      <p className="text-gray-500 dark:text-gray-500">Duration</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{pool.duration} months</p>
+                      <p className="text-neutral-500 dark:text-neutral-500">Duration</p>
+                      <p className="font-medium text-secondary-900 dark:text-white">{pool.duration} months</p>
                     </div>
                     <div>
-                      <p className="text-gray-500 dark:text-gray-500">Progress</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{pool.fundingProgress}%</p>
+                      <p className="text-neutral-500 dark:text-neutral-500">Progress</p>
+                      <p className="font-medium text-secondary-900 dark:text-white">{pool.fundingProgress}%</p>
                     </div>
                   </div>
                 </div>
@@ -692,13 +707,13 @@ const LenderDashboard = () => {
           </div>
         ) : (
           <div className="text-center py-8">
-            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Target className="h-8 w-8 text-gray-400" />
+            <div className="w-16 h-16 bg-neutral-100 dark:bg-secondary-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Target className="h-8 w-8 text-neutral-400" />
             </div>
-            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            <h4 className="text-lg font-medium text-secondary-900 dark:text-white mb-2">
               No pools created yet
             </h4>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-neutral-600 dark:text-neutral-400 mb-4">
               Start creating lending pools to begin earning returns
             </p>
             <Link
@@ -722,7 +737,7 @@ const LenderDashboard = () => {
       {/* Analytics Charts Section */}
       <div className="space-y-8">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          <h2 className="text-2xl font-bold text-secondary-900 dark:text-white mb-6">
             Investment Analytics
           </h2>
         </div>
@@ -730,9 +745,9 @@ const LenderDashboard = () => {
         {isLoading ? (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+              <div key={i} className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-8">
                 <div className="h-[400px] w-full flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
                 </div>
               </div>
             ))}

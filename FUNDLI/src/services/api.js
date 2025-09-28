@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: 'http://localhost:5000/api',
   timeout: 30000, // Increased to 30 seconds for registration
   headers: {
     'Content-Type': 'application/json',
@@ -10,7 +10,7 @@ const api = axios.create({
 });
 
 // Debug logging
-console.log('API Base URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000/api');
+console.log('API Base URL:', 'http://localhost:5000/api');
 
 // Request interceptor to add auth token
 api.interceptors.request.use(
@@ -38,7 +38,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          const response = await axios.post(`${api.defaults.baseURL}/auth/refresh-token`, {
+          const response = await axios.post('http://localhost:5000/api/auth/refresh-token', {
             refreshToken,
           });
 

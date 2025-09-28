@@ -249,9 +249,9 @@ escrowSchema.statics.getEscrowStats = function() {
   return this.aggregate([
     {
       $group: {
-        _id: '$status',
+        _id: null,
         count: { $sum: 1 },
-        totalAmount: { $sum: '$amount' }
+        totalAmount: { $sum: 1 }
       }
     }
   ]);

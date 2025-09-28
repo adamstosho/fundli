@@ -65,13 +65,13 @@ const WalletPage = () => {
 
   const getTransactionIcon = (type) => {
     switch (type) {
-      case 'deposit': return <Plus className="h-4 w-4 text-green-600" />;
-      case 'withdrawal': return <Minus className="h-4 w-4 text-red-600" />;
-      case 'transfer_in': return <ArrowUpDown className="h-4 w-4 text-blue-600" />;
+      case 'deposit': return <Plus className="h-4 w-4 text-success" />;
+      case 'withdrawal': return <Minus className="h-4 w-4 text-error" />;
+      case 'transfer_in': return <ArrowUpDown className="h-4 w-4 text-primary-600" />;
       case 'transfer_out': return <ArrowUpDown className="h-4 w-4 text-orange-600" />;
-      case 'loan_payment': return <CreditCard className="h-4 w-4 text-purple-600" />;
-      case 'loan_disbursement': return <DollarSign className="h-4 w-4 text-green-600" />;
-      default: return <CreditCard className="h-4 w-4 text-gray-600" />;
+      case 'loan_payment': return <CreditCard className="h-4 w-4 text-accent-600" />;
+      case 'loan_disbursement': return <DollarSign className="h-4 w-4 text-success" />;
+      default: return <CreditCard className="h-4 w-4 text-neutral-600" />;
     }
   };
 
@@ -80,24 +80,24 @@ const WalletPage = () => {
       case 'deposit':
       case 'transfer_in':
       case 'loan_disbursement':
-        return 'text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400';
+        return 'text-success bg-success/20 dark:bg-success/20 dark:text-success/50';
       case 'withdrawal':
       case 'transfer_out':
-        return 'text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400';
+        return 'text-error bg-error/20 dark:bg-error/20 dark:text-error/50';
       case 'loan_payment':
-        return 'text-purple-600 bg-purple-100 dark:bg-purple-900/20 dark:text-purple-400';
+        return 'text-accent-600 bg-accent-100 dark:bg-accent-900/20 dark:text-accent-400';
       default:
-        return 'text-gray-600 bg-gray-100 dark:bg-gray-900/20 dark:text-gray-400';
+        return 'text-neutral-600 bg-neutral-100 dark:bg-secondary-900/20 dark:text-neutral-400';
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'pending': return <Clock className="h-4 w-4 text-yellow-600" />;
-      case 'failed': return <XCircle className="h-4 w-4 text-red-600" />;
-      case 'cancelled': return <XCircle className="h-4 w-4 text-gray-600" />;
-      default: return <AlertCircle className="h-4 w-4 text-gray-600" />;
+      case 'completed': return <CheckCircle className="h-4 w-4 text-success" />;
+      case 'pending': return <Clock className="h-4 w-4 text-warning" />;
+      case 'failed': return <XCircle className="h-4 w-4 text-error" />;
+      case 'cancelled': return <XCircle className="h-4 w-4 text-neutral-600" />;
+      default: return <AlertCircle className="h-4 w-4 text-neutral-600" />;
     }
   };
 

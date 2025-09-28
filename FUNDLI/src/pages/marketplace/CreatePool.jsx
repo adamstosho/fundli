@@ -240,7 +240,7 @@ const CreatePool = () => {
       <div className="max-w-4xl mx-auto">
         <div className="card p-8 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-neutral-600 dark:text-neutral-400">
             {authLoading ? 'Loading...' : 'Verifying authentication...'}
           </p>
         </div>
@@ -251,10 +251,10 @@ const CreatePool = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-secondary-900 dark:text-white mb-2">
           Create Lending Pool
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-neutral-600 dark:text-neutral-400">
           Set up a new lending pool to start earning returns
         </p>
       </div>
@@ -268,10 +268,10 @@ const CreatePool = () => {
           <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="h-8 w-8 text-success" />
           </div>
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-semibold text-secondary-900 dark:text-white mb-2">
             Pool Created Successfully!
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-neutral-600 dark:text-neutral-400 mb-4">
             Your lending pool has been created and is now active.
           </p>
         </motion.div>
@@ -327,7 +327,7 @@ const CreatePool = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSign className="h-5 w-5 text-gray-400" />
+                    <DollarSign className="h-5 w-5 text-neutral-400" />
                   </div>
                   <input
                     id="poolSize"
@@ -342,7 +342,7 @@ const CreatePool = () => {
                     placeholder="Enter total amount available for borrowing"
                   />
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                   Total amount available for borrowing in this pool
                 </p>
               </div>
@@ -366,7 +366,7 @@ const CreatePool = () => {
                   <option value="GHS">GHS - Ghanaian Cedi</option>
                   <option value="ZAR">ZAR - South African Rand</option>
                 </select>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                   Select the currency for this lending pool
                 </p>
               </div>
@@ -377,7 +377,7 @@ const CreatePool = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Calendar className="h-5 w-5 text-gray-400" />
+                    <Calendar className="h-5 w-5 text-neutral-400" />
                   </div>
                   <input
                     id="duration"
@@ -398,28 +398,27 @@ const CreatePool = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="interestRate" className="form-label">
-                  Monthly Interest Rate (%)
+                  Interest Rate for {formData.duration || 'X'} Month{formData.duration > 1 ? 's' : ''} (%)
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <TrendingUp className="h-5 w-5 text-gray-400" />
+                    <TrendingUp className="h-5 w-5 text-neutral-400" />
                   </div>
                   <input
                     id="interestRate"
                     name="interestRate"
                     type="number"
                     min="0.1"
-                    max="5"
                     step="0.1"
                     required
                     value={formData.interestRate}
                     onChange={handleChange}
                     className="input-field pl-10"
-                    placeholder="Enter monthly interest rate"
+                    placeholder="Enter interest rate for the period"
                   />
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Monthly interest rate charged to borrowers
+                <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                  Flat interest rate for the entire {formData.duration || 'X'} month period
                 </p>
               </div>
 
@@ -449,7 +448,7 @@ const CreatePool = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSign className="h-5 w-5 text-gray-400" />
+                    <DollarSign className="h-5 w-5 text-neutral-400" />
                   </div>
                   <input
                     id="minInvestment"
@@ -471,7 +470,7 @@ const CreatePool = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSign className="h-5 w-5 text-gray-400" />
+                    <DollarSign className="h-5 w-5 text-neutral-400" />
                   </div>
                   <input
                     id="maxInvestment"
@@ -509,9 +508,9 @@ const CreatePool = () => {
                 name="terms"
                 type="checkbox"
                 required
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded mt-1"
+                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded mt-1"
               />
-              <label htmlFor="terms" className="text-sm text-gray-700 dark:text-gray-300">
+              <label htmlFor="terms" className="text-sm text-neutral-700 dark:text-neutral-300">
                 I agree to the Terms and Conditions
               </label>
             </div>

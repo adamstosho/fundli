@@ -134,7 +134,7 @@ const LenderLoanManagement = () => {
         
         console.log('✅ Investment successful:', result);
         
-        alert(`Successfully invested in loan! $${investmentAmount} has been transferred to ${selectedLoan.borrower.name}.`);
+        alert(`Successfully invested in loan! ₦${investmentAmount} has been transferred to ${selectedLoan.borrower.name}.`);
         
         setShowAcceptModal(false);
         setSelectedLoan(null);
@@ -264,23 +264,23 @@ const LenderLoanManagement = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending': return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400';
-      case 'approved': return 'text-blue-600 bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400';
-      case 'funded': return 'text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400';
-      case 'active': return 'text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400';
-      case 'completed': return 'text-gray-600 bg-gray-100 dark:bg-gray-900/20 dark:text-gray-400';
-      case 'rejected': return 'text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400';
-      case 'defaulted': return 'text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400';
-      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900/20 dark:text-gray-400';
+      case 'pending': return 'text-warning bg-warning/20 dark:bg-warning/20 dark:text-warning/50';
+      case 'approved': return 'text-primary-600 bg-primary-100 dark:bg-primary-900/20 dark:text-primary-400';
+      case 'funded': return 'text-success bg-success/20 dark:bg-success/20 dark:text-success/50';
+      case 'active': return 'text-success bg-success/20 dark:bg-success/20 dark:text-success/50';
+      case 'completed': return 'text-neutral-600 bg-neutral-100 dark:bg-secondary-900/20 dark:text-neutral-400';
+      case 'rejected': return 'text-error bg-error/20 dark:bg-error/20 dark:text-error/50';
+      case 'defaulted': return 'text-error bg-error/20 dark:bg-error/20 dark:text-error/50';
+      default: return 'text-neutral-600 bg-neutral-100 dark:bg-secondary-900/20 dark:text-neutral-400';
     }
   };
 
   const getKycStatusColor = (kycStatus) => {
     switch (kycStatus) {
-      case 'verified': return 'text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400';
-      case 'pending': return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400';
-      case 'rejected': return 'text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400';
-      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900/20 dark:text-gray-400';
+      case 'verified': return 'text-success bg-success/20 dark:bg-success/20 dark:text-success/50';
+      case 'pending': return 'text-warning bg-warning/20 dark:bg-warning/20 dark:text-warning/50';
+      case 'rejected': return 'text-error bg-error/20 dark:bg-error/20 dark:text-error/50';
+      default: return 'text-neutral-600 bg-neutral-100 dark:bg-secondary-900/20 dark:text-neutral-400';
     }
   };
 
@@ -309,8 +309,8 @@ const LenderLoanManagement = () => {
   if (error) {
     return (
       <div className="text-center py-8">
-        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-        <p className="text-red-600 dark:text-red-400">{error}</p>
+        <AlertCircle className="h-12 w-12 text-error mx-auto mb-4" />
+        <p className="text-error dark:text-error/50">{error}</p>
         <button
           onClick={loadLoanData}
           className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
@@ -327,10 +327,10 @@ const LenderLoanManagement = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-2xl font-bold text-secondary-900 dark:text-white">
             Loan Management
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-neutral-600 dark:text-neutral-400">
             Review pending loan applications and track your funded loans
           </p>
         </div>
@@ -346,14 +346,14 @@ const LenderLoanManagement = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
+      <div className="border-b border-neutral-200 dark:border-secondary-700">
         <nav className="-mb-px flex space-x-8">
           <button
             onClick={() => setActiveTab('pending')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'pending'
                 ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
             }`}
           >
             Pending Loans ({pendingLoans.length})
@@ -363,7 +363,7 @@ const LenderLoanManagement = () => {
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'funded'
                 ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
             }`}
           >
             Funded Loans ({fundedLoans.length})
@@ -374,21 +374,21 @@ const LenderLoanManagement = () => {
       {/* Search and Filter */}
       <div className="flex items-center space-x-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
           <input
             type="text"
             placeholder="Search by borrower name or loan purpose..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="w-full pl-10 pr-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-neutral-700 text-secondary-900 dark:text-neutral-100"
           />
         </div>
         <div className="flex items-center space-x-2">
-          <Filter className="h-4 w-4 text-gray-400" />
+          <Filter className="h-4 w-4 text-neutral-400" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-neutral-700 text-secondary-900 dark:text-neutral-100"
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
@@ -406,19 +406,19 @@ const LenderLoanManagement = () => {
         <div className="space-y-6">
           {filteredPendingLoans.length === 0 ? (
             <div className="text-center py-12">
-              <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              <FileText className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-secondary-900 dark:text-white mb-2">
                 No Pending Loan Applications
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-4">
+              <p className="text-neutral-500 dark:text-neutral-400 mb-4">
                 All loan applications have been reviewed by lenders. New applications will appear here when borrowers submit them.
               </p>
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 max-w-md mx-auto">
+              <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-4 max-w-md mx-auto">
                 <div className="flex items-center space-x-2 mb-2">
-                  <Bell className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  <span className="font-medium text-blue-800 dark:text-blue-200">Stay Updated</span>
+                  <Bell className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                  <span className="font-medium text-primary-800 dark:text-primary-200">Stay Updated</span>
                 </div>
-                <p className="text-sm text-blue-700 dark:text-blue-300">
+                <p className="text-sm text-primary-700 dark:text-primary-300">
                   You'll be notified when new loan applications are submitted by borrowers.
                 </p>
               </div>
@@ -431,16 +431,16 @@ const LenderLoanManagement = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                  className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
                 >
                   {/* Loan Header */}
-                  <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                  <div className="p-6 border-b border-neutral-200 dark:border-secondary-700">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                           {loan.purpose}
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
                           Application #{loan.id.slice(-8)}
                         </p>
                       </div>
@@ -463,10 +463,10 @@ const LenderLoanManagement = () => {
                         <User className="h-5 w-5 text-primary-600 dark:text-primary-400" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white">
+                        <p className="font-medium text-secondary-900 dark:text-white">
                           {loan.borrower.name}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
                           {loan.borrower.email}
                         </p>
                       </div>
@@ -475,33 +475,33 @@ const LenderLoanManagement = () => {
                     {/* Loan Details */}
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center space-x-2">
-                        <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        <span className="text-gray-600 dark:text-gray-400">Amount:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">
+                        <DollarSign className="h-4 w-4 text-success dark:text-success/50" />
+                        <span className="text-neutral-600 dark:text-neutral-400">Amount:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">
                           {loan.currency || 'USD'} {loan.loanAmount?.toLocaleString()}
                         </span>
                       </div>
                       
                       <div className="flex items-center space-x-2">
-                        <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                        <span className="text-gray-600 dark:text-gray-400">Duration:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">
+                        <Calendar className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                        <span className="text-neutral-600 dark:text-neutral-400">Duration:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">
                           {loan.duration} months
                         </span>
                       </div>
                       
                       <div className="flex items-center space-x-2">
                         <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                        <span className="text-gray-600 dark:text-gray-400">Applied:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">
+                        <span className="text-neutral-600 dark:text-neutral-400">Applied:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">
                           {new Date(loan.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                       
                       <div className="flex items-center space-x-2">
-                        <TrendingUp className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                        <span className="text-gray-600 dark:text-gray-400">Purpose:</span>
-                        <span className="font-medium text-gray-900 dark:text-white capitalize">
+                        <TrendingUp className="h-4 w-4 text-accent-600 dark:text-accent-400" />
+                        <span className="text-neutral-600 dark:text-neutral-400">Purpose:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white capitalize">
                           {loan.purpose}
                         </span>
                       </div>
@@ -509,11 +509,11 @@ const LenderLoanManagement = () => {
 
                     {/* Collateral Info */}
                     {loan.collateral && (
-                      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+                      <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-3">
+                        <p className="text-sm font-medium text-secondary-900 dark:text-white mb-1">
                           Collateral
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
                           {loan.collateral.description || 'No description provided'}
                         </p>
                       </div>
@@ -536,7 +536,7 @@ const LenderLoanManagement = () => {
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           onClick={() => handleActionClick(loan, 'accept')}
-                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
+                          className="px-4 py-2 bg-success hover:bg-success text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
                         >
                           <CheckCircle className="h-4 w-4" />
                           <span>Accept</span>
@@ -546,7 +546,7 @@ const LenderLoanManagement = () => {
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           onClick={() => handleActionClick(loan, 'reject')}
-                          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
+                          className="px-4 py-2 bg-error hover:bg-error text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
                         >
                           <XCircle className="h-4 w-4" />
                           <span>Reject</span>
@@ -565,11 +565,11 @@ const LenderLoanManagement = () => {
         <div className="space-y-6">
           {filteredFundedLoans.length === 0 ? (
             <div className="text-center py-12">
-              <Target className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              <Target className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-secondary-900 dark:text-white mb-2">
                 No Funded Loans
               </h3>
-              <p className="text-gray-500 dark:text-gray-400">
+              <p className="text-neutral-500 dark:text-neutral-400">
                 You haven't funded any loans yet. Start by reviewing pending applications.
               </p>
             </div>
@@ -581,16 +581,16 @@ const LenderLoanManagement = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                  className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
                 >
                   {/* Loan Header */}
-                  <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                  <div className="p-6 border-b border-neutral-200 dark:border-secondary-700">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                           {loan.purpose}
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
                           Loan #{loan.id.slice(-8)}
                         </p>
                       </div>
@@ -610,10 +610,10 @@ const LenderLoanManagement = () => {
                         <User className="h-5 w-5 text-primary-600 dark:text-primary-400" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white">
+                        <p className="font-medium text-secondary-900 dark:text-white">
                           {loan.borrower.name}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
                           {loan.borrower.email}
                         </p>
                       </div>
@@ -622,55 +622,55 @@ const LenderLoanManagement = () => {
                     {/* Loan Details */}
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center space-x-2">
-                        <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        <span className="text-gray-600 dark:text-gray-400">Funded:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">
+                        <DollarSign className="h-4 w-4 text-success dark:text-success/50" />
+                        <span className="text-neutral-600 dark:text-neutral-400">Funded:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">
                           {loan.currency || 'USD'} {loan.fundedAmount?.toLocaleString()}
                         </span>
                       </div>
                       
                       <div className="flex items-center space-x-2">
-                        <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                        <span className="text-gray-600 dark:text-gray-400">Duration:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">
+                        <Calendar className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                        <span className="text-neutral-600 dark:text-neutral-400">Duration:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">
                           {loan.duration} months
                         </span>
                       </div>
                       
                       <div className="flex items-center space-x-2">
                         <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                        <span className="text-gray-600 dark:text-gray-400">Funded:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">
+                        <span className="text-neutral-600 dark:text-neutral-400">Funded:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">
                           {new Date(loan.fundedAt).toLocaleDateString()}
                         </span>
                       </div>
                       
                       <div className="flex items-center space-x-2">
-                        <TrendingUp className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                        <span className="text-gray-600 dark:text-gray-400">Interest:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">
+                        <TrendingUp className="h-4 w-4 text-accent-600 dark:text-accent-400" />
+                        <span className="text-neutral-600 dark:text-neutral-400">Interest:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">
                           {loan.interestRate}%
                         </span>
                       </div>
                     </div>
 
                     {/* Repayment Progress */}
-                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                    <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-3">
                       <div className="flex justify-between text-sm mb-2">
-                        <span className="text-gray-600 dark:text-gray-400">Repayment Progress</span>
-                        <span className="font-medium text-gray-900 dark:text-white">
+                        <span className="text-neutral-600 dark:text-neutral-400">Repayment Progress</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">
                           ${loan.amountPaid?.toLocaleString()} / ${loan.totalRepayment?.toLocaleString()}
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                      <div className="w-full bg-neutral-200 dark:bg-neutral-600 rounded-full h-2">
                         <div 
-                          className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                          className="bg-success h-2 rounded-full transition-all duration-300"
                           style={{ 
                             width: `${Math.round(((loan.amountPaid || 0) / (loan.totalRepayment || 1)) * 100)}%` 
                           }}
                         ></div>
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400 text-center mt-1">
                         {Math.round(((loan.amountPaid || 0) / (loan.totalRepayment || 1)) * 100)}% repaid
                       </p>
                     </div>
@@ -696,14 +696,14 @@ const LenderLoanManagement = () => {
       {/* Loan Details Modal */}
       {showModal && selectedLoan && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-secondary-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                 Loan Details
               </h3>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
               >
                 ×
               </button>
@@ -712,22 +712,22 @@ const LenderLoanManagement = () => {
             <div className="space-y-6">
               {/* Borrower Information */}
               <div>
-                <h4 className="font-medium text-gray-900 dark:text-white mb-3">Borrower Information</h4>
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2">
+                <h4 className="font-medium text-secondary-900 dark:text-white mb-3">Borrower Information</h4>
+                <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-4 space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Name:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">
+                    <span className="text-neutral-600 dark:text-neutral-400">Name:</span>
+                    <span className="font-medium text-secondary-900 dark:text-white">
                       {selectedLoan.borrower.name}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Email:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">
+                    <span className="text-neutral-600 dark:text-neutral-400">Email:</span>
+                    <span className="font-medium text-secondary-900 dark:text-white">
                       {selectedLoan.borrower.email}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">KYC Status:</span>
+                    <span className="text-neutral-600 dark:text-neutral-400">KYC Status:</span>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getKycStatusColor(selectedLoan.borrower.kycStatus)}`}>
                       {selectedLoan.borrower.kycStatus}
                     </span>
@@ -737,42 +737,42 @@ const LenderLoanManagement = () => {
 
               {/* Loan Information */}
               <div>
-                <h4 className="font-medium text-gray-900 dark:text-white mb-3">Loan Information</h4>
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2">
+                <h4 className="font-medium text-secondary-900 dark:text-white mb-3">Loan Information</h4>
+                <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-4 space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Amount:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">
+                    <span className="text-neutral-600 dark:text-neutral-400">Amount:</span>
+                    <span className="font-medium text-secondary-900 dark:text-white">
                       ${selectedLoan.loanAmount?.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Duration:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">
+                    <span className="text-neutral-600 dark:text-neutral-400">Duration:</span>
+                    <span className="font-medium text-secondary-900 dark:text-white">
                       {selectedLoan.duration} months
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Interest Rate:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">
+                    <span className="text-neutral-600 dark:text-neutral-400">Interest Rate:</span>
+                    <span className="font-medium text-secondary-900 dark:text-white">
                       {selectedLoan.interestRate}%
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Purpose:</span>
-                    <span className="font-medium text-gray-900 dark:text-white capitalize">
+                    <span className="text-neutral-600 dark:text-neutral-400">Purpose:</span>
+                    <span className="font-medium text-secondary-900 dark:text-white capitalize">
                       {selectedLoan.purpose}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Status:</span>
+                    <span className="text-neutral-600 dark:text-neutral-400">Status:</span>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedLoan.status)}`}>
                       {selectedLoan.status}
                     </span>
                   </div>
                   {selectedLoan.purposeDescription && (
                     <div className="mt-3">
-                      <span className="text-gray-600 dark:text-gray-400">Description:</span>
-                      <p className="text-gray-900 dark:text-white mt-1">
+                      <span className="text-neutral-600 dark:text-neutral-400">Description:</span>
+                      <p className="text-secondary-900 dark:text-white mt-1">
                         {selectedLoan.purposeDescription}
                       </p>
                     </div>
@@ -783,36 +783,36 @@ const LenderLoanManagement = () => {
               {/* Repayment Information (for funded loans) */}
               {selectedLoan.status === 'funded' || selectedLoan.status === 'active' || selectedLoan.status === 'completed' ? (
                 <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-3">Repayment Information</h4>
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2">
+                  <h4 className="font-medium text-secondary-900 dark:text-white mb-3">Repayment Information</h4>
+                  <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-4 space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Monthly Payment:</span>
-                      <span className="font-medium text-gray-900 dark:text-white">
+                      <span className="text-neutral-600 dark:text-neutral-400">Monthly Payment:</span>
+                      <span className="font-medium text-secondary-900 dark:text-white">
                         ${selectedLoan.monthlyPayment?.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Total Repayment:</span>
-                      <span className="font-medium text-gray-900 dark:text-white">
+                      <span className="text-neutral-600 dark:text-neutral-400">Total Repayment:</span>
+                      <span className="font-medium text-secondary-900 dark:text-white">
                         ${selectedLoan.totalRepayment?.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Amount Paid:</span>
-                      <span className="font-medium text-gray-900 dark:text-white">
+                      <span className="text-neutral-600 dark:text-neutral-400">Amount Paid:</span>
+                      <span className="font-medium text-secondary-900 dark:text-white">
                         ${selectedLoan.amountPaid?.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Amount Remaining:</span>
-                      <span className="font-medium text-gray-900 dark:text-white">
+                      <span className="text-neutral-600 dark:text-neutral-400">Amount Remaining:</span>
+                      <span className="font-medium text-secondary-900 dark:text-white">
                         ${selectedLoan.amountRemaining?.toLocaleString()}
                       </span>
                     </div>
                     {selectedLoan.nextPaymentDate && (
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Next Payment:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">
+                        <span className="text-neutral-600 dark:text-neutral-400">Next Payment:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">
                           {new Date(selectedLoan.nextPaymentDate).toLocaleDateString()}
                         </span>
                       </div>
@@ -823,28 +823,28 @@ const LenderLoanManagement = () => {
 
               {/* Collateral Information */}
               <div>
-                <h4 className="font-medium text-gray-900 dark:text-white mb-3">Collateral Information</h4>
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-3">
+                <h4 className="font-medium text-secondary-900 dark:text-white mb-3">Collateral Information</h4>
+                <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-4 space-y-3">
                   {selectedLoan.collateral ? (
                     <>
                       <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Type:</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                        <p className="text-sm font-medium text-secondary-900 dark:text-white mb-1">Type:</p>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400 capitalize">
                           {selectedLoan.collateral.type?.replace('_', ' ') || 'Not specified'}
                         </p>
                       </div>
                       
                       <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Description:</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm font-medium text-secondary-900 dark:text-white mb-1">Description:</p>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
                           {selectedLoan.collateral.description || 'No description provided'}
                         </p>
                       </div>
                       
                       {selectedLoan.collateral.estimatedValue && (
                         <div>
-                          <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Estimated Value:</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-sm font-medium text-secondary-900 dark:text-white mb-1">Estimated Value:</p>
+                          <p className="text-sm text-neutral-600 dark:text-neutral-400">
                             ${selectedLoan.collateral.estimatedValue.toLocaleString()}
                           </p>
                         </div>
@@ -852,20 +852,20 @@ const LenderLoanManagement = () => {
                       
                       {selectedLoan.collateral.documents && selectedLoan.collateral.documents.length > 0 && (
                         <div>
-                          <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Documents:</p>
+                          <p className="text-sm font-medium text-secondary-900 dark:text-white mb-2">Documents:</p>
                           <div className="space-y-2">
                             {selectedLoan.collateral.documents.map((doc, index) => (
-                              <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-600 rounded p-2">
+                              <div key={index} className="flex items-center justify-between bg-white dark:bg-neutral-600 rounded p-2">
                                 <div className="flex items-center space-x-2">
-                                  <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                  <span className="text-sm text-gray-900 dark:text-white">{doc.name}</span>
+                                  <FileText className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                                  <span className="text-sm text-secondary-900 dark:text-white">{doc.name}</span>
                                 </div>
                                 {doc.url && (
                                   <a 
                                     href={doc.url} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                                    className="text-primary-600 dark:text-primary-400 hover:underline text-sm"
                                   >
                                     View
                                   </a>
@@ -878,7 +878,7 @@ const LenderLoanManagement = () => {
                     </>
                   ) : (
                     <div className="text-center py-4">
-                      <p className="text-gray-500 dark:text-gray-400 text-sm">
+                      <p className="text-neutral-500 dark:text-neutral-400 text-sm">
                         No collateral information provided by the borrower
                       </p>
                     </div>
@@ -896,43 +896,43 @@ const LenderLoanManagement = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4"
+            className="bg-white dark:bg-secondary-800 rounded-lg p-6 max-w-md w-full mx-4"
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white flex items-center">
+                <CheckCircle className="h-5 w-5 text-success mr-2" />
                 Fund Loan Application
               </h3>
               <button
                 onClick={() => setShowAcceptModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
               >
                 ×
               </button>
             </div>
             
             <div className="space-y-4">
-              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-                <p className="text-sm text-green-800 dark:text-green-200">
+              <div className="bg-success/10 dark:bg-success/20 rounded-lg p-4">
+                <p className="text-sm text-success dark:text-success/30">
                   <strong>Borrower:</strong> {selectedLoan.borrower.name}<br/>
                   <strong>Amount:</strong> ${selectedLoan.loanAmount?.toLocaleString()}<br/>
                   <strong>Purpose:</strong> {selectedLoan.purpose}
                 </p>
               </div>
               
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+              <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-4">
                 <div className="flex items-center space-x-2 mb-2">
-                  <CreditCard className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  <span className="font-medium text-blue-800 dark:text-blue-200">Next Step</span>
+                  <CreditCard className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                  <span className="font-medium text-primary-800 dark:text-primary-200">Next Step</span>
                 </div>
-                <p className="text-sm text-blue-700 dark:text-blue-300">
+                <p className="text-sm text-primary-700 dark:text-primary-300">
                   This will immediately transfer the funds from your wallet to the borrower's wallet. The loan will be marked as funded.
                 </p>
               </div>
               
               <div>
-                <label htmlFor="acceptAmount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Investment Amount ($)
+                <label htmlFor="acceptAmount" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                  Investment Amount (₦)
                 </label>
                 <input
                   type="number"
@@ -941,12 +941,12 @@ const LenderLoanManagement = () => {
                   onChange={(e) => setInvestmentAmount(e.target.value)}
                   placeholder="Enter amount to invest"
                   min="1"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-neutral-700 text-secondary-900 dark:text-neutral-100"
                 />
               </div>
               
               <div>
-                <label htmlFor="acceptNotes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="acceptNotes" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Notes (Optional)
                 </label>
                 <textarea
@@ -955,21 +955,21 @@ const LenderLoanManagement = () => {
                   onChange={(e) => setInvestmentNotes(e.target.value)}
                   placeholder="Add any notes about this investment..."
                   rows="3"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-neutral-700 text-secondary-900 dark:text-neutral-100"
                 />
               </div>
               
               <div className="flex space-x-3">
                 <button
                   onClick={() => setShowAcceptModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  className="flex-1 px-4 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleAcceptLoan}
                   disabled={isProcessing || !investmentAmount || parseFloat(investmentAmount) <= 0}
-                  className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  className="flex-1 px-4 py-2 bg-success hover:bg-success disabled:bg-success/50 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   <CheckCircle className="h-4 w-4" />
                   <span>{isProcessing ? 'Funding...' : 'Fund Loan'}</span>
@@ -986,24 +986,24 @@ const LenderLoanManagement = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4"
+            className="bg-white dark:bg-secondary-800 rounded-lg p-6 max-w-md w-full mx-4"
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                <XCircle className="h-5 w-5 text-red-600 mr-2" />
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white flex items-center">
+                <XCircle className="h-5 w-5 text-error mr-2" />
                 Reject Loan Application
               </h3>
               <button
                 onClick={() => setShowRejectModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
               >
                 ×
               </button>
             </div>
             
             <div className="space-y-4">
-              <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
-                <p className="text-sm text-red-800 dark:text-red-200">
+              <div className="bg-error/10 dark:bg-error/20 rounded-lg p-4">
+                <p className="text-sm text-error dark:text-error/30">
                   <strong>Borrower:</strong> {selectedLoan.borrower.name}<br/>
                   <strong>Amount:</strong> ${selectedLoan.loanAmount?.toLocaleString()}<br/>
                   <strong>Purpose:</strong> {selectedLoan.purpose}
@@ -1011,7 +1011,7 @@ const LenderLoanManagement = () => {
               </div>
               
               <div>
-                <label htmlFor="rejectionReason" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="rejectionReason" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Reason for Rejection *
                 </label>
                 <textarea
@@ -1021,9 +1021,9 @@ const LenderLoanManagement = () => {
                   placeholder="Please provide a reason for rejecting this loan application..."
                   rows="4"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-neutral-700 text-secondary-900 dark:text-neutral-100"
                 />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                   This reason will be sent to the borrower as a notification.
                 </p>
               </div>
@@ -1031,14 +1031,14 @@ const LenderLoanManagement = () => {
               <div className="flex space-x-3">
                 <button
                   onClick={() => setShowRejectModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  className="flex-1 px-4 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleRejectLoan}
                   disabled={isProcessing || !rejectionReason.trim()}
-                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  className="flex-1 px-4 py-2 bg-error hover:bg-error disabled:bg-error/50 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   <XCircle className="h-4 w-4" />
                   <span>{isProcessing ? 'Rejecting...' : 'Reject Loan'}</span>

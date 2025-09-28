@@ -16,9 +16,11 @@ const notificationSchema = new mongoose.Schema({
       'loan_approval',
       'loan_rejection',
       'loan_funding',
+      'loan_funded',
       'repayment_due',
       'repayment_received',
       'investment_opportunity',
+      'investment_successful',
       'pool_created',
       'pool_funded',
       'kyc_approval',
@@ -29,7 +31,19 @@ const notificationSchema = new mongoose.Schema({
       'security_alert',
       'payment_failed',
       'account_verification',
-      'welcome_message'
+      'welcome_message',
+      'money_received',
+      'money_sent',
+      'chat_message',
+      // Admin-specific types
+      'new_user_registration',
+      'new_loan_pool',
+      'new_loan_application',
+      'loan_repayment',
+      'loan_due_for_repayment',
+      // Credit score & badges
+      'credit_score_update',
+      'badge_earned'
     ],
     required: true
   },
@@ -356,7 +370,7 @@ notificationSchema.statics.getNotificationStats = function(userId) {
     },
     {
       $group: {
-        _id: '$status',
+        _id: null,
         count: { $sum: 1 }
       }
     }

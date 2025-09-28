@@ -517,14 +517,14 @@ router.get('/stats', async (req, res) => {
     // Get category distribution
     const categoryStats = await LendingPool.aggregate([
       { $match: { status: 'active' } },
-      { $group: { _id: '$category', count: { $sum: 1 } } },
+      { $group: { _id: null, count: { $sum: 1 } } },
       { $sort: { count: -1 } }
     ]);
 
     // Get risk level distribution
     const riskStats = await LendingPool.aggregate([
       { $match: { status: 'active' } },
-      { $group: { _id: '$riskLevel', count: { $sum: 1 } } },
+      { $group: { _id: null, count: { $sum: 1 } } },
       { $sort: { count: -1 } }
     ]);
 

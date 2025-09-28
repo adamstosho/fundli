@@ -24,25 +24,29 @@ import LoanManagement from './pages/admin/LoanManagement';
 import CollateralManagement from './pages/admin/CollateralManagement';
 import LenderKYCManagement from './components/lender/KYCManagement';
 import BrowseLoans from './pages/borrower/BrowseLoans';
+import MyInvestments from './pages/lender/MyInvestments';
 import PaymentPage from './pages/PaymentPage';
+import PayBackPage from './pages/loans/PayBackPage';
 import WalletPage from './pages/WalletPage';
 import DepositPage from './pages/DepositPage';
 import TransferPage from './pages/TransferPage';
+import WithdrawPage from './pages/WithdrawPage';
 import NotificationsPage from './pages/NotificationsPage';
+import ChatPage from './pages/ChatPage';
 
 // 404 Error Component
 const NotFound = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50">
+  <div className="min-h-screen flex items-center justify-center bg-neutral-50">
     <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
       <div className="text-center">
-        <h1 className="text-6xl font-bold text-gray-300 mb-4">404</h1>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Page Not Found</h2>
-        <p className="text-gray-600 mb-6">
+        <h1 className="text-6xl font-bold text-neutral-300 mb-4">404</h1>
+        <h2 className="text-2xl font-bold text-secondary-900 mb-4">Page Not Found</h2>
+        <p className="text-neutral-600 mb-6">
           The page you're looking for doesn't exist.
         </p>
         <a
           href="/"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
         >
           Go Home
         </a>
@@ -165,7 +169,15 @@ export const router = createBrowserRouter([
       {
         path: 'lender',
         children: [
-          { path: 'kyc', element: <LenderKYCManagement /> }
+          { path: 'kyc', element: <LenderKYCManagement /> },
+          {
+            path: 'investments',
+            element: (
+              <ProtectedRoute userType="lender">
+                <MyInvestments />
+              </ProtectedRoute>
+            )
+          }
         ]
       },
       {
@@ -193,6 +205,14 @@ export const router = createBrowserRouter([
         )
       },
       {
+        path: 'withdraw',
+        element: (
+          <ProtectedRoute>
+            <WithdrawPage />
+          </ProtectedRoute>
+        )
+      },
+      {
         path: 'notifications',
         element: (
           <ProtectedRoute>
@@ -201,10 +221,26 @@ export const router = createBrowserRouter([
         )
       },
       {
+        path: 'chat',
+        element: (
+          <ProtectedRoute>
+            <ChatPage />
+          </ProtectedRoute>
+        )
+      },
+      {
         path: 'payment/:loanId',
         element: (
           <ProtectedRoute userType="lender">
             <PaymentPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: 'payback/:loanId',
+        element: (
+          <ProtectedRoute userType="borrower">
+            <PayBackPage />
           </ProtectedRoute>
         )
       },

@@ -134,7 +134,7 @@ const DepositPage = () => {
       // Check if this is a simulated payment (development mode)
       if (paymentData.transaction && paymentData.transaction.metadata?.simulated) {
         // Handle simulated payment
-        setSuccess(`Deposit successful! $${parseFloat(amount).toLocaleString()} has been added to your wallet.`);
+        setSuccess(`Deposit successful! ₦${parseFloat(amount).toLocaleString()} has been added to your wallet.`);
         setIsLoading(false);
         
         // Refresh wallet data and trigger wallet balance update event
@@ -202,7 +202,7 @@ const DepositPage = () => {
       // Check if this is a simulated payment (development mode)
       if (paymentData.transaction && paymentData.transaction.metadata?.simulated) {
         // Handle simulated bank transfer
-        setSuccess(`Bank transfer successful! $${parseFloat(amount).toLocaleString()} has been added to your wallet.`);
+        setSuccess(`Bank transfer successful! ₦${parseFloat(amount).toLocaleString()} has been added to your wallet.`);
         setIsLoading(false);
         
         // Refresh wallet data and trigger wallet balance update event
@@ -226,7 +226,7 @@ const DepositPage = () => {
 Account Number: ${bankDetails.accountNumber}
 Account Name: ${bankDetails.accountName}
 Bank: ${bankDetails.bankName}
-Amount: $${bankDetails.amount.toLocaleString()}
+Amount: ₦${bankDetails.amount.toLocaleString()}
 Reference: ${bankDetails.reference}
 
 Please transfer the exact amount and use the reference number. Your wallet will be credited within 24 hours after confirmation.`);
@@ -328,23 +328,23 @@ Send the exact amount to the number above and include the reference. Your wallet
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen bg-neutral-50 dark:bg-secondary-900 py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 transition-colors"
+            className="flex items-center text-neutral-600 dark:text-neutral-400 hover:text-secondary-900 dark:hover:text-white mb-4 transition-colors"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back
           </button>
           
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
+          <h1 className="text-3xl font-bold text-secondary-900 dark:text-white flex items-center">
             <CreditCard className="h-8 w-8 mr-3 text-primary-600" />
             Deposit Funds
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <p className="text-neutral-600 dark:text-neutral-400 mt-2">
             Add funds to your wallet using secure payment methods
           </p>
         </div>
@@ -355,21 +355,21 @@ Send the exact amount to the number above and include the reference. Your wallet
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm"
+              className="bg-white dark:bg-secondary-800 rounded-lg p-6 shadow-sm"
             >
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+              <h2 className="text-xl font-semibold text-secondary-900 dark:text-white mb-6">
                 Deposit Amount
               </h2>
 
               {/* Amount Input */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Amount
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 dark:text-gray-400 text-sm">
-                      {currency === 'NGN' ? '₦' : currency === 'USD' ? '$' : currency}
+                    <span className="text-neutral-500 dark:text-neutral-400 text-sm">
+                      {currency === 'NGN' ? '₦' : currency === 'USD' ? '₦' : currency}
                     </span>
                   </div>
                   <input
@@ -377,7 +377,7 @@ Send the exact amount to the number above and include the reference. Your wallet
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="Enter amount"
-                    className="block w-full pl-12 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                    className="block w-full pl-12 pr-3 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-neutral-700 dark:text-white"
                     min="100"
                     step="100"
                   />
@@ -386,7 +386,7 @@ Send the exact amount to the number above and include the reference. Your wallet
 
               {/* Quick Amount Buttons */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
                   Quick Amounts
                 </label>
                 <div className="grid grid-cols-3 gap-3">
@@ -397,10 +397,10 @@ Send the exact amount to the number above and include the reference. Your wallet
                       className={`p-3 text-sm font-medium rounded-lg border transition-colors ${
                         amount === quickAmount.toString()
                           ? 'bg-primary-600 text-white border-primary-600'
-                          : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-primary-500'
+                          : 'bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-600 hover:border-primary-500'
                       }`}
                     >
-                      ₦{quickAmount.toLocaleString()}
+                      ${quickAmount.toLocaleString()}
                     </button>
                   ))}
                 </div>
@@ -408,13 +408,13 @@ Send the exact amount to the number above and include the reference. Your wallet
 
               {/* Currency Selection */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Currency
                 </label>
                 <select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
-                  className="block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  className="block w-full px-3 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-neutral-700 dark:text-white"
                 >
                   <option value="NGN">Nigerian Naira (NGN)</option>
                   <option value="USD">US Dollar (USD)</option>
@@ -425,7 +425,7 @@ Send the exact amount to the number above and include the reference. Your wallet
 
               {/* Payment Method */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
                   Payment Method
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -434,7 +434,7 @@ Send the exact amount to the number above and include the reference. Your wallet
                     className={`p-4 rounded-lg border transition-colors ${
                       paymentMethod === 'card'
                         ? 'bg-primary-600 text-white border-primary-600'
-                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-primary-500'
+                        : 'bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-600 hover:border-primary-500'
                     }`}
                   >
                     <CreditCard className="h-6 w-6 mx-auto mb-2" />
@@ -446,7 +446,7 @@ Send the exact amount to the number above and include the reference. Your wallet
                     className={`p-4 rounded-lg border transition-colors ${
                       paymentMethod === 'bank'
                         ? 'bg-primary-600 text-white border-primary-600'
-                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-primary-500'
+                        : 'bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-600 hover:border-primary-500'
                     }`}
                   >
                     <Banknote className="h-6 w-6 mx-auto mb-2" />
@@ -458,7 +458,7 @@ Send the exact amount to the number above and include the reference. Your wallet
                     className={`p-4 rounded-lg border transition-colors ${
                       paymentMethod === 'mobile'
                         ? 'bg-primary-600 text-white border-primary-600'
-                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-primary-500'
+                        : 'bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-600 hover:border-primary-500'
                     }`}
                   >
                     <Smartphone className="h-6 w-6 mx-auto mb-2" />
@@ -468,8 +468,8 @@ Send the exact amount to the number above and include the reference. Your wallet
                 </div>
                 
                 {/* Payment Method Info */}
-                <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <div className="text-sm text-blue-800 dark:text-blue-200">
+                <div className="mt-3 p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
+                  <div className="text-sm text-primary-800 dark:text-primary-200">
                     {paymentMethod === 'card' && (
                       <>💳 <strong>Card Payment:</strong> Secure payment via Paystack. Supports Visa, Mastercard, and American Express.</>
                     )}
@@ -488,11 +488,11 @@ Send the exact amount to the number above and include the reference. Your wallet
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+                  className="mb-4 p-4 bg-error/10 dark:bg-error/20 border border-error/30 dark:border-error rounded-lg"
                 >
                   <div className="flex items-center">
-                    <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
-                    <span className="text-red-800 dark:text-red-200">{error}</span>
+                    <AlertCircle className="h-5 w-5 text-error dark:text-error/50 mr-2" />
+                    <span className="text-error dark:text-error/30">{error}</span>
                   </div>
                 </motion.div>
               )}
@@ -501,44 +501,44 @@ Send the exact amount to the number above and include the reference. Your wallet
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
+                  className="mb-4 p-4 bg-success/10 dark:bg-success/20 border border-success/30 dark:border-success rounded-lg"
                 >
                   <div className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mr-2 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-success dark:text-success/50 mr-2 mt-0.5" />
                     <div className="flex-1">
-                      <div className="text-green-800 dark:text-green-200 whitespace-pre-line">
+                      <div className="text-success dark:text-success/30 whitespace-pre-line">
                         {success}
                       </div>
                       {success.includes('Account Number') && (
                         <div className="mt-3 space-y-2">
-                          <div className="flex items-center justify-between bg-white dark:bg-gray-700 p-2 rounded">
+                          <div className="flex items-center justify-between bg-white dark:bg-neutral-700 p-2 rounded">
                             <span className="text-sm font-medium">Account Number:</span>
                             <div className="flex items-center space-x-2">
                               <span className="text-sm font-mono">1234567890</span>
                               <button
                                 onClick={() => copyToClipboard('1234567890', 'account')}
-                                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                className="p-1 hover:bg-neutral-200 dark:hover:bg-neutral-600 rounded"
                               >
                                 {copiedItem === 'account' ? (
-                                  <Check className="h-4 w-4 text-green-600" />
+                                  <Check className="h-4 w-4 text-success" />
                                 ) : (
-                                  <Copy className="h-4 w-4 text-gray-600" />
+                                  <Copy className="h-4 w-4 text-neutral-600" />
                                 )}
                               </button>
                             </div>
                           </div>
-                          <div className="flex items-center justify-between bg-white dark:bg-gray-700 p-2 rounded">
+                          <div className="flex items-center justify-between bg-white dark:bg-neutral-700 p-2 rounded">
                             <span className="text-sm font-medium">Reference:</span>
                             <div className="flex items-center space-x-2">
                               <span className="text-sm font-mono">{success.match(/Reference: ([A-Z0-9_]+)/)?.[1] || 'N/A'}</span>
                               <button
                                 onClick={() => copyToClipboard(success.match(/Reference: ([A-Z0-9_]+)/)?.[1] || '', 'reference')}
-                                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                className="p-1 hover:bg-neutral-200 dark:hover:bg-neutral-600 rounded"
                               >
                                 {copiedItem === 'reference' ? (
-                                  <Check className="h-4 w-4 text-green-600" />
+                                  <Check className="h-4 w-4 text-success" />
                                 ) : (
-                                  <Copy className="h-4 w-4 text-gray-600" />
+                                  <Copy className="h-4 w-4 text-neutral-600" />
                                 )}
                               </button>
                             </div>
@@ -547,18 +547,18 @@ Send the exact amount to the number above and include the reference. Your wallet
                       )}
                       {success.includes('Number:') && (
                         <div className="mt-3 space-y-2">
-                          <div className="flex items-center justify-between bg-white dark:bg-gray-700 p-2 rounded">
+                          <div className="flex items-center justify-between bg-white dark:bg-neutral-700 p-2 rounded">
                             <span className="text-sm font-medium">Mobile Number:</span>
                             <div className="flex items-center space-x-2">
                               <span className="text-sm font-mono">08012345678</span>
                               <button
                                 onClick={() => copyToClipboard('08012345678', 'mobile')}
-                                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                                className="p-1 hover:bg-neutral-200 dark:hover:bg-neutral-600 rounded"
                               >
                                 {copiedItem === 'mobile' ? (
-                                  <Check className="h-4 w-4 text-green-600" />
+                                  <Check className="h-4 w-4 text-success" />
                                 ) : (
-                                  <Copy className="h-4 w-4 text-gray-600" />
+                                  <Copy className="h-4 w-4 text-neutral-600" />
                                 )}
                               </button>
                             </div>
@@ -574,7 +574,7 @@ Send the exact amount to the number above and include the reference. Your wallet
               <button
                 onClick={handleDeposit}
                 disabled={isLoading || isVerifying || !amount}
-                className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center"
+                className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-400 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center"
               >
                 {isLoading ? (
                   <>
@@ -603,15 +603,15 @@ Send the exact amount to the number above and include the reference. Your wallet
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm"
+              className="bg-white dark:bg-secondary-800 rounded-lg p-6 shadow-sm"
             >
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4">
                 Current Balance
               </h3>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                ₦{wallet?.balance?.toLocaleString() || '0'}
+              <div className="text-3xl font-bold text-secondary-900 dark:text-white mb-2">
+                ${wallet?.balance?.toLocaleString() || '0'}
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">
                 {wallet?.currency || 'NGN'}
               </p>
             </motion.div>
@@ -621,26 +621,26 @@ Send the exact amount to the number above and include the reference. Your wallet
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm"
+              className="bg-white dark:bg-secondary-800 rounded-lg p-6 shadow-sm"
             >
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4">
                 Deposit Information
               </h3>
               <div className="space-y-4">
                 <div>
-                  <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
+                  <div className="flex justify-between text-sm text-neutral-600 dark:text-neutral-400 mb-1">
                     <span>Deposited Today</span>
-                    <span>₦{wallet?.dailyUsage?.depositAmount?.toLocaleString() || '0'}</span>
+                    <span>${wallet?.dailyUsage?.depositAmount?.toLocaleString() || '0'}</span>
                   </div>
                 </div>
                 <div>
-                  <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
+                  <div className="flex justify-between text-sm text-neutral-600 dark:text-neutral-400 mb-1">
                     <span>Deposited This Month</span>
-                    <span>₦{wallet?.monthlyUsage?.depositAmount?.toLocaleString() || '0'}</span>
+                    <span>${wallet?.monthlyUsage?.depositAmount?.toLocaleString() || '0'}</span>
                   </div>
                 </div>
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
-                  <p className="text-sm text-green-800 dark:text-green-200">
+                <div className="bg-success/10 dark:bg-success/20 border border-success/30 dark:border-success rounded-lg p-3">
+                  <p className="text-sm text-success dark:text-success/30">
                     ✓ Unlimited deposits available
                   </p>
                 </div>
@@ -652,27 +652,27 @@ Send the exact amount to the number above and include the reference. Your wallet
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm"
+              className="bg-white dark:bg-secondary-800 rounded-lg p-6 shadow-sm"
             >
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                <Shield className="h-5 w-5 mr-2 text-green-600" />
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4 flex items-center">
+                <Shield className="h-5 w-5 mr-2 text-success" />
                 Security Features
               </h3>
               <div className="space-y-3">
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                  <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                <div className="flex items-center text-sm text-neutral-600 dark:text-neutral-400">
+                  <CheckCircle className="h-4 w-4 text-success mr-2" />
                   SSL Encryption
                 </div>
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                  <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                <div className="flex items-center text-sm text-neutral-600 dark:text-neutral-400">
+                  <CheckCircle className="h-4 w-4 text-success mr-2" />
                   PCI DSS Compliant
                 </div>
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                  <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                <div className="flex items-center text-sm text-neutral-600 dark:text-neutral-400">
+                  <CheckCircle className="h-4 w-4 text-success mr-2" />
                   Fraud Protection
                 </div>
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                  <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                <div className="flex items-center text-sm text-neutral-600 dark:text-neutral-400">
+                  <CheckCircle className="h-4 w-4 text-success mr-2" />
                   Real-time Verification
                 </div>
               </div>

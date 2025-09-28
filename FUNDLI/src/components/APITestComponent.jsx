@@ -69,36 +69,36 @@ const APITestComponent = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+    <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6 mb-8">
+      <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4">
         API Test Results
       </h3>
       
       <button
         onClick={testAPI}
         disabled={isLoading}
-        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 mb-4"
+        className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 mb-4"
       >
         {isLoading ? 'Testing...' : 'Test API Endpoints'}
       </button>
       
       <div className="space-y-4">
         {Object.entries(testResults).map(([key, result]) => (
-          <div key={key} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-            <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+          <div key={key} className="border border-neutral-200 dark:border-secondary-700 rounded-lg p-4">
+            <h4 className="font-medium text-secondary-900 dark:text-white mb-2">
               {key}
             </h4>
             <div className="text-sm">
-              <p className={`mb-1 ${result.ok ? 'text-green-600' : 'text-red-600'}`}>
+              <p className={`mb-1 ${result.ok ? 'text-success' : 'text-error'}`}>
                 Status: {result.status} {result.ok ? '✅' : '❌'}
               </p>
               {result.data && (
-                <pre className="bg-gray-100 dark:bg-gray-900 p-2 rounded text-xs overflow-auto max-h-32">
+                <pre className="bg-neutral-100 dark:bg-secondary-900 p-2 rounded text-xs overflow-auto max-h-32">
                   {JSON.stringify(result.data, null, 2)}
                 </pre>
               )}
               {result.error && (
-                <p className="text-red-600 text-xs">{result.error}</p>
+                <p className="text-error text-xs">{result.error}</p>
               )}
             </div>
           </div>

@@ -658,7 +658,7 @@ const getFeedbackStats = async (req, res) => {
     const stats = await Feedback.aggregate([
       {
         $group: {
-          _id: '$status',
+          _id: null,
           count: { $sum: 1 }
         }
       }
@@ -676,7 +676,7 @@ const getFeedbackStats = async (req, res) => {
     const priorityStats = await Feedback.aggregate([
       {
         $group: {
-          _id: '$priority',
+          _id: null,
           count: { $sum: 1 }
         }
       }

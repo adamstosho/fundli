@@ -109,10 +109,10 @@ const TwoFactorVerification = ({ onSuccess, onCancel, onUseBackupCode }) => {
           <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <Shield className="h-8 w-8 text-primary-600 dark:text-primary-400" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-secondary-900 dark:text-white mb-2">
             Two-Factor Authentication
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-neutral-600 dark:text-neutral-400">
             {useBackupCode 
               ? 'Enter one of your backup codes' 
               : 'Enter the 6-digit code from your authenticator app'
@@ -121,10 +121,10 @@ const TwoFactorVerification = ({ onSuccess, onCancel, onUseBackupCode }) => {
         </div>
 
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <div className="bg-error/10 dark:bg-error/20 border border-error/30 dark:border-error rounded-lg p-4">
             <div className="flex items-center">
-              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
-              <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+              <AlertCircle className="h-5 w-5 text-error dark:text-error/50 mr-2" />
+              <p className="text-error dark:text-error/30 text-sm">{error}</p>
             </div>
           </div>
         )}
@@ -133,7 +133,7 @@ const TwoFactorVerification = ({ onSuccess, onCancel, onUseBackupCode }) => {
           <div className="space-y-4">
             {/* Token Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Verification Code
               </label>
               <div className="relative">
@@ -142,12 +142,12 @@ const TwoFactorVerification = ({ onSuccess, onCancel, onUseBackupCode }) => {
                   value={token}
                   onChange={(e) => setToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   placeholder="000000"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-center text-2xl font-mono tracking-widest"
+                  className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-center text-2xl font-mono tracking-widest"
                   maxLength={6}
                 />
                 <button
                   onClick={refreshToken}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
                 >
                   <RefreshCw className="h-4 w-4" />
                 </button>
@@ -156,7 +156,7 @@ const TwoFactorVerification = ({ onSuccess, onCancel, onUseBackupCode }) => {
 
             {/* Timer */}
             <div className="text-center">
-              <div className="inline-flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+              <div className="inline-flex items-center space-x-2 text-sm text-neutral-600 dark:text-neutral-400">
                 <div className="w-2 h-2 bg-primary-600 rounded-full animate-pulse"></div>
                 <span>Code refreshes in {timeRemaining}s</span>
               </div>
@@ -184,7 +184,7 @@ const TwoFactorVerification = ({ onSuccess, onCancel, onUseBackupCode }) => {
 
               <button
                 onClick={() => setUseBackupCode(true)}
-                className="w-full px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                className="w-full px-4 py-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 transition-colors"
               >
                 Use backup code instead
               </button>
@@ -194,7 +194,7 @@ const TwoFactorVerification = ({ onSuccess, onCancel, onUseBackupCode }) => {
           <div className="space-y-4">
             {/* Backup Code Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Backup Code
               </label>
               <input
@@ -202,7 +202,7 @@ const TwoFactorVerification = ({ onSuccess, onCancel, onUseBackupCode }) => {
                 value={backupCode}
                 onChange={(e) => setBackupCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8))}
                 placeholder="XXXXXXXX"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-center text-lg font-mono tracking-wider"
+                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-center text-lg font-mono tracking-wider"
                 maxLength={8}
               />
             </div>
@@ -229,7 +229,7 @@ const TwoFactorVerification = ({ onSuccess, onCancel, onUseBackupCode }) => {
 
               <button
                 onClick={() => setUseBackupCode(false)}
-                className="w-full px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                className="w-full px-4 py-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 transition-colors"
               >
                 Use authenticator app instead
               </button>
@@ -238,10 +238,10 @@ const TwoFactorVerification = ({ onSuccess, onCancel, onUseBackupCode }) => {
         )}
 
         {/* Help Text */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4">
           <div className="flex items-start">
-            <Smartphone className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2 mt-0.5" />
-            <div className="text-sm text-blue-800 dark:text-blue-300">
+            <Smartphone className="h-5 w-5 text-primary-600 dark:text-primary-400 mr-2 mt-0.5" />
+            <div className="text-sm text-primary-800 dark:text-primary-300">
               <p className="font-medium mb-1">Need help?</p>
               <p>Make sure your device's time is synchronized. If you're still having trouble, contact support.</p>
             </div>
@@ -251,7 +251,7 @@ const TwoFactorVerification = ({ onSuccess, onCancel, onUseBackupCode }) => {
         {/* Cancel Button */}
         <button
           onClick={onCancel}
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-secondary-800 transition-colors"
         >
           Cancel
         </button>

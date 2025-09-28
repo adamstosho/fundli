@@ -17,7 +17,7 @@ const Layout = () => {
   const isLandingPage = location.pathname === '/';
 
   return (
-    <div className={`min-h-screen ${isLandingPage ? '' : 'bg-gray-50 dark:bg-gray-900'}`}>
+    <div className={`min-h-screen ${isLandingPage ? '' : 'bg-neutral-100 dark:bg-secondary-900'}`}>
       {/* Only show the main navbar for authenticated users or non-landing pages */}
       {!isLandingPage && <Navbar onMenuClick={() => setSidebarOpen(true)} />}
       

@@ -156,6 +156,21 @@ const userSchema = new mongoose.Schema({
     max: 850,
     default: 0
   },
+
+  // Gamified reliability points and badges for borrowers
+  reliabilityPoints: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  badges: [
+    {
+      key: { type: String, required: true },
+      name: { type: String, required: true },
+      icon: { type: String },
+      earnedAt: { type: Date, default: Date.now }
+    }
+  ],
   
   walletBalance: {
     type: Number,

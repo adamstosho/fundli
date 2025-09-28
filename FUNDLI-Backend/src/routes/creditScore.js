@@ -279,8 +279,8 @@ router.get('/stats/overview', adminAuth, async (req, res) => {
     const distribution = await User.aggregate([
       {
         $group: {
-          _id: {
-            $switch: {
+            _id: {
+              $switch: {
               branches: [
                 { case: { $gte: ['$creditScore', 750] }, then: 'Excellent (750+)' },
                 { case: { $gte: ['$creditScore', 700] }, then: 'Good (700-749)' },

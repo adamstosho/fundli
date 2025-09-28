@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   DollarSign, 
@@ -32,6 +32,7 @@ import FeedbackInbox from '../../components/common/FeedbackInbox';
 
 const BorrowerDashboard = () => {
   const { user, kycStatus } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalBorrowed: 0,
     activeLoans: 0,
@@ -50,6 +51,8 @@ const BorrowerDashboard = () => {
   });
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [unreadFeedbackCount, setUnreadFeedbackCount] = useState(0);
+  const [showLoanDetailsModal, setShowLoanDetailsModal] = useState(false);
+  const [selectedLoan, setSelectedLoan] = useState(null);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -295,6 +298,7 @@ const BorrowerDashboard = () => {
   const getStatusBadge = (status) => {
     const statusConfig = {
       active: { color: 'badge-success', icon: CheckCircle, text: 'Active' },
+      funded: { color: 'badge-success', icon: CheckCircle, text: 'Funded' },
       pending: { color: 'badge-warning', icon: Clock, text: 'Pending' },
       completed: { color: 'badge-info', icon: CheckCircle, text: 'Completed' },
       overdue: { color: 'badge-error', icon: AlertCircle, text: 'Overdue' }
@@ -309,6 +313,96 @@ const BorrowerDashboard = () => {
         <span>{config.text}</span>
       </span>
     );
+  };
+
+  const handleViewLoanDetails = (loan) => {
+    setSelectedLoan(loan);
+    setShowLoanDetailsModal(true);
+  };
+
+  const handlePayBack = (loan) => {
+    // Navigate to PayBackPage with loan data
+    navigate(`/payback/${loan._id}`, { 
+      state: { loan } 
+    });
+  };
+
+  const handleSetAutoRepay = async (loan) => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        alert('Please log in to set up auto repay');
+        return;
+      }
+
+      // Calculate total repayment using flat interest
+      const principal = loan.loanAmount || 0;
+      const interestRate = loan.interestRate || 0;
+      const interestAmount = principal * (interestRate / 100);
+      const totalRepayment = principal + interestAmount;
+      const amountPaid = loan.amountPaid || 0;
+      const amountRemaining = totalRepayment - amountPaid;
+
+      // Calculate due date
+      let dueDateText = 'N/A';
+      if (loan.fundedAt && loan.duration) {
+        const fundedDate = new Date(loan.fundedAt);
+        const dueDate = new Date(fundedDate);
+        dueDate.setMonth(dueDate.getMonth() + loan.duration);
+        dueDateText = dueDate.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      }
+
+      // Confirm auto repay setup
+      const confirmed = window.confirm(
+        `Set up automatic repayment for this loan?\n\n` +
+        `Principal Amount: $${principal.toLocaleString()}\n` +
+        `Interest Amount (${interestRate}%): $${interestAmount.toLocaleString()}\n` +
+        `Total Repayment: $${totalRepayment.toLocaleString()}\n` +
+        `Amount Remaining: $${amountRemaining.toLocaleString()}\n` +
+        `Due Date: ${dueDateText}\n` +
+        `Purpose: ${loan.purpose}\n\n` +
+        `This will automatically deduct the remaining amount from your wallet on the due date.`
+      );
+      
+      if (!confirmed) return;
+      
+      // Set up auto repay API call
+      const response = await fetch(`http://localhost:5000/api/loans/${loan._id}/auto-repay`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          enabled: true,
+          paymentMethod: 'wallet',
+          amount: amountRemaining,
+          dueDate: loan.fundedAt && loan.duration ? (() => {
+            const fundedDate = new Date(loan.fundedAt);
+            const dueDate = new Date(fundedDate);
+            dueDate.setMonth(dueDate.getMonth() + loan.duration);
+            return dueDate.toISOString();
+          })() : null
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert(`Auto repay set up successfully! ${result.message}`);
+        // Refresh dashboard data
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to set up auto repay: ${errorData.message}`);
+      }
+    } catch (error) {
+      console.error('Error setting up auto repay:', error);
+      alert('Failed to set up auto repay. Please try again.');
+    }
   };
 
   const quickActions = [
@@ -363,10 +457,10 @@ const BorrowerDashboard = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900 dark:text-white">
             Welcome back, {user?.firstName || user?.name?.split(' ')[0] || 'Borrower'}!
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-neutral-600 dark:text-neutral-400 mt-1">
             Here's what's happening with your loans today
           </p>
         </div>
@@ -384,7 +478,7 @@ const BorrowerDashboard = () => {
               window.dispatchEvent(new CustomEvent('dashboardRefreshed'));
             }}
             disabled={isLoading}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors text-sm font-medium"
+            className="flex items-center space-x-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white rounded-lg transition-colors text-sm font-medium"
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             <span>{isLoading ? 'Refreshing...' : 'Refresh Data'}</span>
@@ -397,14 +491,14 @@ const BorrowerDashboard = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
+          className="bg-error/10 dark:bg-error/20 border border-error/30 dark:border-error rounded-lg p-4"
         >
           <div className="flex items-start">
-            <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 flex-shrink-0" />
+            <AlertCircle className="h-5 w-5 text-error dark:text-error/50 mr-3 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-red-800 dark:text-red-200 font-medium mb-2">Dashboard Data Error</p>
-              <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
-              <div className="mt-2 text-xs text-red-600 dark:text-red-400">
+              <p className="text-error dark:text-error/30 font-medium mb-2">Dashboard Data Error</p>
+              <p className="text-error dark:text-error/40 text-sm">{error}</p>
+              <div className="mt-2 text-xs text-error dark:text-error/50">
                 <p>Possible solutions:</p>
                 <ul className="list-disc list-inside mt-1">
                   <li>Check your internet connection</li>
@@ -424,13 +518,13 @@ const BorrowerDashboard = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4"
+          className="bg-success/10 dark:bg-success/20 border border-success/30 dark:border-success rounded-lg p-4"
         >
           <div className="flex items-start">
-            <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+            <CheckCircle className="h-5 w-5 text-success dark:text-success/50 mr-3 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-green-800 dark:text-green-200 font-medium mb-1">Success!</p>
-              <p className="text-green-700 dark:text-green-300 text-sm">{successMessage}</p>
+              <p className="text-success dark:text-success/30 font-medium mb-1">Success!</p>
+              <p className="text-success dark:text-success/40 text-sm">{successMessage}</p>
             </div>
           </div>
         </motion.div>
@@ -442,19 +536,19 @@ const BorrowerDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+          className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Total Borrowed
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                 ${stats.totalBorrowed.toLocaleString()}
               </p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-              <DollarSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center">
+              <DollarSign className="h-6 w-6 text-primary-600 dark:text-primary-400" />
             </div>
           </div>
         </motion.div>
@@ -463,19 +557,19 @@ const BorrowerDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+          className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Active Loans
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                 {stats.activeLoans}
               </p>
             </div>
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-              <CreditCard className="h-6 w-6 text-green-600 dark:text-green-400" />
+            <div className="w-12 h-12 bg-success/20 dark:bg-success/20 rounded-lg flex items-center justify-center">
+              <CreditCard className="h-6 w-6 text-success dark:text-success/50" />
             </div>
           </div>
         </motion.div>
@@ -484,14 +578,14 @@ const BorrowerDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+          className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Total Repaid
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                 ${stats.totalRepaid.toLocaleString()}
               </p>
             </div>
@@ -505,19 +599,19 @@ const BorrowerDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+          className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                 Credit Score
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                 {stats.creditScore}
               </p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
-              <BarChart3 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+            <div className="w-12 h-12 bg-accent-100 dark:bg-accent-900/20 rounded-lg flex items-center justify-center">
+              <BarChart3 className="h-6 w-6 text-accent-600 dark:text-accent-400" />
             </div>
           </div>
         </motion.div>
@@ -542,7 +636,7 @@ const BorrowerDashboard = () => {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+        <h2 className="text-xl font-semibold text-secondary-900 dark:text-white mb-4">
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -556,18 +650,18 @@ const BorrowerDashboard = () => {
               {action.onClick ? (
                 <button
                   onClick={action.onClick}
-                  className="w-full text-left bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200 group"
+                  className="w-full text-left bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200 group"
                 >
                   <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
                     <action.icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-2">
                     {action.title}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                  <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-4">
                     {action.description}
                   </p>
-                  <div className="flex items-center text-blue-600 dark:text-blue-400 font-medium text-sm group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                  <div className="flex items-center text-primary-600 dark:text-primary-400 font-medium text-sm group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
                     Get Started
                     <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
                   </div>
@@ -575,18 +669,18 @@ const BorrowerDashboard = () => {
               ) : (
                 <Link
                   to={action.href}
-                  className="block bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200 group"
+                  className="block bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200 group"
                 >
                   <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
                     <action.icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-2">
                     {action.title}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                  <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-4">
                     {action.description}
                   </p>
-                  <div className="flex items-center text-blue-600 dark:text-blue-400 font-medium text-sm group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                  <div className="flex items-center text-primary-600 dark:text-primary-400 font-medium text-sm group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
                     Get Started
                     <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
                   </div>
@@ -604,15 +698,15 @@ const BorrowerDashboard = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+          className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
         >
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
               Recent Loans
             </h3>
             <Link
               to="/loans/status"
-              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+              className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
             >
               View All
             </Link>
@@ -621,28 +715,28 @@ const BorrowerDashboard = () => {
           <div className="space-y-4">
             {recentLoans.length > 0 ? (
               recentLoans.map((loan) => (
-                <div key={loan._id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div key={loan._id} className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-secondary-800 rounded-lg">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <h4 className="font-medium text-gray-900 dark:text-white">
+                      <h4 className="font-medium text-secondary-900 dark:text-white">
                         ${loan.loanAmount?.toLocaleString() || 0}
                       </h4>
                       {getStatusBadge(loan.status)}
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
                       {loan.purpose}
                     </p>
                     {loan.nextPaymentDate && (
-                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                      <p className="text-xs text-neutral-500 dark:text-neutral-500 mt-1">
                         Next payment: {new Date(loan.nextPaymentDate).toLocaleDateString()}
                       </p>
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    <p className="text-sm font-medium text-secondary-900 dark:text-white">
                       ${((loan.loanAmount || 0) - (loan.amountPaid || 0)).toLocaleString()}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-500">
+                    <p className="text-xs text-neutral-500 dark:text-neutral-500">
                       Remaining
                     </p>
                   </div>
@@ -650,14 +744,14 @@ const BorrowerDashboard = () => {
               ))
             ) : (
               <div className="text-center py-8">
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400">No loans found</p>
-                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                <FileText className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
+                <p className="text-neutral-500 dark:text-neutral-400">No loans found</p>
+                <p className="text-sm text-neutral-400 dark:text-neutral-500 mt-1">
                   Start by applying for your first loan
                 </p>
                 <Link
                   to="/loans/apply"
-                  className="inline-flex items-center mt-3 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                  className="inline-flex items-center mt-3 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
                 >
                   Apply for Loan
                   <ArrowRight className="h-4 w-4 ml-1" />
@@ -667,57 +761,94 @@ const BorrowerDashboard = () => {
           </div>
         </motion.div>
 
-        {/* Upcoming Payments */}
+        {/* Upcoming Payments - Only Funded Loans */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.7 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+          className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
         >
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
               Upcoming Payments
             </h3>
             <Link
               to="/loans/repayment"
-              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+              className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
             >
               View Schedule
             </Link>
           </div>
           
           <div className="space-y-4">
-            {upcomingPayments.length > 0 ? (
-              upcomingPayments.map((payment) => (
-                <div key={payment.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h4 className="font-medium text-gray-900 dark:text-white">
-                        ${payment.amount.toLocaleString()}
-                      </h4>
-                      <span className="badge-warning">Due Soon</span>
+            {recentLoans.filter(loan => loan.status === 'funded' || loan.status === 'active').length > 0 ? (
+              recentLoans
+                .filter(loan => loan.status === 'funded' || loan.status === 'active')
+                .map((loan) => (
+                  <div key={loan._id} className="p-4 bg-neutral-50 dark:bg-secondary-800 rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <h4 className="font-medium text-secondary-900 dark:text-white">
+                          ${loan.loanAmount?.toLocaleString() || 0}
+                        </h4>
+                        <span className="badge-success">Funded</span>
+                      </div>
+                      <button
+                        onClick={() => handleViewLoanDetails(loan)}
+                        className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+                      >
+                        View Details
+                      </button>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {payment.loanPurpose}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                      Due: {new Date(payment.dueDate).toLocaleDateString()}
-                    </p>
+                    
+                    <div className="space-y-2 mb-4">
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                        Purpose: {loan.purpose}
+                      </p>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                        Principal: ${loan.loanAmount?.toLocaleString()}
+                      </p>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                        Interest Rate: {loan.interestRate || 0}% (Flat Rate)
+                      </p>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                        Interest Amount: ${((loan.loanAmount || 0) * (loan.interestRate || 0) / 100).toLocaleString()}
+                      </p>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                        Total Repayment: ${((loan.loanAmount || 0) + ((loan.loanAmount || 0) * (loan.interestRate || 0) / 100)).toLocaleString()}
+                      </p>
+                      {loan.fundedAt && loan.duration && (
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                          Due Date: {(() => {
+                            const fundedDate = new Date(loan.fundedAt);
+                            const dueDate = new Date(fundedDate);
+                            dueDate.setMonth(dueDate.getMonth() + loan.duration);
+                            return dueDate.toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            });
+                          })()}
+                        </p>
+                      )}
+                    </div>
+                    
                   </div>
-                  <div className="text-right">
-                    <button className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
-                      Pay Now
-                    </button>
-                  </div>
-                </div>
-              ))
+                ))
             ) : (
               <div className="text-center py-8">
-                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400">No upcoming payments</p>
-                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                  You're all caught up on payments
+                <Calendar className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
+                <p className="text-neutral-500 dark:text-neutral-400">No funded loans</p>
+                <p className="text-sm text-neutral-400 dark:text-neutral-500 mt-1">
+                  Apply for loans to see upcoming payments here
                 </p>
+                <Link
+                  to="/loans/apply"
+                  className="inline-flex items-center mt-3 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+                >
+                  Apply for Loan
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </Link>
               </div>
             )}
           </div>
@@ -733,9 +864,9 @@ const BorrowerDashboard = () => {
           transition={{ duration: 0.6, delay: 0.8 }}
         >
           {isLoading ? (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+            <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-8">
               <div className="h-[400px] w-full flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
               </div>
             </div>
           ) : (
@@ -750,9 +881,9 @@ const BorrowerDashboard = () => {
           transition={{ duration: 0.6, delay: 0.9 }}
         >
           {isLoading ? (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+            <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-8">
               <div className="h-[400px] w-full flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
               </div>
             </div>
           ) : (
@@ -768,9 +899,9 @@ const BorrowerDashboard = () => {
         transition={{ duration: 0.6, delay: 1.0 }}
       >
         {isLoading ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+          <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-8">
             <div className="h-[400px] w-full flex items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
             </div>
           </div>
         ) : (
@@ -789,6 +920,268 @@ const BorrowerDashboard = () => {
       {/* Feedback Modal */}
       {showFeedbackModal && (
         <FeedbackInbox onClose={() => setShowFeedbackModal(false)} />
+      )}
+
+      {/* Loan Details Modal */}
+      {showLoanDetailsModal && selectedLoan && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-secondary-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
+                Loan Details
+              </h3>
+              <button
+                onClick={() => setShowLoanDetailsModal(false)}
+                className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              {/* Loan Summary */}
+              <div className="bg-neutral-50 dark:bg-secondary-900 rounded-lg p-4">
+                <h4 className="font-medium text-secondary-900 dark:text-white mb-3">Loan Summary</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-neutral-600 dark:text-neutral-400">Purpose:</span>
+                    <p className="font-medium text-secondary-900 dark:text-white">{selectedLoan.purpose}</p>
+                  </div>
+                  <div>
+                    <span className="text-neutral-600 dark:text-neutral-400">Status:</span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(selectedLoan.status).props.className}`}>
+                      {selectedLoan.status}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-neutral-600 dark:text-neutral-400">Principal Amount:</span>
+                    <p className="font-medium text-secondary-900 dark:text-white">${selectedLoan.loanAmount?.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <span className="text-neutral-600 dark:text-neutral-400">Interest Rate:</span>
+                    <p className="font-medium text-secondary-900 dark:text-white">{selectedLoan.interestRate || 0}% (Flat Rate)</p>
+                  </div>
+                  <div>
+                    <span className="text-neutral-600 dark:text-neutral-400">Loan Duration:</span>
+                    <p className="font-medium text-secondary-900 dark:text-white">{selectedLoan.duration} months</p>
+                  </div>
+                  <div>
+                    <span className="text-neutral-600 dark:text-neutral-400">Interest Amount:</span>
+                    <p className="font-medium text-orange-600 dark:text-orange-400">
+                      ${((selectedLoan.loanAmount || 0) * (selectedLoan.interestRate || 0) / 100).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Flat Rate Explanation */}
+                <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <div className="flex items-start space-x-2">
+                    <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center mt-0.5">
+                      <span className="text-white text-xs font-bold">i</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">Flat Interest Rate System</p>
+                      <p className="text-xs text-blue-700 dark:text-blue-300">
+                        Interest is calculated once for the entire {selectedLoan.duration || 0}-month period. 
+                        You pay the principal amount plus {selectedLoan.interestRate || 0}% interest at the end of the loan term.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Repayment Information */}
+              <div className="bg-neutral-50 dark:bg-secondary-900 rounded-lg p-4">
+                <h4 className="font-medium text-secondary-900 dark:text-white mb-3">Repayment Information</h4>
+                
+                {/* Calculate flat interest total repayment */}
+                {(() => {
+                  const principal = selectedLoan.loanAmount || 0;
+                  const interestRate = selectedLoan.interestRate || 0;
+                  const interestAmount = principal * (interestRate / 100);
+                  const totalRepayment = principal + interestAmount;
+                  const amountPaid = selectedLoan.amountPaid || 0;
+                  const amountRemaining = totalRepayment - amountPaid;
+                  const progressPercentage = totalRepayment > 0 ? Math.round((amountPaid / totalRepayment) * 100) : 0;
+                  
+                  return (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-neutral-600 dark:text-neutral-400">Principal Amount:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">
+                          ${principal.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-neutral-600 dark:text-neutral-400">Interest Amount ({interestRate}%):</span>
+                        <span className="font-medium text-orange-600 dark:text-orange-400">
+                          ${interestAmount.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between border-t border-neutral-200 dark:border-secondary-700 pt-2">
+                        <span className="text-neutral-600 dark:text-neutral-400">Total Repayment:</span>
+                        <span className="font-bold text-lg text-secondary-900 dark:text-white">
+                          ${totalRepayment.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-neutral-600 dark:text-neutral-400">Amount Paid:</span>
+                        <span className="font-medium text-success-600 dark:text-success-400">
+                          ${amountPaid.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-neutral-600 dark:text-neutral-400">Amount Remaining:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">
+                          ${amountRemaining.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-neutral-600 dark:text-neutral-400">Due Date:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">
+                          {(() => {
+                            if (selectedLoan.fundedAt && selectedLoan.duration) {
+                              const fundedDate = new Date(selectedLoan.fundedAt);
+                              const dueDate = new Date(fundedDate);
+                              dueDate.setMonth(dueDate.getMonth() + selectedLoan.duration);
+                              return dueDate.toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              });
+                            }
+                            return 'N/A';
+                          })()}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
+                
+                {/* Progress Bar */}
+                <div className="mt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-neutral-600 dark:text-neutral-400">Repayment Progress</span>
+                    <span className="text-sm font-medium text-secondary-900 dark:text-white">
+                      {(() => {
+                        const principal = selectedLoan.loanAmount || 0;
+                        const interestRate = selectedLoan.interestRate || 0;
+                        const totalRepayment = principal + (principal * (interestRate / 100));
+                        const amountPaid = selectedLoan.amountPaid || 0;
+                        return totalRepayment > 0 ? Math.round((amountPaid / totalRepayment) * 100) : 0;
+                      })()}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-neutral-200 dark:bg-secondary-700 rounded-full h-3">
+                    <div 
+                      className="bg-primary-600 h-3 rounded-full transition-all duration-300"
+                      style={{ 
+                        width: `${(() => {
+                          const principal = selectedLoan.loanAmount || 0;
+                          const interestRate = selectedLoan.interestRate || 0;
+                          const totalRepayment = principal + (principal * (interestRate / 100));
+                          const amountPaid = selectedLoan.amountPaid || 0;
+                          return totalRepayment > 0 ? (amountPaid / totalRepayment) * 100 : 0;
+                        })()}%` 
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Timeline */}
+              <div className="bg-neutral-50 dark:bg-secondary-900 rounded-lg p-4">
+                <h4 className="font-medium text-secondary-900 dark:text-white mb-3">Loan Timeline</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-neutral-600 dark:text-neutral-400">Applied Date:</span>
+                    <span className="font-medium text-secondary-900 dark:text-white">
+                      {selectedLoan.createdAt ? new Date(selectedLoan.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      }) : 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-neutral-600 dark:text-neutral-400">Funded Date:</span>
+                    <span className="font-medium text-secondary-900 dark:text-white">
+                      {selectedLoan.fundedAt ? new Date(selectedLoan.fundedAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      }) : 'Not Funded Yet'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-neutral-600 dark:text-neutral-400">Repayment Date:</span>
+                    <span className="font-medium text-secondary-900 dark:text-white">
+                      {(() => {
+                        if (selectedLoan.fundedAt && selectedLoan.duration) {
+                          const fundedDate = new Date(selectedLoan.fundedAt);
+                          const repaymentDate = new Date(fundedDate);
+                          repaymentDate.setMonth(repaymentDate.getMonth() + selectedLoan.duration);
+                          return repaymentDate.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          });
+                        }
+                        return 'N/A';
+                      })()}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-neutral-600 dark:text-neutral-400">Loan Duration:</span>
+                    <span className="font-medium text-secondary-900 dark:text-white">
+                      {selectedLoan.duration} months
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Days remaining calculation */}
+                {(() => {
+                  if (selectedLoan.fundedAt && selectedLoan.duration) {
+                    const fundedDate = new Date(selectedLoan.fundedAt);
+                    const repaymentDate = new Date(fundedDate);
+                    repaymentDate.setMonth(repaymentDate.getMonth() + selectedLoan.duration);
+                    const today = new Date();
+                    const diffTime = repaymentDate - today;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    return (
+                      <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                          <span className="text-sm font-medium text-orange-800 dark:text-orange-200">
+                            {diffDays > 0 ? `${diffDays} days until repayment` : diffDays === 0 ? 'Repayment due today' : `${Math.abs(diffDays)} days overdue`}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-3 pt-4">
+                <button
+                  onClick={() => handlePayBack(selectedLoan)}
+                  className="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors font-medium"
+                >
+                  Pay Back
+                </button>
+                <button
+                  onClick={() => handleSetAutoRepay(selectedLoan)}
+                  className="flex-1 px-4 py-2 bg-success-600 hover:bg-success-700 text-white rounded-lg transition-colors font-medium"
+                >
+                  Set Auto Repay
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

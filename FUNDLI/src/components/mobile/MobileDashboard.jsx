@@ -151,7 +151,7 @@ const MobileRecentActivity = ({ activities }) => {
               <p className={`text-sm font-medium ${
                 activity.amount > 0 ? 'text-success' : 'text-error'
               }`}>
-                {activity.amount > 0 ? '+' : ''}₦{Math.abs(activity.amount).toLocaleString()}
+                {activity.amount > 0 ? '+' : ''}${Math.abs(activity.amount).toLocaleString()}
               </p>
             </div>
           </motion.div>

@@ -37,6 +37,25 @@ router.post('/', protect, async (req, res) => {
 
     console.log('Pool created successfully:', pool);
 
+    // Send notification to admins about new loan pool creation
+    try {
+      const NotificationService = require('../services/notificationService');
+      
+      await NotificationService.notifyAdminNewLoanPool({
+        poolId: pool._id,
+        poolName: pool.name,
+        lenderName: `${req.user.firstName} ${req.user.lastName}`,
+        lenderEmail: req.user.email,
+        poolSize: pool.poolSize,
+        interestRate: pool.interestRate
+      });
+      
+      console.log(`📧 New loan pool notification sent to admins: ${pool.name}`);
+    } catch (notificationError) {
+      console.error('Error sending admin new loan pool notification:', notificationError);
+      // Don't fail pool creation if notifications fail
+    }
+
     // Track referral action for pool creation
     try {
       const ReferralService = require('../services/referralService');
@@ -86,10 +105,43 @@ router.get('/', async (req, res) => {
       .populate('creator', 'firstName lastName email')
       .sort({ createdAt: -1 });
 
+    // If user is authenticated, filter out pools where they have been funded
+    let filteredPools = pools;
+    if (req.headers.authorization) {
+      try {
+        const token = req.headers.authorization.replace('Bearer ', '');
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+
+        // Find pools where this user has already been funded
+        const Loan = require('../models/Loan');
+        const fundedLoanPools = await Loan.find({
+          borrower: userId,
+          status: { $in: ['funded', 'active', 'completed'] }
+        }).select('lendingPool');
+
+        const fundedPoolIds = fundedLoanPools.map(loan => loan.lendingPool.toString());
+        
+        // Filter out only the specific pools where user has already been funded
+        // This allows borrowers to still see and apply to other available pools
+        filteredPools = pools.filter(pool => !fundedPoolIds.includes(pool._id.toString()));
+        
+        console.log(`🔍 Pool filtering for user ${userId}:`);
+        console.log(`  - Total pools available: ${pools.length}`);
+        console.log(`  - Pools where user is funded: ${fundedPoolIds.length}`);
+        console.log(`  - Pools still available: ${filteredPools.length}`);
+        console.log(`  - Funded pool IDs: [${fundedPoolIds.join(', ')}]`);
+      } catch (authError) {
+        console.log('🔍 Auth error in pools route (continuing without filtering):', authError.message);
+        // Continue without filtering if token is invalid
+      }
+    }
+
     res.status(200).json({
       status: 'success',
       data: {
-        pools: pools.map(pool => ({
+        pools: filteredPools.map(pool => ({
           id: pool._id,
           name: pool.name,
           description: pool.description,

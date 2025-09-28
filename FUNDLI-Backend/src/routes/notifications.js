@@ -439,7 +439,7 @@ router.post('/test-comprehensive', protect, async (req, res) => {
           recipientId: userId,
           type: 'loan_application',
           title: 'Loan Application Submitted',
-          message: 'Your loan application for $5,000 has been submitted and is under review.',
+          message: 'Your loan application for ₦5,000 has been submitted and is under review.',
           priority: 'normal',
           action: {
             type: 'view',
@@ -459,7 +459,7 @@ router.post('/test-comprehensive', protect, async (req, res) => {
           recipientId: userId,
           type: 'loan_approval',
           title: 'Loan Application Approved!',
-          message: 'Congratulations! Your loan application for $5,000 has been approved.',
+          message: 'Congratulations! Your loan application for ₦5,000 has been approved.',
           priority: 'high',
           action: {
             type: 'view',
@@ -479,7 +479,7 @@ router.post('/test-comprehensive', protect, async (req, res) => {
           recipientId: userId,
           type: 'repayment_due',
           title: 'Payment Due Reminder',
-          message: 'Your loan payment of $450 is due in 3 days.',
+          message: 'Your loan payment of ₦450 is due in 3 days.',
           priority: 'high',
           actionRequired: true,
           action: {
@@ -502,7 +502,7 @@ router.post('/test-comprehensive', protect, async (req, res) => {
           recipientId: userId,
           type: 'investment_opportunity',
           title: 'New Investment Opportunity',
-          message: 'A new loan application for $8,000 is available for investment.',
+          message: 'A new loan application for ₦8,000 is available for investment.',
           priority: 'normal',
           action: {
             type: 'view',
@@ -523,7 +523,7 @@ router.post('/test-comprehensive', protect, async (req, res) => {
           recipientId: userId,
           type: 'loan_funding',
           title: 'Investment Successful',
-          message: 'Your investment of $8,000 has been successfully processed.',
+          message: 'Your investment of ₦8,000 has been successfully processed.',
           priority: 'normal',
           action: {
             type: 'view',
@@ -543,7 +543,7 @@ router.post('/test-comprehensive', protect, async (req, res) => {
           recipientId: userId,
           type: 'repayment_received',
           title: 'Repayment Received',
-          message: 'You have received a repayment of $450 from John Doe.',
+          message: 'You have received a repayment of ₦450 from John Doe.',
           priority: 'normal',
           action: {
             type: 'view',
@@ -565,7 +565,7 @@ router.post('/test-comprehensive', protect, async (req, res) => {
           recipientId: userId,
           type: 'loan_application',
           title: 'New Loan Application Requires Review',
-          message: 'A new loan application for $10,000 requires admin review.',
+          message: 'A new loan application for ₦10,000 requires admin review.',
           priority: 'high',
           actionRequired: true,
           action: {

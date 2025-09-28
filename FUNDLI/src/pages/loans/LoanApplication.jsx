@@ -295,22 +295,22 @@ const LoanApplication = () => {
       {/* Collateral Status Banner */}
       {currentStep === 'loan-form' && (
         <div className={`mb-6 p-4 rounded-lg border ${
-          statusInfo.type === 'success' ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' :
-          statusInfo.type === 'warning' ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800' :
-          statusInfo.type === 'error' ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800' :
-          'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
+          statusInfo.type === 'success' ? 'bg-success/10 border-success/30 dark:bg-success/20 dark:border-success' :
+          statusInfo.type === 'warning' ? 'bg-warning/10 border-warning/30 dark:bg-warning/20 dark:border-warning' :
+          statusInfo.type === 'error' ? 'bg-error/10 border-error/30 dark:bg-error/20 dark:border-error' :
+          'bg-primary-50 border-primary-200 dark:bg-primary-900/20 dark:border-primary-800'
         }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              {statusInfo.type === 'success' && <CheckCircle className="h-5 w-5 text-green-600" />}
-              {statusInfo.type === 'warning' && <AlertCircle className="h-5 w-5 text-yellow-600" />}
-              {statusInfo.type === 'error' && <AlertCircle className="h-5 w-5 text-red-600" />}
-              {statusInfo.type === 'info' && <FileText className="h-5 w-5 text-blue-600" />}
+              {statusInfo.type === 'success' && <CheckCircle className="h-5 w-5 text-success" />}
+              {statusInfo.type === 'warning' && <AlertCircle className="h-5 w-5 text-warning" />}
+              {statusInfo.type === 'error' && <AlertCircle className="h-5 w-5 text-error" />}
+              {statusInfo.type === 'info' && <FileText className="h-5 w-5 text-primary-600" />}
               <p className={`text-sm font-medium ${
-                statusInfo.type === 'success' ? 'text-green-800 dark:text-green-200' :
-                statusInfo.type === 'warning' ? 'text-yellow-800 dark:text-yellow-200' :
-                statusInfo.type === 'error' ? 'text-red-800 dark:text-red-200' :
-                'text-blue-800 dark:text-blue-200'
+                statusInfo.type === 'success' ? 'text-success dark:text-success/30' :
+                statusInfo.type === 'warning' ? 'text-warning dark:text-warning/30' :
+                statusInfo.type === 'error' ? 'text-error dark:text-error/30' :
+                'text-primary-800 dark:text-primary-200'
               }`}>
                 {statusInfo.message}
               </p>
@@ -318,7 +318,7 @@ const LoanApplication = () => {
             {statusInfo.type !== 'success' && (
               <button
                 onClick={() => setCurrentStep('collateral-verification')}
-                className="text-sm px-3 py-1 rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="text-sm px-3 py-1 rounded-md bg-white dark:bg-secondary-800 border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
               >
                 {statusInfo.action}
               </button>
@@ -490,11 +490,11 @@ const LoanApplication = () => {
 
               {/* Basic Collateral Information */}
               <div className="border-t pt-6">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                  <Shield className="h-5 w-5 mr-2 text-blue-600" />
+                <h3 className="text-lg font-medium text-secondary-900 dark:text-white mb-4 flex items-center">
+                  <Shield className="h-5 w-5 mr-2 text-primary-600" />
                   Collateral Information (Optional)
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
                   Providing collateral information can help improve your loan approval chances and interest rates.
                 </p>
                 
@@ -522,7 +522,7 @@ const LoanApplication = () => {
                       <button
                         type="button"
                         onClick={() => setCollateralData(prev => ({ ...prev, type: 'real_estate' }))}
-                        className="mt-2 text-sm text-blue-600 hover:text-blue-800 underline"
+                        className="mt-2 text-sm text-primary-600 hover:text-primary-800 underline"
                       >
                         Use default type (Real Estate)
                       </button>
@@ -535,7 +535,7 @@ const LoanApplication = () => {
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <DollarSign className="h-5 w-5 text-gray-400" />
+                        <DollarSign className="h-5 w-5 text-neutral-400" />
                       </div>
                       <input
                         id="collateralValue"
@@ -568,7 +568,7 @@ const LoanApplication = () => {
                     <button
                       type="button"
                       onClick={() => setCollateralData(prev => ({ ...prev, description: 'Commercial property in downtown area' }))}
-                      className="mt-2 text-sm text-blue-600 hover:text-blue-800 underline"
+                      className="mt-2 text-sm text-primary-600 hover:text-primary-800 underline"
                     >
                       Use default description
                     </button>
@@ -583,7 +583,7 @@ const LoanApplication = () => {
                   name="terms"
                   type="checkbox"
                   required
-                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded mt-1"
+                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded mt-1"
                 />
                 <label htmlFor="terms" className="text-sm text-neutral-700 dark:text-neutral-300">
                   I agree to the{' '}

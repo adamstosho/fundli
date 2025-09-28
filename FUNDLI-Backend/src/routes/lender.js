@@ -296,7 +296,7 @@ router.post('/loan/:id/invest', protect, async (req, res) => {
     if (investmentAmount > remainingAmount) {
       return res.status(400).json({
         status: 'error',
-        message: `Investment amount exceeds remaining loan amount. Maximum: $${remainingAmount.toLocaleString()}`
+        message: `Investment amount exceeds remaining loan amount. Maximum: ₦${remainingAmount.toLocaleString()}`
       });
     }
 
@@ -313,7 +313,7 @@ router.post('/loan/:id/invest', protect, async (req, res) => {
     if (lenderWallet.balance < parseFloat(investmentAmount)) {
       return res.status(400).json({
         status: 'error',
-        message: `Insufficient wallet balance. Available: $${lenderWallet.balance.toLocaleString()}, Required: $${parseFloat(investmentAmount).toLocaleString()}`,
+        message: `Insufficient wallet balance. Available: ₦${lenderWallet.balance.toLocaleString()}, Required: ₦${parseFloat(investmentAmount).toLocaleString()}`,
         data: {
           availableBalance: lenderWallet.balance,
           requiredAmount: parseFloat(investmentAmount),
@@ -322,8 +322,8 @@ router.post('/loan/:id/invest', protect, async (req, res) => {
       });
     }
 
-    console.log(`💰 Investing in loan ${req.params.id}: Lender ${req.user.email} investing $${parseFloat(investmentAmount)}`);
-    console.log(`📊 Lender balance before: $${lenderWallet.balance.toLocaleString()}`);
+    console.log(`💰 Investing in loan ${req.params.id}: Lender ${req.user.email} investing ₦${parseFloat(investmentAmount)}`);
+    console.log(`📊 Lender balance before: ₦${lenderWallet.balance.toLocaleString()}`);
 
     // Get borrower wallet
     const borrowerWallet = await Wallet.findOne({ user: loan.borrower._id });
@@ -334,7 +334,7 @@ router.post('/loan/:id/invest', protect, async (req, res) => {
       });
     }
 
-    console.log(`📊 Borrower balance before: $${borrowerWallet.balance.toLocaleString()}`);
+    console.log(`📊 Borrower balance before: ₦${borrowerWallet.balance.toLocaleString()}`);
 
     // Generate unique transaction references for lender and borrower
     const baseReference = `INVEST_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
@@ -407,8 +407,8 @@ router.post('/loan/:id/invest', protect, async (req, res) => {
     }
 
     console.log(`✅ Wallet updates completed:`);
-    console.log(`📊 Lender balance after: $${lenderWallet.balance.toLocaleString()}`);
-    console.log(`📊 Borrower balance after: $${borrowerWallet.balance.toLocaleString()}`);
+    console.log(`📊 Lender balance after: ₦${lenderWallet.balance.toLocaleString()}`);
+    console.log(`📊 Borrower balance after: ₦${borrowerWallet.balance.toLocaleString()}`);
 
     // Add investment to loan
     const newInvestment = {
@@ -438,6 +438,86 @@ router.post('/loan/:id/invest', protect, async (req, res) => {
     
     console.log(`✅ Loan updated successfully. New status: ${updatedLoan.status}`);
 
+    // Create notifications for both lender and borrower
+    try {
+      // Notification for the borrower (loan funding received)
+      await NotificationService.createNotification({
+        recipientId: loan.borrower._id,
+        type: 'loan_funded',
+        title: '🎉 Loan Funding Received!',
+        message: `Your loan has received ₦${parseFloat(investmentAmount).toLocaleString()} from ${req.user.firstName} ${req.user.lastName}${notes ? ` - "${notes}"` : ''}`,
+        content: `Investment Details:\n\nAmount: ₦${parseFloat(investmentAmount).toLocaleString()}\nFrom: ${req.user.firstName} ${req.user.lastName}\nLoan Purpose: ${loan.purpose}\nTotal Loan Amount: ₦${loan.loanAmount.toLocaleString()}\n\n${notes ? `📝 Investment Notes:\n"${notes}"\n\n` : ''}${updatedLoan.status === 'funded' ? '🎯 Congratulations! Your loan is now fully funded and ready for disbursement!\n\n' : `📊 Funding Progress: ₦${updatedLoan.fundingProgress.fundedAmount.toLocaleString()} of ₦${loan.loanAmount.toLocaleString()} funded (${Math.round((updatedLoan.fundingProgress.fundedAmount / loan.loanAmount) * 100)}%)\n\n`}Your new wallet balance: ₦${borrowerWallet.balance.toLocaleString()}`,
+        priority: 'high',
+        actionRequired: false,
+        action: {
+          type: 'view',
+          url: '/dashboard',
+          buttonText: 'View Dashboard'
+        },
+        relatedEntities: {
+          loanId: loan._id,
+          lenderId: req.user.id,
+          amount: parseFloat(investmentAmount),
+          currency: borrowerWallet.currency
+        },
+        metadata: {
+          loanId: loan._id,
+          lenderName: `${req.user.firstName} ${req.user.lastName}`,
+          lenderEmail: req.user.email,
+          investmentAmount: parseFloat(investmentAmount),
+          loanAmount: loan.loanAmount,
+          loanPurpose: loan.purpose,
+          newBalance: borrowerWallet.balance,
+          loanStatus: updatedLoan.status,
+          isFullyFunded: updatedLoan.status === 'funded',
+          fundingProgress: Math.round((updatedLoan.fundingProgress.fundedAmount / loan.loanAmount) * 100),
+          notes: notes || null,
+          hasNotes: !!notes
+        }
+      });
+
+      // Notification for the lender (investment successful)
+      await NotificationService.createNotification({
+        recipientId: req.user.id,
+        type: 'investment_successful',
+        title: '✅ Investment Successful!',
+        message: `You successfully invested ₦${parseFloat(investmentAmount).toLocaleString()} in ${loan.borrower.firstName} ${loan.borrower.lastName}'s loan${updatedLoan.status === 'funded' ? ' - Loan Fully Funded!' : ''}`,
+        content: `Investment Details:\n\nAmount Invested: ₦${parseFloat(investmentAmount).toLocaleString()}\nBorrower: ${loan.borrower.firstName} ${loan.borrower.lastName}\nLoan Purpose: ${loan.purpose}\nTotal Loan Amount: ₦${loan.loanAmount.toLocaleString()}\n\n${notes ? `📝 Your Investment Notes:\n"${notes}"\n\n` : ''}${updatedLoan.status === 'funded' ? '🎯 Congratulations! You\'ve helped fully fund this loan!\n\n' : `📊 Funding Progress: ₦${updatedLoan.fundingProgress.fundedAmount.toLocaleString()} of ₦${loan.loanAmount.toLocaleString()} funded (${Math.round((updatedLoan.fundingProgress.fundedAmount / loan.loanAmount) * 100)}%)\n\n`}Your remaining wallet balance: ₦${lenderWallet.balance.toLocaleString()}`,
+        priority: 'normal',
+        actionRequired: false,
+        action: {
+          type: 'view',
+          url: '/lender/investments',
+          buttonText: 'View Investments'
+        },
+        relatedEntities: {
+          loanId: loan._id,
+          borrowerId: loan.borrower._id,
+          amount: parseFloat(investmentAmount),
+          currency: lenderWallet.currency
+        },
+        metadata: {
+          loanId: loan._id,
+          borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+          borrowerEmail: loan.borrower.email,
+          investmentAmount: parseFloat(investmentAmount),
+          loanAmount: loan.loanAmount,
+          loanPurpose: loan.purpose,
+          remainingBalance: lenderWallet.balance,
+          loanStatus: updatedLoan.status,
+          isFullyFunded: updatedLoan.status === 'funded',
+          fundingProgress: Math.round((updatedLoan.fundingProgress.fundedAmount / loan.loanAmount) * 100),
+          notes: notes || null,
+          hasNotes: !!notes
+        }
+      });
+
+      console.log(`📧 Notifications sent to borrower and lender for investment ${baseReference}`);
+    } catch (notificationError) {
+      // Log notification error but don't fail the investment
+      console.error('Error creating investment notifications:', notificationError);
+    }
+
     // Update lender's investment statistics
     try {
       await req.user.updateInvestmentStats(
@@ -453,7 +533,7 @@ router.post('/loan/:id/invest', protect, async (req, res) => {
 
     res.status(200).json({
       status: 'success',
-      message: `Successfully invested $${investmentAmount.toLocaleString()} in loan application`,
+      message: `Successfully invested ₦${investmentAmount.toLocaleString()} in loan application`,
       data: {
         loan: {
           id: updatedLoan._id,
@@ -763,11 +843,30 @@ router.post('/loan/:id/fund', protect, async (req, res) => {
         endDate: endDate
       },
       { new: true }
-    );
+    ).populate('borrower', 'firstName lastName email');
+
+    // Send notification to borrower about loan funding
+    try {
+      const NotificationService = require('../services/notificationService');
+      
+      await NotificationService.notifyLoanFunded({
+        borrowerId: updatedLoan.borrower._id,
+        borrowerName: `${updatedLoan.borrower.firstName} ${updatedLoan.borrower.lastName}`,
+        loanId: updatedLoan._id,
+        loanAmount: updatedLoan.loanAmount,
+        fundedAmount: amount,
+        lenderName: `${req.user.firstName} ${req.user.lastName}`
+      });
+      
+      console.log(`📧 Loan funded notification sent to borrower ${updatedLoan.borrower._id}`);
+    } catch (notificationError) {
+      console.error('Error sending borrower funding notification:', notificationError);
+      // Don't fail the funding if notifications fail
+    }
 
     res.status(200).json({
       status: 'success',
-      message: `Successfully funded loan with $${amount.toLocaleString()}`,
+      message: `Successfully funded loan with ₦${amount.toLocaleString()}`,
       data: {
         loan: {
           id: updatedLoan._id,
@@ -948,7 +1047,7 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
     if (parseFloat(investmentAmount) > loan.loanAmount) {
       return res.status(400).json({
         status: 'error',
-        message: `Investment amount cannot exceed loan amount. Maximum: $${loan.loanAmount.toLocaleString()}`
+        message: `Investment amount cannot exceed loan amount. Maximum: ₦${loan.loanAmount.toLocaleString()}`
       });
     }
 
@@ -965,7 +1064,7 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
     if (lenderWallet.balance < parseFloat(investmentAmount)) {
       return res.status(400).json({
         status: 'error',
-        message: `Insufficient wallet balance. Available: $${lenderWallet.balance.toLocaleString()}, Required: $${parseFloat(investmentAmount).toLocaleString()}`,
+        message: `Insufficient wallet balance. Available: ₦${lenderWallet.balance.toLocaleString()}, Required: ₦${parseFloat(investmentAmount).toLocaleString()}`,
         data: {
           availableBalance: lenderWallet.balance,
           requiredAmount: parseFloat(investmentAmount),
@@ -974,8 +1073,8 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
       });
     }
 
-    console.log(`💰 Funding loan ${req.params.id}: Lender ${req.user.email} funding $${parseFloat(investmentAmount)}`);
-    console.log(`📊 Lender balance before: $${lenderWallet.balance.toLocaleString()}`);
+    console.log(`💰 Funding loan ${req.params.id}: Lender ${req.user.email} funding ₦${parseFloat(investmentAmount)}`);
+    console.log(`📊 Lender balance before: ₦${lenderWallet.balance.toLocaleString()}`);
 
     // Get borrower wallet
     const borrowerWallet = await Wallet.findOne({ user: loan.borrower._id });
@@ -986,7 +1085,7 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
       });
     }
 
-    console.log(`📊 Borrower balance before: $${borrowerWallet.balance.toLocaleString()}`);
+    console.log(`📊 Borrower balance before: ₦${borrowerWallet.balance.toLocaleString()}`);
 
     // Generate transaction reference
     const reference = `FUND_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
@@ -1042,8 +1141,8 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
     await borrowerWallet.save();
 
     console.log(`✅ Wallet updates completed:`);
-    console.log(`📊 Lender balance after: $${lenderWallet.balance.toLocaleString()}`);
-    console.log(`📊 Borrower balance after: $${borrowerWallet.balance.toLocaleString()}`);
+    console.log(`📊 Lender balance after: ₦${lenderWallet.balance.toLocaleString()}`);
+    console.log(`📊 Borrower balance after: ₦${borrowerWallet.balance.toLocaleString()}`);
     
     // Debug: Log the actual wallet balance values
     console.log(`🔍 DEBUG - Lender wallet balance: ${lenderWallet.balance}`);
@@ -1078,12 +1177,10 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
       // Also notify admin about the loan funding
       await NotificationService.notifyAdminLoanFunded({
         loanId: loan._id,
-        borrowerId: loan.borrower._id,
-        lenderId: req.user.id,
-        amount: parseFloat(investmentAmount),
         borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
         lenderName: `${req.user.firstName} ${req.user.lastName}`,
-        loanPurpose: loan.purpose
+        fundedAmount: parseFloat(investmentAmount),
+        loanAmount: loan.loanAmount
       });
 
       console.log(`📧 Notifications sent to lender, borrower, and admin via NotificationService`);
@@ -1154,9 +1251,28 @@ router.post('/loan/:id/accept', protect, async (req, res) => {
       // Don't fail the entire transaction if collateral update fails
     }
 
+    // Send notification to borrower about loan funding
+    try {
+      const NotificationService = require('../services/notificationService');
+      
+      await NotificationService.notifyLoanFunded({
+        borrowerId: loan.borrower._id,
+        borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+        loanId: updatedLoan._id,
+        loanAmount: loan.loanAmount,
+        fundedAmount: parseFloat(investmentAmount),
+        lenderName: `${req.user.firstName} ${req.user.lastName}`
+      });
+      
+      console.log(`📧 Loan funded notification sent to borrower ${loan.borrower._id}`);
+    } catch (notificationError) {
+      console.error('Error sending borrower funding notification:', notificationError);
+      // Don't fail the funding if notifications fail
+    }
+
     res.status(200).json({
       status: 'success',
-      message: `Successfully funded loan with $${parseFloat(investmentAmount).toLocaleString()}`,
+      message: `Successfully funded loan with ₦${parseFloat(investmentAmount).toLocaleString()}`,
       data: {
         loan: {
           id: updatedLoan._id,
@@ -1291,37 +1407,47 @@ router.get('/funded-loans', protect, async (req, res) => {
     console.log('✅ Proceeding to fetch funded loans for user:', req.user.id);
 
     const loans = await Loan.find({
-      fundedBy: req.user.id,
+      'fundingProgress.investors.user': req.user.id,
       status: { $in: ['approved', 'funded', 'active', 'completed'] }
     })
     .populate('borrower', 'firstName lastName email')
     .sort({ fundedAt: -1, approvedAt: -1 });
 
-    const fundedLoans = loans.map(loan => ({
-      id: loan._id,
-      borrower: {
-        name: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
-        email: loan.borrower.email
-      },
-      loanAmount: loan.loanAmount,
-      fundedAmount: loan.fundedAmount || loan.loanAmount,
-      purpose: loan.purpose,
-      purposeDescription: loan.purposeDescription,
-      duration: loan.duration,
-      interestRate: loan.interestRate,
-      status: loan.status,
-      fundedAt: loan.fundedAt || loan.approvedAt,
-      startDate: loan.startDate,
-      endDate: loan.endDate,
-      monthlyPayment: loan.monthlyPayment,
-      totalRepayment: loan.totalRepayment,
-      amountPaid: loan.amountPaid || 0,
-      amountRemaining: loan.amountRemaining || loan.totalRepayment,
-      nextPaymentDate: loan.nextPaymentDate,
-      repayments: loan.repayments || [],
-      collateral: loan.collateral,
-      riskScore: loan.riskScore
-    }));
+    const fundedLoans = loans.map(loan => {
+      // Find the user's specific investment in this loan
+      const userInvestment = loan.fundingProgress.investors.find(inv => 
+        inv.user.toString() === req.user.id.toString()
+      );
+      
+      return {
+        id: loan._id,
+        borrower: {
+          name: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+          email: loan.borrower.email
+        },
+        loanAmount: loan.loanAmount,
+        fundedAmount: userInvestment ? userInvestment.amount : 0, // User's specific investment amount
+        totalFundedAmount: loan.fundingProgress.fundedAmount || 0, // Total funded by all investors
+        purpose: loan.purpose,
+        purposeDescription: loan.purposeDescription,
+        duration: loan.duration,
+        interestRate: loan.interestRate,
+        status: loan.status,
+        createdAt: loan.createdAt, // Application date
+        fundedAt: loan.fundedAt || loan.approvedAt,
+        startDate: loan.startDate,
+        endDate: loan.endDate,
+        monthlyPayment: loan.monthlyPayment,
+        totalRepayment: loan.totalRepayment,
+        amountPaid: loan.amountPaid || 0,
+        amountRemaining: loan.amountRemaining || loan.totalRepayment,
+        nextPaymentDate: loan.nextPaymentDate,
+        repayments: loan.repayments || [],
+        collateral: loan.collateral,
+        riskScore: loan.riskScore,
+        userInvestment: userInvestment // Include the full investment details
+      };
+    });
 
     res.status(200).json({
       status: 'success',
@@ -1329,7 +1455,13 @@ router.get('/funded-loans', protect, async (req, res) => {
         fundedLoans,
         total: fundedLoans.length,
         totalFunded: fundedLoans.reduce((sum, loan) => sum + loan.fundedAmount, 0),
-        totalReturns: fundedLoans.reduce((sum, loan) => sum + loan.amountPaid, 0)
+        totalReturns: fundedLoans.reduce((sum, loan) => sum + loan.amountPaid, 0),
+        activeInvestments: fundedLoans.filter(loan => 
+          loan.status === 'active' || loan.status === 'funded' || loan.status === 'approved'
+        ).length,
+        repaidInvestments: fundedLoans.filter(loan => 
+          loan.status === 'completed' || loan.status === 'repaid'
+        ).length
       }
     });
 
@@ -1746,8 +1878,8 @@ router.get('/dashboard-charts', protect, async (req, res) => {
       },
       {
         $group: {
-          _id: {
-            $switch: {
+            _id: {
+              $switch: {
               branches: [
                 { case: { $lt: ['$riskScore', 3] }, then: 'Low Risk' },
                 { case: { $lt: ['$riskScore', 7] }, then: 'Medium Risk' },
@@ -1845,7 +1977,7 @@ router.get('/notifications', protect, async (req, res) => {
     const notifications = await Notification.find({
       recipient: req.user.id
     })
-    .populate('sender', 'firstName lastName email userType')
+    .populate('recipient', 'firstName lastName email userType')
     .sort({ createdAt: -1 })
     .limit(50); // Limit to last 50 notifications
 

@@ -74,6 +74,23 @@ const register = async (req, res) => {
     // Send OTP email
     await emailService.sendOTPEmail(email, otp, firstName);
 
+    // Send notification to admins about new user registration
+    try {
+      const NotificationService = require('../services/notificationService');
+      
+      await NotificationService.notifyAdminNewUserRegistration({
+        userId: user._id,
+        userType: user.userType,
+        userName: `${user.firstName} ${user.lastName}`,
+        userEmail: user.email
+      });
+      
+      console.log(`📧 New user registration notification sent to admins for ${user.userType}: ${user.email}`);
+    } catch (notificationError) {
+      console.error('Error sending admin new user notification:', notificationError);
+      // Don't fail registration if notifications fail
+    }
+
     // Generate tokens
     const accessToken = generateToken(user._id, user.userType);
     const refreshToken = generateRefreshToken(user._id);

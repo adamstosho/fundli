@@ -106,7 +106,7 @@ const referralSchema = new mongoose.Schema({
     },
     maxReward: {
       type: Number,
-      default: 1000 // $1000 max reward
+      default: 1000 // ₦1000 max reward
     }
   },
   
@@ -371,9 +371,9 @@ referralSchema.statics.getReferralStats = function(userId) {
     },
     {
       $group: {
-        _id: '$status',
+        _id: null,
         count: { $sum: 1 },
-        totalRewards: { $sum: '$rewardAmount' }
+        totalRewards: { $sum: 1 }
       }
     }
   ]);

@@ -230,7 +230,7 @@ class EmailService {
   async sendLoanApprovalEmail(email, name, loanDetails) {
     try {
       const subject = 'Loan Application Approved - Fundli';
-      const text = `Hello ${name},\n\nCongratulations! Your loan application has been approved.\n\nLoan Amount: $${loanDetails.amount}\nPurpose: ${loanDetails.purpose}\nDuration: ${loanDetails.duration} months\n\nBest regards,\nFundli Team`;
+      const text = `Hello ${name},\n\nCongratulations! Your loan application has been approved.\n\nLoan Amount: ₦${loanDetails.amount}\nPurpose: ${loanDetails.purpose}\nDuration: ${loanDetails.duration} months\n\nBest regards,\nFundli Team`;
       
       const html = this.generateLoanApprovalEmailHTML(name, loanDetails);
 
@@ -282,7 +282,7 @@ class EmailService {
   async sendRepaymentReminderEmail(email, name, repaymentDetails) {
     try {
       const subject = 'Payment Reminder - Fundli';
-      const text = `Hello ${name},\n\nThis is a friendly reminder about your upcoming payment.\n\nAmount Due: $${repaymentDetails.amount}\nDue Date: ${repaymentDetails.dueDate}\n\nPlease ensure timely payment to avoid late fees.\n\nBest regards,\nFundli Team`;
+      const text = `Hello ${name},\n\nThis is a friendly reminder about your upcoming payment.\n\nAmount Due: ₦${repaymentDetails.amount}\nDue Date: ${repaymentDetails.dueDate}\n\nPlease ensure timely payment to avoid late fees.\n\nBest regards,\nFundli Team`;
       
       const html = this.generateRepaymentReminderEmailHTML(name, repaymentDetails);
 
@@ -308,7 +308,7 @@ class EmailService {
   async sendReferralRewardEmail(email, name, rewardDetails) {
     try {
       const subject = 'Referral Reward Earned - Fundli';
-      const text = `Hello ${name},\n\nCongratulations! You've earned a referral reward.\n\nReward Amount: $${rewardDetails.amount}\nReferral: ${rewardDetails.referralName}\n\nYour reward has been added to your wallet.\n\nBest regards,\nFundli Team`;
+      const text = `Hello ${name},\n\nCongratulations! You've earned a referral reward.\n\nReward Amount: ₦${rewardDetails.amount}\nReferral: ${rewardDetails.referralName}\n\nYour reward has been added to your wallet.\n\nBest regards,\nFundli Team`;
       
       const html = this.generateReferralRewardEmailHTML(name, rewardDetails);
 
@@ -595,7 +595,7 @@ class EmailService {
             <div class="loan-details">
               <div class="detail-row">
                 <span>Loan Amount:</span>
-                <strong>$${loanDetails.amount}</strong>
+                <strong>₦${loanDetails.amount}</strong>
               </div>
               <div class="detail-row">
                 <span>Purpose:</span>
@@ -693,7 +693,7 @@ class EmailService {
             <h2>Hello ${name},</h2>
             <p>This is a friendly reminder about your upcoming payment.</p>
             <div class="reminder-box">
-              <p><strong>Amount Due:</strong> $${repaymentDetails.amount}</p>
+              <p><strong>Amount Due:</strong> ₦${repaymentDetails.amount}</p>
               <p><strong>Due Date:</strong> ${repaymentDetails.dueDate}</p>
             </div>
             <p>Please ensure timely payment to avoid late fees.</p>
@@ -739,7 +739,7 @@ class EmailService {
             <h2>Hello ${name},</h2>
             <p>Congratulations! You've earned a referral reward.</p>
             <div class="reward-box">
-              <p><strong>Reward Amount:</strong> $${rewardDetails.amount}</p>
+              <p><strong>Reward Amount:</strong> ₦${rewardDetails.amount}</p>
               <p><strong>Referral:</strong> ${rewardDetails.referralName}</p>
             </div>
             <p>Your reward has been added to your wallet.</p>

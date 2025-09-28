@@ -2,9 +2,8 @@
 const CACHE_NAME = 'fundli-v1';
 const urlsToCache = [
   '/',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
-  '/manifest.json'
+  '/manifest.json',
+  '/icon.svg'
 ];
 
 // Install event
@@ -12,18 +11,41 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        return cache.addAll(urlsToCache);
+        return cache.addAll(urlsToCache).catch((error) => {
+          console.log('Cache addAll failed:', error);
+          // Continue even if some files fail to cache
+          return Promise.resolve();
+        });
       })
   );
 });
 
 // Fetch event
 self.addEventListener('fetch', (event) => {
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  // Skip requests to external domains
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
         // Return cached version or fetch from network
-        return response || fetch(event.request);
+        if (response) {
+          return response;
+        }
+        
+        return fetch(event.request).catch(() => {
+          // Return a fallback for failed requests
+          if (event.request.destination === 'document') {
+            return caches.match('/');
+          }
+        });
       })
   );
 });
@@ -34,8 +56,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: 'You have a new notification from FUNDLI',
-    icon: '/icon-192x192.png',
-    badge: '/badge-72x72.png',
+    icon: '/icon.svg',
+    badge: '/icon.svg',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
@@ -45,12 +67,12 @@ self.addEventListener('push', (event) => {
       {
         action: 'explore',
         title: 'View Details',
-        icon: '/icon-192x192.png'
+        icon: '/icon.svg'
       },
       {
         action: 'close',
         title: 'Close',
-        icon: '/icon-192x192.png'
+        icon: '/icon.svg'
       }
     ]
   };

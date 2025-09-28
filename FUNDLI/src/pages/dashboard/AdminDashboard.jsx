@@ -102,7 +102,7 @@ const AdminDashboard = () => {
             activities.push({
               id: loan._id,
               type: `loan_${loan.status}`,
-              message: `Loan application for $${loan.loanAmount} - ${loan.purpose} (${loan.status})`,
+              message: `Loan application for ₦${loan.loanAmount} - ${loan.purpose} (${loan.status})`,
               timestamp: loan.createdAt,
               userType: 'loan'
             });
@@ -187,17 +187,17 @@ const AdminDashboard = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900 dark:text-white">
             Admin Dashboard
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-neutral-600 dark:text-neutral-400 mt-1">
             Welcome back, {user?.name}. Here's your platform overview.
           </p>
         </div>
         <button
           onClick={loadDashboardData}
           disabled={isLoading}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           <span>Refresh Data</span>
@@ -205,14 +205,14 @@ const AdminDashboard = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
+      <div className="border-b border-neutral-200 dark:border-secondary-700">
         <nav className="-mb-px flex space-x-8 overflow-x-auto">
           <button
             onClick={() => setActiveTab('overview')}
             className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
               activeTab === 'overview'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
             }`}
           >
             Overview
@@ -221,8 +221,8 @@ const AdminDashboard = () => {
             onClick={() => setActiveTab('loans')}
             className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
               activeTab === 'loans'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
             }`}
           >
             Loan Applications
@@ -231,8 +231,8 @@ const AdminDashboard = () => {
             onClick={() => setActiveTab('collateral')}
             className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
               activeTab === 'collateral'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
             }`}
           >
             Collateral Verification
@@ -241,8 +241,8 @@ const AdminDashboard = () => {
             onClick={() => setActiveTab('feedback')}
             className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
               activeTab === 'feedback'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
             }`}
           >
             Feedback Management
@@ -259,19 +259,19 @@ const AdminDashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+              className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                     Total Users
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                     {stats.totalUsers.toLocaleString()}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                  <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center">
+                  <Users className="h-6 w-6 text-primary-600 dark:text-primary-400" />
                 </div>
               </div>
             </motion.div>
@@ -280,19 +280,19 @@ const AdminDashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+              className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                     Pending KYC
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                     {stats.pendingKYC}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center">
-                  <Shield className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                <div className="w-12 h-12 bg-warning/20 dark:bg-warning/20 rounded-lg flex items-center justify-center">
+                  <Shield className="h-6 w-6 text-warning dark:text-warning/50" />
                 </div>
               </div>
             </motion.div>
@@ -301,19 +301,19 @@ const AdminDashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+              className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                     Pending Loans
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                     {stats.pendingLoans}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-                  <FileText className="h-6 w-6 text-green-600 dark:text-green-400" />
+                <div className="w-12 h-12 bg-success/20 dark:bg-success/20 rounded-lg flex items-center justify-center">
+                  <FileText className="h-6 w-6 text-success dark:text-success/50" />
                 </div>
               </div>
             </motion.div>
@@ -322,14 +322,14 @@ const AdminDashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+              className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                     Total Transactions
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                     {stats.totalTransactions.toLocaleString()}
                   </p>
                 </div>
@@ -347,7 +347,7 @@ const AdminDashboard = () => {
 
           {/* Quick Actions */}
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-xl font-semibold text-secondary-900 dark:text-white mb-4">
               Quick Actions
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -360,18 +360,18 @@ const AdminDashboard = () => {
                 >
                   <Link
                     to={action.href}
-                    className="block bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200 group"
+                    className="block bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200 group"
                   >
                     <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
                       <action.icon className="h-6 w-6 text-white" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-2">
                       {action.title}
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                    <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-4">
                       {action.description}
                     </p>
-                    <div className="flex items-center text-blue-600 dark:text-blue-400 font-medium text-sm group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                    <div className="flex items-center text-primary-600 dark:text-primary-400 font-medium text-sm group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
                       Access
                       <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
                     </div>
@@ -386,34 +386,34 @@ const AdminDashboard = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.8 }}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+            className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                 Recent Activities
               </h3>
-              <BarChart3 className="h-5 w-5 text-gray-400" />
+              <BarChart3 className="h-5 w-5 text-neutral-400" />
             </div>
         
         <div className="space-y-4">
           {recentActivities.map((activity) => (
-            <div key={activity.id} className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div key={activity.id} className="flex items-center space-x-4 p-4 bg-neutral-50 dark:bg-secondary-800 rounded-lg">
               <div className="flex-shrink-0">
                 {getActivityIcon(activity.type)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                <p className="text-sm font-medium text-secondary-900 dark:text-white">
                   {activity.message}
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   User Type: {activity.userType}
                 </p>
               </div>
               <div className="flex-shrink-0 text-right">
-                <p className="text-xs text-gray-500 dark:text-gray-500">
+                <p className="text-xs text-neutral-500 dark:text-neutral-500">
                   {new Date(activity.timestamp).toLocaleDateString()}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-500">
+                <p className="text-xs text-neutral-500 dark:text-neutral-500">
                   {new Date(activity.timestamp).toLocaleTimeString()}
                 </p>
               </div>
@@ -430,25 +430,25 @@ const AdminDashboard = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.9 }}
-            className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+            className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-                  <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+                <div className="w-12 h-12 bg-success/20 dark:bg-success/20 rounded-lg flex items-center justify-center">
+                  <CheckCircle className="h-6 w-6 text-success dark:text-success/50" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                     Platform Status: Healthy
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-neutral-600 dark:text-neutral-400">
                     All systems are running smoothly
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">99.9%</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Uptime</p>
+                <p className="text-2xl font-bold text-success dark:text-success/50">99.9%</p>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">Uptime</p>
               </div>
             </div>
           </motion.div>
@@ -468,17 +468,17 @@ const AdminDashboard = () => {
       {/* Feedback Management Tab */}
       {activeTab === 'feedback' && (
         <div className="space-y-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                  <MessageSquare className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center">
+                  <MessageSquare className="h-6 w-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h2 className="text-xl font-bold text-secondary-900 dark:text-white">
                     Feedback Management
                   </h2>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-neutral-600 dark:text-neutral-400">
                     Send feedback to borrowers and lenders, manage communication
                   </p>
                 </div>
@@ -486,39 +486,39 @@ const AdminDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/30 rounded-lg p-6 border border-blue-200 dark:border-blue-800">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/30 rounded-lg p-6 border border-primary-200 dark:border-primary-800">
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
                     <MessageSquare className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Send Feedback</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Communicate with users</p>
+                    <h3 className="font-semibold text-secondary-900 dark:text-white">Send Feedback</h3>
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400">Communicate with users</p>
                   </div>
                 </div>
-                <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+                <p className="text-sm text-neutral-700 dark:text-neutral-300 mb-4">
                   Send feedback to borrowers and lenders about their loan applications, collateral verification, or any other matters.
                 </p>
                 <button
                   onClick={() => setShowFeedbackModal(true)}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+                  className="w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center space-x-2"
                 >
                   <MessageSquare className="h-4 w-4" />
                   <span>Send Feedback</span>
                 </button>
               </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/30 rounded-lg p-6 border border-green-200 dark:border-green-800">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/30 rounded-lg p-6 border border-success/30 dark:border-success">
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-success rounded-lg flex items-center justify-center">
                     <CheckCircle className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">View Responses</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Check user replies</p>
+                    <h3 className="font-semibold text-secondary-900 dark:text-white">View Responses</h3>
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400">Check user replies</p>
                   </div>
                 </div>
-                <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+                <p className="text-sm text-neutral-700 dark:text-neutral-300 mb-4">
                   View and manage responses from borrowers and lenders to your feedback messages.
                 </p>
                 <button
@@ -526,24 +526,24 @@ const AdminDashboard = () => {
                     // This would open a feedback inbox or management interface
                     alert('Feedback inbox feature coming soon!');
                   }}
-                  className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
+                  className="w-full px-4 py-2 bg-success text-white rounded-lg hover:bg-success transition-colors flex items-center justify-center space-x-2"
                 >
                   <CheckCircle className="h-4 w-4" />
                   <span>View Responses</span>
                 </button>
               </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-900/30 rounded-lg p-6 border border-purple-200 dark:border-purple-800">
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-900/30 rounded-lg p-6 border border-accent-200 dark:border-accent-800">
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-accent-600 rounded-lg flex items-center justify-center">
                     <BarChart3 className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Feedback Analytics</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Track communication</p>
+                    <h3 className="font-semibold text-secondary-900 dark:text-white">Feedback Analytics</h3>
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400">Track communication</p>
                   </div>
                 </div>
-                <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+                <p className="text-sm text-neutral-700 dark:text-neutral-300 mb-4">
                   View analytics and statistics about your feedback communication with users.
                 </p>
                 <button
@@ -551,7 +551,7 @@ const AdminDashboard = () => {
                     // This would open analytics
                     alert('Feedback analytics feature coming soon!');
                   }}
-                  className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2"
+                  className="w-full px-4 py-2 bg-accent-600 text-white rounded-lg hover:bg-accent-700 transition-colors flex items-center justify-center space-x-2"
                 >
                   <BarChart3 className="h-4 w-4" />
                   <span>View Analytics</span>
@@ -559,12 +559,12 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            <div className="mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <div className="mt-8 p-4 bg-warning/10 dark:bg-warning/20 border border-warning/30 dark:border-warning rounded-lg">
               <div className="flex items-start space-x-3">
-                <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+                <AlertCircle className="h-5 w-5 text-warning dark:text-warning/50 mt-0.5" />
                 <div>
-                  <h4 className="font-medium text-yellow-800 dark:text-yellow-200">Quick Access</h4>
-                  <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                  <h4 className="font-medium text-warning dark:text-warning/30">Quick Access</h4>
+                  <p className="text-sm text-warning dark:text-warning/40 mt-1">
                     You can also send feedback directly from the Loan Applications and Collateral Verification tabs by clicking the "Chat Borrower" or "Chat Lender" buttons.
                   </p>
                 </div>

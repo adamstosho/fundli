@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 const paystackService = require('./paystackService');
 const emailService = require('./emailService');
+const NotificationService = require('./notificationService');
 const logger = require('../utils/logger');
 
 class RepaymentService {
@@ -139,6 +140,58 @@ class RepaymentService {
         
         // Send confirmation email
         await this.sendPaymentConfirmation(loan, duePayment, totalAmount, lateFee);
+        
+        // Send notification to lender about repayment received
+        try {
+          const lender = await User.findById(loan.fundedBy);
+          if (lender) {
+            await NotificationService.notifyRepaymentReceived({
+              lenderId: lender._id,
+              lenderName: `${lender.firstName} ${lender.lastName}`,
+              loanId: loan._id,
+              borrowerName: `${borrower.firstName} ${borrower.lastName}`,
+              repaymentAmount: totalAmount,
+              loanAmount: loan.loanAmount
+            });
+            
+            logger.info('Repayment notification sent to lender', {
+              lenderId: lender._id,
+              loanId: loan._id,
+              amount: totalAmount
+            });
+          }
+        } catch (notificationError) {
+          logger.error('Failed to send repayment notification to lender', {
+            loanId: loan._id,
+            error: notificationError.message
+          });
+          // Don't fail the payment if notifications fail
+        }
+
+        // Send notification to admins about automated repayment
+        try {
+          const lender = await User.findById(loan.fundedBy);
+          if (lender) {
+            await NotificationService.notifyAdminLoanRepayment({
+              loanId: loan._id,
+              borrowerName: `${borrower.firstName} ${borrower.lastName}`,
+              lenderName: `${lender.firstName} ${lender.lastName}`,
+              repaymentAmount: totalAmount,
+              loanAmount: loan.loanAmount
+            });
+            
+            logger.info('Automated repayment notification sent to admins', {
+              loanId: loan._id,
+              amount: totalAmount
+            });
+          }
+        } catch (notificationError) {
+          logger.error('Failed to send admin repayment notification', {
+            loanId: loan._id,
+            error: notificationError.message
+          });
+          // Don't fail the payment if notifications fail
+        }
         
         logger.info('Loan payment processed successfully', {
           loanId: loan._id,
@@ -324,7 +377,7 @@ class RepaymentService {
       await emailService.sendEmail({
         to: borrower.email,
         subject: 'Insufficient Funds for Loan Payment - Fundli',
-        text: `Your loan payment of $${requiredAmount} could not be processed due to insufficient funds. Please add funds to your wallet.`,
+        text: `Your loan payment of ₦${requiredAmount} could not be processed due to insufficient funds. Please add funds to your wallet.`,
         html: this.generateInsufficientFundsEmailHTML(
           borrower.firstName,
           requiredAmount,
@@ -372,7 +425,7 @@ class RepaymentService {
         await emailService.sendEmail({
           to: borrower.email,
           subject: 'Loan Payment Failed - Fundli',
-          text: `Your loan payment of $${payment.amount} failed. Reason: ${error}`,
+          text: `Your loan payment of ₦${payment.amount} failed. Reason: ${error}`,
           html: this.generatePaymentFailureEmailHTML(
             borrower.firstName,
             payment.amount,
@@ -513,7 +566,7 @@ class RepaymentService {
       await emailService.sendEmail({
         to: borrower.email,
         subject: 'Payment Confirmation - Fundli',
-        text: `Your loan payment of $${amount} has been processed successfully.`,
+        text: `Your loan payment of ₦${amount} has been processed successfully.`,
         html: this.generatePaymentConfirmationEmailHTML(
           borrower.firstName,
           amount,
@@ -539,7 +592,7 @@ class RepaymentService {
   calculateLateFee(amount, daysOverdue) {
     if (daysOverdue <= 0) return 0;
     
-    // 5% of payment amount per week overdue, minimum $10
+    // 5% of payment amount per week overdue, minimum ₦10
     const weeklyFee = amount * 0.05;
     const totalFee = weeklyFee * Math.ceil(daysOverdue / 7);
     
@@ -627,12 +680,12 @@ class RepaymentService {
               </div>
               <div class="detail-row">
                 <span>Amount Paid:</span>
-                <strong>$${amount}</strong>
+                <strong>₦${amount}</strong>
               </div>
               ${lateFee > 0 ? `
               <div class="detail-row">
                 <span>Late Fee:</span>
-                <strong>$${lateFee}</strong>
+                <strong>₦${lateFee}</strong>
               </div>
               ` : ''}
             </div>
@@ -676,9 +729,9 @@ class RepaymentService {
             <h2>Hello ${name},</h2>
             <p>Your loan payment could not be processed due to insufficient funds.</p>
             <div class="warning-box">
-              <p><strong>Required Amount:</strong> $${requiredAmount}</p>
-              <p><strong>Available Balance:</strong> $${availableBalance}</p>
-              <p><strong>Shortfall:</strong> $${requiredAmount - availableBalance}</p>
+              <p><strong>Required Amount:</strong> ₦${requiredAmount}</p>
+              <p><strong>Available Balance:</strong> ₦${availableBalance}</p>
+              <p><strong>Shortfall:</strong> ₦${requiredAmount - availableBalance}</p>
             </div>
             <p>Please add funds to your wallet to complete the payment.</p>
           </div>
@@ -720,7 +773,7 @@ class RepaymentService {
             <h2>Hello ${name},</h2>
             <p>Your loan payment could not be processed.</p>
             <div class="error-box">
-              <p><strong>Amount:</strong> $${amount}</p>
+              <p><strong>Amount:</strong> ₦${amount}</p>
               <p><strong>Error:</strong> ${error}</p>
             </div>
             <p>Please try again or contact support if the issue persists.</p>

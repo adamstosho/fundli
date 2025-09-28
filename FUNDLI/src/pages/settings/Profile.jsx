@@ -192,10 +192,10 @@ const Profile = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-secondary-900 dark:text-white mb-2">
           Profile Settings
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-neutral-600 dark:text-neutral-400">
           Manage your personal information and account details
         </p>
       </div>
@@ -291,7 +291,7 @@ const Profile = () => {
                 </button>
                 <button
                   onClick={clearPreview}
-                  className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center"
+                  className="w-full bg-neutral-200 text-neutral-700 px-4 py-2 rounded-lg hover:bg-neutral-300 transition-colors flex items-center justify-center"
                 >
                   <X className="h-4 w-4 mr-2" />
                   Cancel
@@ -299,20 +299,20 @@ const Profile = () => {
               </div>
             )}
             
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-xl font-semibold text-secondary-900 dark:text-white mb-2">
               {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : 'User Name'}
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-neutral-600 dark:text-neutral-400 mb-4">
               Member since {formatDate(user?.createdAt)}
             </p>
             
             <div className="space-y-3 text-sm">
-              <div className="flex items-center justify-center space-x-2 text-gray-600 dark:text-gray-400">
+              <div className="flex items-center justify-center space-x-2 text-neutral-600 dark:text-neutral-400">
                 <Mail className="h-4 w-4" />
                 <span>{user?.email}</span>
               </div>
               {user?.phone && (
-                <div className="flex items-center justify-center space-x-2 text-gray-600 dark:text-gray-400">
+                <div className="flex items-center justify-center space-x-2 text-neutral-600 dark:text-neutral-400">
                   <Phone className="h-4 w-4" />
                   <span>{user.phone}</span>
                 </div>
@@ -320,11 +320,11 @@ const Profile = () => {
             </div>
 
             {/* Account Status */}
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Account Status</h4>
+            <div className="mt-6 pt-6 border-t border-neutral-200 dark:border-secondary-700">
+              <h4 className="text-sm font-medium text-secondary-900 dark:text-white mb-3">Account Status</h4>
               <div className="space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Email Verified</span>
+                  <span className="text-neutral-600 dark:text-neutral-400">Email Verified</span>
                   <span className={`px-2 py-1 rounded-full text-xs ${
                     user?.isEmailVerified 
                       ? 'bg-success/10 text-success' 
@@ -334,7 +334,7 @@ const Profile = () => {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Phone Verified</span>
+                  <span className="text-neutral-600 dark:text-neutral-400">Phone Verified</span>
                   <span className={`px-2 py-1 rounded-full text-xs ${
                     user?.isPhoneVerified 
                       ? 'bg-success/10 text-success' 
@@ -344,13 +344,13 @@ const Profile = () => {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">KYC Status</span>
+                  <span className="text-neutral-600 dark:text-neutral-400">KYC Status</span>
                   <span className={`px-2 py-1 rounded-full text-xs ${
                     user?.kycStatus === 'verified' 
                       ? 'bg-success/10 text-success'
                       : user?.kycStatus === 'pending'
                       ? 'bg-warning/10 text-warning'
-                      : 'bg-gray-100 text-gray-600'
+                      : 'bg-neutral-100 text-neutral-600'
                   }`}>
                     {user?.kycStatus || 'Not submitted'}
                   </span>
@@ -369,7 +369,7 @@ const Profile = () => {
         >
           <div className="card p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                 Personal Information
               </h3>
               <button
@@ -431,7 +431,7 @@ const Profile = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
+                    <Mail className="h-5 w-5 text-neutral-400" />
                   </div>
                   <input
                     id="email"
@@ -439,11 +439,11 @@ const Profile = () => {
                     type="email"
                     value={formData.email}
                     disabled={true} // Email cannot be changed
-                    className="input-field pl-10 bg-gray-50 dark:bg-gray-800 cursor-not-allowed"
+                    className="input-field pl-10 bg-neutral-50 dark:bg-secondary-800 cursor-not-allowed"
                     title="Email address cannot be changed"
                   />
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                   Email address cannot be changed for security reasons
                 </p>
               </div>
@@ -454,7 +454,7 @@ const Profile = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Phone className="h-5 w-5 text-gray-400" />
+                    <Phone className="h-5 w-5 text-neutral-400" />
                   </div>
                   <input
                     id="phone"
@@ -483,13 +483,13 @@ const Profile = () => {
                   className="input-field disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Tell us about yourself..."
                 />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                   {formData.bio.length}/500 characters
                 </p>
               </div>
 
               {isEditing && (
-                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex justify-end space-x-3 pt-4 border-t border-neutral-200 dark:border-secondary-700">
                   <button
                     type="button"
                     onClick={handleCancel}

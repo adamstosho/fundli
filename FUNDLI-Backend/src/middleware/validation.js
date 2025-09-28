@@ -206,7 +206,7 @@ const validateObjectId = (paramName = 'id') => {
       }
 
       // Basic ObjectId format validation
-      const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+      const objectIdRegex = /^[0-9a-fA-F]{24}₦/;
       if (!objectIdRegex.test(id)) {
         return res.status(HTTP_STATUS.BAD_REQUEST).json({
           status: 'error',

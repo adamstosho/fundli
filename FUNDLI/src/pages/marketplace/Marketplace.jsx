@@ -43,26 +43,88 @@ const Marketplace = () => {
         if (!response.ok) {
           const errorText = await response.text();
           console.error('API Error Response:', errorText);
-          throw new Error(`Failed to fetch lending pools: ${response.status} ${response.statusText}`);
+          throw new Error(`Failed to fetch loan pools: ${response.status} ${response.statusText}`);
         }
 
         const result = await response.json();
         console.log('Raw API response:', result);
         console.log('Pools data:', result.data?.pools);
-                const mappedLoans = (result.data.pools || []).map(pool => ({
+
+        // Also fetch user's investments to exclude loans they've already invested in
+        let userInvestments = [];
+        if (user?.userType === 'lender') {
+          try {
+            console.log('Fetching user investments...');
+            const investmentsResponse = await fetch('http://localhost:5000/api/lender/funded-loans', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (investmentsResponse.ok) {
+              const investmentsResult = await investmentsResponse.json();
+              userInvestments = investmentsResult.data?.fundedLoans || [];
+              console.log('User investments:', userInvestments);
+            }
+          } catch (error) {
+            console.log('Could not fetch user investments:', error);
+          }
+        }
+        
+        // Filter out funded loans and pools where current user has invested
+        const availablePools = (result.data?.pools || []).filter(pool => {
+          // Exclude pools that are funded, completed, or closed
+          if (pool.status === 'funded' || pool.status === 'completed' || pool.status === 'closed') {
+            return false;
+          }
+          
+          // Exclude pools where current user has already invested (from pool investors)
+          if (user?.userType === 'lender' && pool.investors) {
+            const hasUserInvested = pool.investors.some(investor => 
+              investor.user?.toString() === user.id?.toString() || 
+              investor.userId?.toString() === user.id?.toString()
+            );
+            if (hasUserInvested) {
+              return false;
+            }
+          }
+          
+          // Exclude pools that correspond to loans the user has already invested in
+          if (user?.userType === 'lender' && userInvestments.length > 0) {
+            const hasInvestedInRelatedLoan = userInvestments.some(investment => {
+              // Check if this pool is related to a loan the user has invested in
+              return investment.id === pool.id || 
+                     investment.poolId === pool.id ||
+                     investment.loanId === pool.id;
+            });
+            if (hasInvestedInRelatedLoan) {
+              return false;
+            }
+          }
+          
+          return true;
+        });
+        
+        console.log(`Filtered ${availablePools.length} available pools from ${result.data?.pools?.length || 0} total pools`);
+        console.log('Available pools:', availablePools.map(p => ({ id: p.id, name: p.name, status: p.status })));
+        
+        const mappedLoans = availablePools.map(pool => ({
           id: pool.id || pool._id || Math.random().toString(),
           purpose: pool.name || 'Lending Pool',
-          borrower: pool.creator?.firstName + ' ' + pool.creator?.lastName || 'Lender',
+          borrower: pool.creator?.name || 'Lender',
           amount: pool.poolSize || 0,
-          currency: pool.currency || 'USD',
-          category: 'business', // Default category since pools don't have categories yet
+          currency: pool.currency || 'NGN',
+          category: pool.category || 'personal',
           roi: pool.interestRate || 0,
           duration: pool.duration || 12,
-          riskScore: pool.riskLevel === 'low' ? 'A' : pool.riskLevel === 'medium' ? 'B' : 'C',
-          collateral: 'Pool Assets',
-          funded: pool.fundingProgress || 0,
-          image: null,
-          creatorId: pool.creator?.id || pool.creator?._id || pool.creator
+          riskScore: pool.riskLevel || 'B',
+          collateral: pool.collateral || 'Pool Assets',
+          funded: pool.fundedAmount || 0,
+          image: pool.image,
+          creatorId: pool.creator?.id || pool.creator?._id,
+          status: pool.status,
+          kycStatus: pool.kycStatus,
+          createdAt: pool.createdAt
         }));
         console.log('Mapped loans:', mappedLoans);
         setLoans(mappedLoans);
@@ -75,7 +137,7 @@ const Marketplace = () => {
     };
 
     loadMarketplaceData();
-  }, []);
+  }, [user?.id, user?.userType]);
 
   const handleDeleteClick = (loanId, loanName) => {
     // Check if the pool has any funding
@@ -149,7 +211,7 @@ const Marketplace = () => {
       'B': 'bg-warning text-white',
       'C': 'bg-error text-white'
     };
-    return colors[score] || 'bg-gray-500 text-white';
+    return colors[score] || 'bg-neutral-500 text-white';
   };
 
   const filteredLoans = loans.filter(loan => {
@@ -171,10 +233,10 @@ const Marketplace = () => {
     <div className="space-y-8">
       <div>
         <h1 className="text-h1 text-neutral-900 dark:text-white">
-          Loan Marketplace
+          Browse Loan Opportunities
         </h1>
         <p className="text-neutral-600 dark:text-neutral-400 mt-2">
-          Browse and invest in verified loan opportunities
+          Find and apply for loans from available lending pools
         </p>
       </div>
 
@@ -185,7 +247,7 @@ const Marketplace = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400" />
               <input
                 type="text"
-                placeholder="Search loans by purpose or borrower..."
+                placeholder="Search lending pools by name or lender..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100"
@@ -285,12 +347,12 @@ const Marketplace = () => {
                 to={`/marketplace/pool/${loan.id}`}
                 className="flex-1 btn-primary text-sm py-2 flex items-center justify-center"
               >
-                View Details
+                Apply for Loan
               </Link>
               {user?.userType === 'lender' && user?.id === loan.creatorId && (
                 <button
                   onClick={() => handleDeleteClick(loan.id, loan.purpose)}
-                  className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center"
+                  className="px-3 py-2 bg-error hover:bg-error text-white rounded-lg transition-colors duration-200 flex items-center justify-center"
                   title="Delete Pool"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -310,10 +372,10 @@ const Marketplace = () => {
         >
           <DollarSign className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
           <h3 className="text-h3 text-neutral-900 dark:text-white mb-2">
-            No loans found
+            No lending pools found
           </h3>
           <p className="text-neutral-600 dark:text-neutral-400">
-            Try adjusting your search criteria or check back later for new opportunities.
+            Try adjusting your search criteria or check back later for new lending opportunities.
           </p>
         </motion.div>
       )}
@@ -339,7 +401,7 @@ const Marketplace = () => {
             {loans.length}
           </p>
           <p className="text-sm text-neutral-600 dark:text-neutral-400">
-            Active Loans
+            Available Pools
           </p>
         </div>
         
@@ -351,7 +413,7 @@ const Marketplace = () => {
             {loans.filter(loan => loan.riskScore === 'A').length}
           </p>
           <p className="text-sm text-neutral-600 dark:text-neutral-400">
-            Low Risk Loans
+            Low Risk Pools
           </p>
         </div>
       </div>
@@ -364,8 +426,8 @@ const Marketplace = () => {
           exit={{ opacity: 0, y: -50 }}
           className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg ${
             notification.type === 'success' 
-              ? 'bg-green-500 text-white' 
-              : 'bg-red-500 text-white'
+              ? 'bg-success text-white' 
+              : 'bg-error text-white'
           }`}
         >
           {notification.message}
@@ -386,8 +448,8 @@ const Marketplace = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
-                <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
+              <div className="w-10 h-10 bg-error/20 dark:bg-error/20 rounded-full flex items-center justify-center">
+                <Trash2 className="h-5 w-5 text-error dark:text-error/50" />
               </div>
               <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
                 Delete Pool
@@ -410,7 +472,7 @@ const Marketplace = () => {
               <button
                 onClick={handleDeleteConfirm}
                 disabled={isDeleting}
-                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg transition-colors flex items-center justify-center"
+                className="flex-1 px-4 py-2 bg-error hover:bg-error disabled:bg-error/50 text-white rounded-lg transition-colors flex items-center justify-center"
               >
                 {isDeleting ? (
                   <>

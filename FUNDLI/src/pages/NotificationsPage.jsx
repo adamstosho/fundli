@@ -50,9 +50,14 @@ const NotificationsPage = () => {
       }
       
       // Use different endpoints based on user type
-      const endpoint = user.userType === 'lender' 
-        ? 'http://localhost:5000/api/lender/notifications'
-        : 'http://localhost:5000/api/notifications';
+      let endpoint;
+      if (user.userType === 'lender') {
+        endpoint = 'http://localhost:5000/api/lender/notifications';
+      } else if (user.userType === 'admin') {
+        endpoint = 'http://localhost:5000/api/admin/notifications';
+      } else {
+        endpoint = 'http://localhost:5000/api/notifications';
+      }
       
       console.log('🔔 Loading notifications for user type:', user.userType);
       console.log('🔔 Using endpoint:', endpoint);
@@ -271,30 +276,54 @@ const NotificationsPage = () => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="h-5 w-5 text-green-600" />;
+        return <CheckCircle className="h-5 w-5 text-success" />;
       case 'error':
-        return <AlertCircle className="h-5 w-5 text-red-600" />;
+        return <AlertCircle className="h-5 w-5 text-error" />;
       case 'warning':
-        return <AlertCircle className="h-5 w-5 text-yellow-600" />;
+        return <AlertCircle className="h-5 w-5 text-warning" />;
       case 'info':
-        return <Info className="h-5 w-5 text-blue-600" />;
+        return <Info className="h-5 w-5 text-primary-600" />;
+      case 'new_user_registration':
+        return <Bell className="h-5 w-5 text-blue-600" />;
+      case 'new_loan_pool':
+        return <DollarSign className="h-5 w-5 text-green-600" />;
+      case 'new_loan_application':
+        return <AlertCircle className="h-5 w-5 text-orange-600" />;
+      case 'loan_funded':
+        return <CheckCircle className="h-5 w-5 text-green-600" />;
+      case 'loan_repayment':
+        return <DollarSign className="h-5 w-5 text-blue-600" />;
+      case 'loan_due_for_repayment':
+        return <AlertCircle className="h-5 w-5 text-red-600" />;
       default:
-        return <Bell className="h-5 w-5 text-gray-600" />;
+        return <Bell className="h-5 w-5 text-neutral-600" />;
     }
   };
 
   const getNotificationColor = (type) => {
     switch (type) {
       case 'success':
-        return 'border-l-green-500 bg-green-50 dark:bg-green-900/20';
+        return 'border-l-green-500 bg-success/10 dark:bg-success/20';
       case 'error':
-        return 'border-l-red-500 bg-red-50 dark:bg-red-900/20';
+        return 'border-l-red-500 bg-error/10 dark:bg-error/20';
       case 'warning':
-        return 'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-900/20';
+        return 'border-l-yellow-500 bg-warning/10 dark:bg-warning/20';
       case 'info':
+        return 'border-l-blue-500 bg-primary-50 dark:bg-primary-900/20';
+      case 'new_user_registration':
         return 'border-l-blue-500 bg-blue-50 dark:bg-blue-900/20';
+      case 'new_loan_pool':
+        return 'border-l-green-500 bg-green-50 dark:bg-green-900/20';
+      case 'new_loan_application':
+        return 'border-l-orange-500 bg-orange-50 dark:bg-orange-900/20';
+      case 'loan_funded':
+        return 'border-l-green-500 bg-green-50 dark:bg-green-900/20';
+      case 'loan_repayment':
+        return 'border-l-blue-500 bg-blue-50 dark:bg-blue-900/20';
+      case 'loan_due_for_repayment':
+        return 'border-l-red-500 bg-red-50 dark:bg-red-900/20';
       default:
-        return 'border-l-gray-500 bg-gray-50 dark:bg-gray-900/20';
+        return 'border-l-gray-500 bg-neutral-50 dark:bg-secondary-900/20';
     }
   };
 
@@ -313,32 +342,32 @@ const NotificationsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-neutral-50 dark:bg-secondary-900 flex items-center justify-center">
         <div className="text-center">
           <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-primary-600" />
-          <p className="text-gray-600 dark:text-gray-400">Loading notifications...</p>
+          <p className="text-neutral-600 dark:text-neutral-400">Loading notifications...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen bg-neutral-50 dark:bg-secondary-900 py-8">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
+              <h1 className="text-3xl font-bold text-secondary-900 dark:text-white flex items-center">
                 <Bell className="h-8 w-8 mr-3 text-primary-600" />
                 Notifications
                 {unreadCount > 0 && (
-                  <span className="ml-3 bg-red-500 text-white text-sm px-2 py-1 rounded-full">
+                  <span className="ml-3 bg-error text-white text-sm px-2 py-1 rounded-full">
                     {unreadCount}
                   </span>
                 )}
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-neutral-600 dark:text-neutral-400 mt-2">
                 Stay updated with your account activities
               </p>
             </div>
@@ -347,7 +376,7 @@ const NotificationsPage = () => {
               <button
                 onClick={refreshNotifications}
                 disabled={refreshing}
-                className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="p-2 text-neutral-600 dark:text-neutral-400 hover:text-secondary-900 dark:hover:text-white transition-colors"
               >
                 <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
               </button>
@@ -365,10 +394,10 @@ const NotificationsPage = () => {
         </div>
 
         {/* Filters and Search */}
-        <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+        <div className="mb-6 bg-white dark:bg-secondary-800 rounded-lg p-4 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
             {/* Filter Tabs */}
-            <div className="flex space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+            <div className="flex space-x-1 bg-neutral-100 dark:bg-neutral-700 rounded-lg p-1">
               {[
                 { key: 'all', label: 'All', count: notifications.length },
                 { key: 'unread', label: 'Unread', count: unreadCount },
@@ -379,8 +408,8 @@ const NotificationsPage = () => {
                   onClick={() => setFilter(key)}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                     filter === key
-                      ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                      ? 'bg-white dark:bg-neutral-600 text-secondary-900 dark:text-white shadow-sm'
+                      : 'text-neutral-600 dark:text-neutral-400 hover:text-secondary-900 dark:hover:text-white'
                   }`}
                 >
                   {label} ({count})
@@ -390,13 +419,13 @@ const NotificationsPage = () => {
 
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
               <input
                 type="text"
                 placeholder="Search notifications..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white w-full md:w-64"
+                className="pl-10 pr-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-neutral-700 dark:text-white w-full md:w-64"
               />
             </div>
           </div>
@@ -404,10 +433,10 @@ const NotificationsPage = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <div className="mb-6 p-4 bg-error/10 dark:bg-error/20 border border-error/30 dark:border-error rounded-lg">
             <div className="flex items-center">
-              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
-              <span className="text-red-800 dark:text-red-200">{error}</span>
+              <AlertCircle className="h-5 w-5 text-error dark:text-error/50 mr-2" />
+              <span className="text-error dark:text-error/30">{error}</span>
             </div>
           </div>
         )}
@@ -416,11 +445,11 @@ const NotificationsPage = () => {
         <div className="space-y-4">
           {filteredNotifications.length === 0 ? (
             <div className="text-center py-12">
-              <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              <Bell className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-secondary-900 dark:text-white mb-2">
                 {filter === 'all' ? 'No notifications yet' : `No ${filter} notifications`}
               </h3>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-neutral-600 dark:text-neutral-400">
                 {filter === 'all' 
                   ? 'You\'ll see notifications about your account activities here.'
                   : `You don't have any ${filter} notifications at the moment.`
@@ -435,8 +464,8 @@ const NotificationsPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className={`border-l-4 rounded-lg p-4 shadow-sm transition-all duration-200 hover:shadow-md ${
                   notification.isRead 
-                    ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700' 
-                    : `${getNotificationColor(notification.type)} border-gray-200 dark:border-gray-700`
+                    ? 'bg-white dark:bg-secondary-800 border-neutral-200 dark:border-secondary-700' 
+                    : `${getNotificationColor(notification.type)} border-neutral-200 dark:border-secondary-700`
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -449,8 +478,8 @@ const NotificationsPage = () => {
                       <div className="flex items-center space-x-2 mb-1">
                         <h3 className={`text-sm font-medium ${
                           notification.isRead 
-                            ? 'text-gray-600 dark:text-gray-400' 
-                            : 'text-gray-900 dark:text-white'
+                            ? 'text-neutral-600 dark:text-neutral-400' 
+                            : 'text-secondary-900 dark:text-white'
                         }`}>
                           {notification.title}
                         </h3>
@@ -461,13 +490,13 @@ const NotificationsPage = () => {
                       
                       <p className={`text-sm ${
                         notification.isRead 
-                          ? 'text-gray-500 dark:text-gray-500' 
-                          : 'text-gray-700 dark:text-gray-300'
+                          ? 'text-neutral-500 dark:text-neutral-500' 
+                          : 'text-neutral-700 dark:text-neutral-300'
                       }`}>
                         {notification.message}
                       </p>
                       
-                      <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center space-x-4 mt-2 text-xs text-neutral-500 dark:text-neutral-400">
                         <div className="flex items-center space-x-1">
                           <Clock className="h-3 w-3" />
                           <span>
@@ -490,7 +519,7 @@ const NotificationsPage = () => {
                               notification.metadata.borrowerName || 'Borrower'
                             )}
                             disabled={fundingLoan === notification.metadata.loanId}
-                            className="flex items-center space-x-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs rounded-md transition-colors"
+                            className="flex items-center space-x-1 px-3 py-1.5 bg-success hover:bg-success disabled:bg-success/50 text-white text-xs rounded-md transition-colors"
                           >
                             <DollarSign className="h-3 w-3" />
                             <span>{fundingLoan === notification.metadata.loanId ? 'Funding...' : 'Fund Loan'}</span>
@@ -501,7 +530,7 @@ const NotificationsPage = () => {
                               notification.metadata.borrowerName || 'Borrower'
                             )}
                             disabled={rejectingLoan === notification.metadata.loanId}
-                            className="flex items-center space-x-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white text-xs rounded-md transition-colors"
+                            className="flex items-center space-x-1 px-3 py-1.5 bg-error hover:bg-error disabled:bg-error/50 text-white text-xs rounded-md transition-colors"
                           >
                             <XCircle className="h-3 w-3" />
                             <span>{rejectingLoan === notification.metadata.loanId ? 'Rejecting...' : 'Reject Loan'}</span>
@@ -515,7 +544,7 @@ const NotificationsPage = () => {
                     {notification.isRead ? (
                       <button
                         onClick={() => markAsUnread(notification._id)}
-                        className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                        className="p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                         title="Mark as unread"
                       >
                         <EyeOff className="h-4 w-4" />
@@ -523,7 +552,7 @@ const NotificationsPage = () => {
                     ) : (
                       <button
                         onClick={() => markAsRead(notification._id)}
-                        className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                        className="p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                         title="Mark as read"
                       >
                         <Eye className="h-4 w-4" />
@@ -532,7 +561,7 @@ const NotificationsPage = () => {
                     
                     <button
                       onClick={() => deleteNotification(notification._id)}
-                      className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                      className="p-1 text-neutral-400 hover:text-error transition-colors"
                       title="Delete notification"
                     >
                       <Trash2 className="h-4 w-4" />

@@ -56,7 +56,7 @@ router.get('/borrower-stats', protect, async (req, res) => {
     const loans = await Loan.find({ borrower: userId }).sort({ createdAt: -1 });
     console.log('📊 Found loans for user:', loans.length);
     loans.forEach((loan, index) => {
-      console.log(`  ${index + 1}. ${loan.purpose} - $${loan.loanAmount} - ${loan.status}`);
+      console.log(`  ${index + 1}. ${loan.purpose} - ₦${loan.loanAmount} - ${loan.status}`);
     });
     
     // Calculate stats - only count funded/active loans for total borrowed
@@ -89,7 +89,13 @@ router.get('/borrower-stats', protect, async (req, res) => {
       status: loan.status,
       amountPaid: loan.amountPaid || 0,
       nextPaymentDate: loan.nextPaymentDate,
-      createdAt: loan.createdAt
+      createdAt: loan.createdAt,
+      interestRate: loan.interestRate || 0,
+      fundedAt: loan.fundedAt,
+      duration: loan.duration,
+      totalRepayment: loan.totalRepayment || (loan.loanAmount + (loan.loanAmount * (loan.interestRate || 0) / 100)),
+      collateral: loan.collateral,
+      purposeDescription: loan.purposeDescription
     }));
     
     // Get upcoming payments from active loans

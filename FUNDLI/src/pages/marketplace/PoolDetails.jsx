@@ -78,10 +78,10 @@ const PoolDetails = () => {
   if (error) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+        <h2 className="text-2xl font-semibold text-secondary-900 dark:text-white mb-2">
           Error Loading Pool
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">
+        <p className="text-neutral-600 dark:text-neutral-400 mb-4">
           {error}
         </p>
         <Link
@@ -97,10 +97,10 @@ const PoolDetails = () => {
   if (!pool) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+        <h2 className="text-2xl font-semibold text-secondary-900 dark:text-white mb-2">
           Pool Not Found
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">
+        <p className="text-neutral-600 dark:text-neutral-400 mb-4">
           The requested pool could not be found.
         </p>
         <Link
@@ -140,10 +140,10 @@ const PoolDetails = () => {
           </Link>
         </div>
         
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-secondary-900 dark:text-white mb-2">
           {poolName}
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-neutral-600 dark:text-neutral-400">
           Pool ID: {poolId} • Created {createdAt}
         </p>
       </div>
@@ -158,8 +158,8 @@ const PoolDetails = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pool Size</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Pool Size</p>
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                 ${poolSize.toLocaleString()}
               </p>
             </div>
@@ -177,7 +177,7 @@ const PoolDetails = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Funded Amount</p>
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Funded Amount</p>
               <p className="text-2xl font-bold text-success">
                 ${fundedAmount.toLocaleString()}
               </p>
@@ -196,7 +196,7 @@ const PoolDetails = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Interest Rate</p>
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Interest Rate</p>
               <p className="text-2xl font-bold text-accent">
                 {interestRate}%
               </p>
@@ -215,8 +215,8 @@ const PoolDetails = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Investors</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Investors</p>
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                 {investors}
               </p>
             </div>
@@ -235,20 +235,20 @@ const PoolDetails = () => {
         className="card p-6 mb-8"
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
             Funding Progress
           </h3>
-          <span className="text-sm text-gray-600 dark:text-gray-400">
+          <span className="text-sm text-neutral-600 dark:text-neutral-400">
             {fundedAmount.toLocaleString()} of {poolSize.toLocaleString()} funded
           </span>
         </div>
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+        <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-3">
           <div 
             className="bg-gradient-to-r from-primary-500 to-accent-500 h-3 rounded-full transition-all duration-500"
             style={{ width: `${fundingProgress}%` }}
           ></div>
         </div>
-        <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mt-2">
+        <div className="flex justify-between text-sm text-neutral-600 dark:text-neutral-400 mt-2">
           <span>0%</span>
           <span>{Math.round(fundingProgress)}%</span>
           <span>100%</span>
@@ -262,33 +262,33 @@ const PoolDetails = () => {
         transition={{ duration: 0.6, delay: 0.6 }}
         className="card p-6"
       >
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4">
           Pool Information
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-            <span className="text-gray-600 dark:text-gray-400">Pool Name</span>
-            <span className="font-medium text-gray-900 dark:text-white">{poolName}</span>
+          <div className="flex justify-between py-2 border-b border-neutral-200 dark:border-secondary-700">
+            <span className="text-neutral-600 dark:text-neutral-400">Pool Name</span>
+            <span className="font-medium text-secondary-900 dark:text-white">{poolName}</span>
           </div>
-          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-            <span className="text-gray-600 dark:text-gray-400">Duration</span>
-            <span className="font-medium text-gray-900 dark:text-white">{duration} months</span>
+          <div className="flex justify-between py-2 border-b border-neutral-200 dark:border-secondary-700">
+            <span className="text-neutral-600 dark:text-neutral-400">Duration</span>
+            <span className="font-medium text-secondary-900 dark:text-white">{duration} months</span>
           </div>
-          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-            <span className="text-gray-600 dark:text-gray-400">Interest Rate</span>
+          <div className="flex justify-between py-2 border-b border-neutral-200 dark:border-secondary-700">
+            <span className="text-neutral-600 dark:text-neutral-400">Interest Rate</span>
             <span className="font-medium text-accent">{interestRate}% annually</span>
           </div>
-          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-            <span className="text-gray-600 dark:text-gray-400">Risk Level</span>
-            <span className="font-medium text-gray-900 dark:text-white capitalize">{pool.riskLevel || 'N/A'}</span>
+          <div className="flex justify-between py-2 border-b border-neutral-200 dark:border-secondary-700">
+            <span className="text-neutral-600 dark:text-neutral-400">Risk Level</span>
+            <span className="font-medium text-secondary-900 dark:text-white capitalize">{pool.riskLevel || 'N/A'}</span>
           </div>
-          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-            <span className="text-gray-600 dark:text-gray-400">Status</span>
+          <div className="flex justify-between py-2 border-b border-neutral-200 dark:border-secondary-700">
+            <span className="text-neutral-600 dark:text-neutral-400">Status</span>
             <span className="font-medium text-success capitalize">{pool.status || 'N/A'}</span>
           </div>
           <div className="flex justify-between py-2">
-            <span className="text-gray-600 dark:text-gray-400">Created</span>
-            <span className="font-medium text-gray-900 dark:text-white">
+            <span className="text-neutral-600 dark:text-neutral-400">Created</span>
+            <span className="font-medium text-secondary-900 dark:text-white">
               {createdAt}
             </span>
           </div>
@@ -302,8 +302,8 @@ const PoolDetails = () => {
         transition={{ duration: 0.6, delay: 0.7 }}
         className="card overflow-hidden mt-8"
       >
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="px-6 py-4 border-b border-neutral-200 dark:border-secondary-700">
+          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
             Pool Loans ({loans.length})
           </h3>
         </div>
@@ -311,44 +311,44 @@ const PoolDetails = () => {
         {loans.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-800">
+              <thead className="bg-neutral-50 dark:bg-secondary-800">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                     Loan ID
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                     Borrower
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                     Amount
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                     ROI
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="bg-white dark:bg-secondary-900 divide-y divide-gray-200 dark:divide-gray-700">
                 {loans.map((loan, index) => (
                   <motion.tr
                     key={loan.id || index}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 * index }}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="hover:bg-neutral-50 dark:hover:bg-secondary-800"
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-secondary-900 dark:text-white">
                       {loan.id || 'N/A'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400">
                       {loan.borrower || 'N/A'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-secondary-900 dark:text-white">
                       ${(loan.amount || 0).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-success">
@@ -375,7 +375,7 @@ const PoolDetails = () => {
           </div>
         ) : (
           <div className="text-center py-8">
-            <p className="text-gray-500 dark:text-gray-400">No loans found in this pool</p>
+            <p className="text-neutral-500 dark:text-neutral-400">No loans found in this pool</p>
           </div>
         )}
       </motion.div>

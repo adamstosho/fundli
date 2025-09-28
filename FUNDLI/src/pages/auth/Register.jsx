@@ -66,7 +66,7 @@ const Register = () => {
     }
 
     // Phone number validation - ensure it's a valid format
-    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+    const phoneRegex = /^\+?[1-9]\d{1,14}₦/;
     if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
       setError('Please enter a valid phone number');
       setIsLoading(false);

@@ -30,7 +30,7 @@ const LandingPage = () => {
       icon: DollarSign,
       title: 'Direct Lending',
       description: 'Connect borrowers and lenders without traditional banking intermediaries',
-      color: 'from-blue-500 to-purple-600',
+      color: 'from-primary-500 to-accent-500',
       animation: 'bounce'
     },
     {
@@ -63,7 +63,7 @@ const LandingPage = () => {
       title: 'Create Account',
       description: 'Sign up and complete KYC verification in minutes',
       icon: User,
-      color: 'from-blue-500 to-purple-600'
+      color: 'from-primary-500 to-accent-500'
     },
     {
       number: '02',
@@ -82,10 +82,10 @@ const LandingPage = () => {
   ];
 
   const stats = [
-    { label: 'Active Users', value: '10K+', icon: Users, color: 'text-blue-500' },
-    { label: 'Total Loans', value: '$2M+', icon: DollarSign, color: 'text-green-500' },
+    { label: 'Active Users', value: '10K+', icon: Users, color: 'text-primary-500' },
+    { label: 'Total Loans', value: '₦2M+', icon: DollarSign, color: 'text-success' },
     { label: 'Success Rate', value: '98%', icon: Award, color: 'text-orange-500' },
-    { label: 'Countries', value: '25+', icon: Globe, color: 'text-purple-500' }
+    { label: 'Countries', value: '25+', icon: Globe, color: 'text-accent-500' }
   ];
 
   const testimonials = [
@@ -136,8 +136,8 @@ const LandingPage = () => {
       name: 'Borrower',
       price: '2.5%',
       period: 'per transaction',
-      features: ['Up to $50K loans', '24-48hr approval', 'Flexible terms', 'No hidden fees'],
-      color: 'from-blue-500 to-purple-600',
+      features: ['Up to ₦50K loans', '24-48hr approval', 'Flexible terms', 'No hidden fees'],
+      color: 'from-primary-500 to-accent-500',
       popular: false
     },
     {
@@ -558,7 +558,7 @@ const LandingPage = () => {
                   
                   <div className="flex mb-3 sm:mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400 fill-current" />
+                      <Star key={i} className="h-4 w-4 sm:h-5 sm:w-5 text-warning/50 fill-current" />
                     ))}
                   </div>
                   
@@ -635,7 +635,7 @@ const LandingPage = () => {
                   <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center">
-                        <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 sm:mr-3 flex-shrink-0" />
+                        <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-success mr-2 sm:mr-3 flex-shrink-0" />
                         <span className="text-sm sm:text-base text-neutral-600 dark:text-neutral-400">{feature}</span>
                       </li>
                     ))}

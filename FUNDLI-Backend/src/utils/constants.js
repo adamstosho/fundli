@@ -199,7 +199,7 @@ const INTEREST_RATES = {
 const LOAN_LIMITS = {
   MIN: 0, // No minimum
   MAX: 999999999, // No practical maximum
-  DEFAULT: 500 // $500 default
+  DEFAULT: 500 // ₦500 default
 };
 
 /**
@@ -208,7 +208,7 @@ const LOAN_LIMITS = {
 const INVESTMENT_LIMITS = {
   MIN: 0, // No minimum
   MAX: 999999999, // No practical maximum
-  DEFAULT: 100 // $100 default
+  DEFAULT: 100 // ₦100 default
 };
 
 /**
@@ -224,8 +224,8 @@ const DURATION_LIMITS = {
  * Referral system
  */
 const REFERRAL = {
-  BONUS_AMOUNT: 10, // $10 bonus
-  MIN_INVESTMENT_FOR_BONUS: 100, // $100 minimum investment
+  BONUS_AMOUNT: 10, // ₦10 bonus
+  MIN_INVESTMENT_FOR_BONUS: 100, // ₦100 minimum investment
   BONUS_PAYOUT_DELAY: 30 // 30 days delay before bonus payout
 };
 

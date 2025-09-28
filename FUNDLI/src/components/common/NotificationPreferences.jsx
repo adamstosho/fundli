@@ -128,8 +128,8 @@ const NotificationPreferences = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <RefreshCw className="h-8 w-8 animate-spin text-blue-600" />
-        <span className="ml-2 text-gray-600 dark:text-gray-400">Loading preferences...</span>
+        <RefreshCw className="h-8 w-8 animate-spin text-primary-600" />
+        <span className="ml-2 text-neutral-600 dark:text-neutral-400">Loading preferences...</span>
       </div>
     );
   }
@@ -139,11 +139,11 @@ const NotificationPreferences = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-            <Settings className="h-6 w-6 mr-3 text-blue-600" />
+          <h2 className="text-2xl font-bold text-secondary-900 dark:text-white flex items-center">
+            <Settings className="h-6 w-6 mr-3 text-primary-600" />
             Notification Preferences
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-neutral-600 dark:text-neutral-400 mt-1">
             Customize how and when you receive notifications
           </p>
         </div>
@@ -154,11 +154,11 @@ const NotificationPreferences = () => {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4"
+          className="bg-success/10 dark:bg-success/20 border border-success/30 dark:border-success rounded-lg p-4"
         >
           <div className="flex items-center">
-            <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
-            <span className="text-green-800 dark:text-green-200">{success}</span>
+            <CheckCircle className="h-5 w-5 text-success dark:text-success/50 mr-2" />
+            <span className="text-success dark:text-success/30">{success}</span>
           </div>
         </motion.div>
       )}
@@ -167,28 +167,28 @@ const NotificationPreferences = () => {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
+          className="bg-error/10 dark:bg-error/20 border border-error/30 dark:border-error rounded-lg p-4"
         >
           <div className="flex items-center">
-            <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
-            <span className="text-red-800 dark:text-red-200">{error}</span>
+            <AlertCircle className="h-5 w-5 text-error dark:text-error/50 mr-2" />
+            <span className="text-error dark:text-error/30">{error}</span>
           </div>
         </motion.div>
       )}
 
       {/* Notification Channels */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6">
+        <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4">
           Notification Channels
         </h3>
         <div className="space-y-4">
           {/* Email Notifications */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
             <div className="flex items-center space-x-3">
-              <Mail className="h-5 w-5 text-blue-600" />
+              <Mail className="h-5 w-5 text-primary-600" />
               <div>
-                <h4 className="font-medium text-gray-900 dark:text-white">Email Notifications</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <h4 className="font-medium text-secondary-900 dark:text-white">Email Notifications</h4>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   Receive notifications via email
                 </p>
               </div>
@@ -196,7 +196,7 @@ const NotificationPreferences = () => {
             <button
               onClick={() => handleChannelToggle('email')}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                preferences.email ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
+                preferences.email ? 'bg-primary-600' : 'bg-neutral-200 dark:bg-neutral-600'
               }`}
             >
               <span
@@ -208,12 +208,12 @@ const NotificationPreferences = () => {
           </div>
 
           {/* Push Notifications */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
             <div className="flex items-center space-x-3">
-              <Bell className="h-5 w-5 text-green-600" />
+              <Bell className="h-5 w-5 text-success" />
               <div>
-                <h4 className="font-medium text-gray-900 dark:text-white">Push Notifications</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <h4 className="font-medium text-secondary-900 dark:text-white">Push Notifications</h4>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   Receive browser push notifications
                 </p>
               </div>
@@ -221,7 +221,7 @@ const NotificationPreferences = () => {
             <button
               onClick={() => handleChannelToggle('push')}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                preferences.push ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
+                preferences.push ? 'bg-primary-600' : 'bg-neutral-200 dark:bg-neutral-600'
               }`}
             >
               <span
@@ -233,12 +233,12 @@ const NotificationPreferences = () => {
           </div>
 
           {/* SMS Notifications */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
             <div className="flex items-center space-x-3">
-              <Smartphone className="h-5 w-5 text-purple-600" />
+              <Smartphone className="h-5 w-5 text-accent-600" />
               <div>
-                <h4 className="font-medium text-gray-900 dark:text-white">SMS Notifications</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <h4 className="font-medium text-secondary-900 dark:text-white">SMS Notifications</h4>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   Receive text message notifications
                 </p>
               </div>
@@ -246,7 +246,7 @@ const NotificationPreferences = () => {
             <button
               onClick={() => handleChannelToggle('sms')}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                preferences.sms ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
+                preferences.sms ? 'bg-primary-600' : 'bg-neutral-200 dark:bg-neutral-600'
               }`}
             >
               <span
@@ -260,21 +260,21 @@ const NotificationPreferences = () => {
       </div>
 
       {/* Notification Types */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6">
+        <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4">
           Notification Types
         </h3>
         <div className="space-y-3">
           {notificationTypes.map((type) => (
-            <div key={type.key} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div key={type.key} className="flex items-center justify-between p-3 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
               <div className="flex-1">
-                <h4 className="font-medium text-gray-900 dark:text-white">{type.label}</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{type.description}</p>
+                <h4 className="font-medium text-secondary-900 dark:text-white">{type.label}</h4>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">{type.description}</p>
               </div>
               <button
                 onClick={() => handleTypeToggle(type.key)}
                 className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                  preferences.types[type.key] ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
+                  preferences.types[type.key] ? 'bg-primary-600' : 'bg-neutral-200 dark:bg-neutral-600'
                 }`}
               >
                 <span
@@ -293,7 +293,7 @@ const NotificationPreferences = () => {
         <button
           onClick={savePreferences}
           disabled={saving}
-          className="flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center space-x-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {saving ? (
             <RefreshCw className="h-4 w-4 animate-spin" />

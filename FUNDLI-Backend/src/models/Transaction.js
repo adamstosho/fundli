@@ -399,8 +399,8 @@ transactionSchema.statics.getTransactionStats = function(userId) {
       $group: {
         _id: '$type',
         count: { $sum: 1 },
-        totalAmount: { $sum: '$amount' },
-        totalFees: { $sum: '$fees.total' }
+        totalAmount: { $sum: 1 },
+        totalFees: { $sum: null }
       }
     }
   ]);
@@ -425,7 +425,7 @@ transactionSchema.statics.getDailyStats = function(date) {
         _id: '$type',
         count: { $sum: 1 },
         totalAmount: { $sum: '$amount' },
-        totalFees: { $sum: '$fees.total' }
+        totalFees: { $sum: 1 }
       }
     }
   ]);

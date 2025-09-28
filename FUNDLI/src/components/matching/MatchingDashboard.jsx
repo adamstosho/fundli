@@ -74,15 +74,15 @@ const MatchingDashboard = () => {
   };
 
   const getScoreColor = (score) => {
-    if (score >= 80) return 'text-green-600 dark:text-green-400';
-    if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-red-600 dark:text-red-400';
+    if (score >= 80) return 'text-success dark:text-success/50';
+    if (score >= 60) return 'text-warning dark:text-warning/50';
+    return 'text-error dark:text-error/50';
   };
 
   const getScoreBgColor = (score) => {
-    if (score >= 80) return 'bg-green-100 dark:bg-green-900/20';
-    if (score >= 60) return 'bg-yellow-100 dark:bg-yellow-900/20';
-    return 'bg-red-100 dark:bg-red-900/20';
+    if (score >= 80) return 'bg-success/20 dark:bg-success/20';
+    if (score >= 60) return 'bg-warning/20 dark:bg-warning/20';
+    return 'bg-error/20 dark:bg-error/20';
   };
 
   if (isLoading) {
@@ -98,10 +98,10 @@ const MatchingDashboard = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-2xl font-bold text-secondary-900 dark:text-white">
             AI Matching Dashboard
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-neutral-600 dark:text-neutral-400 mt-1">
             {user?.userType === 'borrower' 
               ? 'Find lenders for your loan applications'
               : user?.userType === 'lender'
@@ -112,7 +112,7 @@ const MatchingDashboard = () => {
         </div>
         <div className="flex items-center space-x-2">
           <Target className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">
+          <span className="text-sm text-neutral-600 dark:text-neutral-400">
             AI-Powered Matching
           </span>
         </div>
@@ -121,45 +121,45 @@ const MatchingDashboard = () => {
       {/* Admin Stats */}
       {user?.userType === 'admin' && stats && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-secondary-800 rounded-lg p-4 border border-neutral-200 dark:border-secondary-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Loans</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalLoans}</p>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">Total Loans</p>
+                <p className="text-2xl font-bold text-secondary-900 dark:text-white">{stats.totalLoans}</p>
               </div>
-              <CreditCard className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              <CreditCard className="h-8 w-8 text-primary-600 dark:text-primary-400" />
             </div>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-secondary-800 rounded-lg p-4 border border-neutral-200 dark:border-secondary-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Active Lenders</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalLenders}</p>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">Active Lenders</p>
+                <p className="text-2xl font-bold text-secondary-900 dark:text-white">{stats.totalLenders}</p>
               </div>
-              <Users className="h-8 w-8 text-green-600 dark:text-green-400" />
+              <Users className="h-8 w-8 text-success dark:text-success/50" />
             </div>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-secondary-800 rounded-lg p-4 border border-neutral-200 dark:border-secondary-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Active Borrowers</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalBorrowers}</p>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">Active Borrowers</p>
+                <p className="text-2xl font-bold text-secondary-900 dark:text-white">{stats.totalBorrowers}</p>
               </div>
-              <Users className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              <Users className="h-8 w-8 text-accent-600 dark:text-accent-400" />
             </div>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-secondary-800 rounded-lg p-4 border border-neutral-200 dark:border-secondary-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Avg Credit Score</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">Avg Credit Score</p>
+                <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                   {Math.round(stats.averageCreditScore)}
                 </p>
               </div>
-              <TrendingUp className="h-8 w-8 text-yellow-600 dark:text-yellow-400" />
+              <TrendingUp className="h-8 w-8 text-warning dark:text-warning/50" />
             </div>
           </div>
         </div>
@@ -167,10 +167,10 @@ const MatchingDashboard = () => {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div className="bg-error/10 dark:bg-error/20 border border-error/30 dark:border-error rounded-lg p-4">
           <div className="flex items-center">
-            <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
-            <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+            <AlertCircle className="h-5 w-5 text-error dark:text-error/50 mr-2" />
+            <p className="text-error dark:text-error/30 text-sm">{error}</p>
           </div>
         </div>
       )}
@@ -186,18 +186,18 @@ const MatchingDashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6"
+                className="bg-white dark:bg-secondary-800 rounded-lg border border-neutral-200 dark:border-secondary-700 p-6"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                       Loan Application Matches
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      ₦{loanMatch.loanAmount?.toLocaleString()} • {loanMatch.loanPurpose}
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                      ${loanMatch.loanAmount?.toLocaleString()} • {loanMatch.loanPurpose}
                     </p>
                   </div>
-                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                  <span className="text-sm text-neutral-500 dark:text-neutral-500">
                     {loanMatch.matches.length} matches found
                   </span>
                 </div>
@@ -206,7 +206,7 @@ const MatchingDashboard = () => {
                   {loanMatch.matches.map((match, matchIndex) => (
                     <div
                       key={match.lenderId}
-                      className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
+                      className="border border-neutral-200 dark:border-secondary-700 rounded-lg p-4 hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center space-x-2">
@@ -214,10 +214,10 @@ const MatchingDashboard = () => {
                             <Users className="h-4 w-4 text-primary-600 dark:text-primary-400" />
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900 dark:text-white">
+                            <p className="font-medium text-secondary-900 dark:text-white">
                               {match.lender.firstName} {match.lender.lastName}
                             </p>
-                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">
                               Lender
                             </p>
                           </div>
@@ -229,26 +229,26 @@ const MatchingDashboard = () => {
 
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-400">Max Amount:</span>
-                          <span className="font-medium">₦{match.lender.maxLoanAmount?.toLocaleString()}</span>
+                          <span className="text-neutral-600 dark:text-neutral-400">Max Amount:</span>
+                          <span className="font-medium">${match.lender.maxLoanAmount?.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-400">Interest Rate:</span>
+                          <span className="text-neutral-600 dark:text-neutral-400">Interest Rate:</span>
                           <span className="font-medium">{match.recommendedInterestRate}%</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-400">Risk Score:</span>
+                          <span className="text-neutral-600 dark:text-neutral-400">Risk Score:</span>
                           <span className="font-medium">{match.riskScore}</span>
                         </div>
                       </div>
 
                       <div className="mt-3">
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Match Reasons:</p>
+                        <p className="text-xs text-neutral-600 dark:text-neutral-400 mb-2">Match Reasons:</p>
                         <div className="flex flex-wrap gap-1">
                           {match.matchReasons.slice(0, 3).map((reason, reasonIndex) => (
                             <span
                               key={reasonIndex}
-                              className="px-2 py-1 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 text-xs rounded"
+                              className="px-2 py-1 bg-success/20 dark:bg-success/20 text-success dark:text-success/50 text-xs rounded"
                             >
                               {reason}
                             </span>
@@ -260,7 +260,7 @@ const MatchingDashboard = () => {
                         <button className="flex-1 px-3 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 transition-colors">
                           Contact Lender
                         </button>
-                        <button className="px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <button className="px-3 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 text-sm rounded-lg hover:bg-neutral-50 dark:hover:bg-secondary-800 transition-colors">
                           <Eye className="h-4 w-4" />
                         </button>
                       </div>
@@ -277,7 +277,7 @@ const MatchingDashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6"
+                className="bg-white dark:bg-secondary-800 rounded-lg border border-neutral-200 dark:border-secondary-700 p-6"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
@@ -285,10 +285,10 @@ const MatchingDashboard = () => {
                       <CreditCard className="h-6 w-6 text-primary-600 dark:text-primary-400" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        ₦{match.loan.amount?.toLocaleString()}
+                      <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
+                        ${match.loan.amount?.toLocaleString()}
                       </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">
                         {match.loan.purpose} • {match.loan.duration} months
                       </p>
                     </div>
@@ -301,30 +301,30 @@ const MatchingDashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Borrower Info */}
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white mb-3">Borrower Information</h4>
+                    <h4 className="font-medium text-secondary-900 dark:text-white mb-3">Borrower Information</h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Name:</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">Name:</span>
                         <span className="font-medium">{match.borrower.firstName} {match.borrower.lastName}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Credit Score:</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">Credit Score:</span>
                         <span className="font-medium">{match.borrower.creditScore}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Monthly Income:</span>
-                        <span className="font-medium">₦{match.borrower.monthlyIncome?.toLocaleString()}</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">Monthly Income:</span>
+                        <span className="font-medium">${match.borrower.monthlyIncome?.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Employment:</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">Employment:</span>
                         <span className="font-medium">{match.borrower.employmentStatus}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">KYC Status:</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">KYC Status:</span>
                         <span className={`px-2 py-1 rounded text-xs ${
                           match.borrower.kycStatus === 'verified' 
-                            ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
-                            : 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400'
+                            ? 'bg-success/20 dark:bg-success/20 text-success dark:text-success/50'
+                            : 'bg-warning/20 dark:bg-warning/20 text-warning dark:text-warning/50'
                         }`}>
                           {match.borrower.kycStatus}
                         </span>
@@ -334,26 +334,26 @@ const MatchingDashboard = () => {
 
                   {/* Loan Details */}
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white mb-3">Loan Details</h4>
+                    <h4 className="font-medium text-secondary-900 dark:text-white mb-3">Loan Details</h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Amount:</span>
-                        <span className="font-medium">₦{match.loan.amount?.toLocaleString()}</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">Amount:</span>
+                        <span className="font-medium">${match.loan.amount?.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Duration:</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">Duration:</span>
                         <span className="font-medium">{match.loan.duration} months</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Proposed Rate:</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">Proposed Rate:</span>
                         <span className="font-medium">{match.loan.proposedInterestRate}%</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Recommended Rate:</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">Recommended Rate:</span>
                         <span className="font-medium text-primary-600 dark:text-primary-400">{match.recommendedInterestRate}%</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Risk Score:</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">Risk Score:</span>
                         <span className="font-medium">{match.riskScore}</span>
                       </div>
                     </div>
@@ -362,12 +362,12 @@ const MatchingDashboard = () => {
 
                 {/* Match Reasons */}
                 <div className="mt-4">
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">Why This Match?</h4>
+                  <h4 className="font-medium text-secondary-900 dark:text-white mb-2">Why This Match?</h4>
                   <div className="flex flex-wrap gap-2">
                     {match.matchReasons.map((reason, reasonIndex) => (
                       <span
                         key={reasonIndex}
-                        className="px-3 py-1 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 text-sm rounded-full"
+                        className="px-3 py-1 bg-success/20 dark:bg-success/20 text-success dark:text-success/50 text-sm rounded-full"
                       >
                         {reason}
                       </span>
@@ -380,10 +380,10 @@ const MatchingDashboard = () => {
                   <button className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
                     Invest Now
                   </button>
-                  <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <button className="px-4 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-secondary-800 transition-colors">
                     <MessageCircle className="h-4 w-4" />
                   </button>
-                  <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <button className="px-4 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-secondary-800 transition-colors">
                     <Eye className="h-4 w-4" />
                   </button>
                 </div>
@@ -393,11 +393,11 @@ const MatchingDashboard = () => {
         </div>
       ) : (
         <div className="text-center py-12">
-          <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          <Target className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-secondary-900 dark:text-white mb-2">
             No matches found
           </h3>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-neutral-600 dark:text-neutral-400">
             {user?.userType === 'borrower' 
               ? 'Complete your loan application to find matching lenders'
               : 'No loan opportunities match your criteria at the moment'

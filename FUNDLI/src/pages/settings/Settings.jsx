@@ -38,10 +38,10 @@ const Settings = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-secondary-900 dark:text-white mb-2">
           Account Settings
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-neutral-600 dark:text-neutral-400">
           Manage your account preferences and security settings
         </p>
       </div>
@@ -60,15 +60,15 @@ const Settings = () => {
             ) : (
               <Sun className="h-6 w-6 text-primary-600 dark:text-primary-400" />
             )}
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
               Appearance
             </h3>
           </div>
           
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-gray-900 dark:text-white">Dark Mode</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="font-medium text-secondary-900 dark:text-white">Dark Mode</p>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">
                 Switch between light and dark themes
               </p>
             </div>
@@ -95,7 +95,7 @@ const Settings = () => {
         >
           <div className="flex items-center space-x-3 mb-6">
             <Bell className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
               Notifications
             </h3>
           </div>
@@ -103,10 +103,10 @@ const Settings = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <Mail className="h-5 w-5 text-gray-400" />
+                <Mail className="h-5 w-5 text-neutral-400" />
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Email Notifications</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="font-medium text-secondary-900 dark:text-white">Email Notifications</p>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
                     Receive important updates via email
                   </p>
                 </div>
@@ -114,7 +114,7 @@ const Settings = () => {
               <button
                 onClick={() => handleNotificationChange('email')}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
-                  notifications.email ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
+                  notifications.email ? 'bg-primary-600' : 'bg-neutral-200 dark:bg-neutral-700'
                 }`}
               >
                 <span
@@ -127,10 +127,10 @@ const Settings = () => {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <Smartphone className="h-5 w-5 text-gray-400" />
+                <Smartphone className="h-5 w-5 text-neutral-400" />
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Push Notifications</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="font-medium text-secondary-900 dark:text-white">Push Notifications</p>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
                     Get instant updates on your device
                   </p>
                 </div>
@@ -138,7 +138,7 @@ const Settings = () => {
               <button
                 onClick={() => handleNotificationChange('push')}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
-                  notifications.push ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
+                  notifications.push ? 'bg-primary-600' : 'bg-neutral-200 dark:bg-neutral-700'
                 }`}
               >
                 <span
@@ -151,10 +151,10 @@ const Settings = () => {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <Mail className="h-5 w-5 text-gray-400" />
+                <Mail className="h-5 w-5 text-neutral-400" />
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Marketing Emails</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="font-medium text-secondary-900 dark:text-white">Marketing Emails</p>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
                     Receive promotional content and offers
                   </p>
                 </div>
@@ -162,7 +162,7 @@ const Settings = () => {
               <button
                 onClick={() => handleNotificationChange('marketing')}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
-                  notifications.marketing ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
+                  notifications.marketing ? 'bg-primary-600' : 'bg-neutral-200 dark:bg-neutral-700'
                 }`}
               >
                 <span
@@ -184,7 +184,7 @@ const Settings = () => {
         >
           <div className="flex items-center space-x-3 mb-6">
             <Shield className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
               Security
             </h3>
           </div>
@@ -192,10 +192,10 @@ const Settings = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <Shield className="h-5 w-5 text-gray-400" />
+                <Shield className="h-5 w-5 text-neutral-400" />
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="font-medium text-secondary-900 dark:text-white">Two-Factor Authentication</p>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
                     Add an extra layer of security to your account
                   </p>
                 </div>
@@ -203,7 +203,7 @@ const Settings = () => {
               <button
                 onClick={() => handleSecurityChange('twoFactor', !security.twoFactor)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
-                  security.twoFactor ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
+                  security.twoFactor ? 'bg-primary-600' : 'bg-neutral-200 dark:bg-neutral-700'
                 }`}
               >
                 <span
@@ -216,10 +216,10 @@ const Settings = () => {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <Smartphone className="h-5 w-5 text-gray-400" />
+                <Smartphone className="h-5 w-5 text-neutral-400" />
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Biometric Login</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="font-medium text-secondary-900 dark:text-white">Biometric Login</p>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
                     Use fingerprint or face ID to log in
                   </p>
                 </div>
@@ -227,7 +227,7 @@ const Settings = () => {
               <button
                 onClick={() => handleSecurityChange('biometric', !security.biometric)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
-                  security.biometric ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
+                  security.biometric ? 'bg-primary-600' : 'bg-neutral-200 dark:bg-neutral-700'
                 }`}
               >
                 <span
@@ -240,10 +240,10 @@ const Settings = () => {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <Globe className="h-5 w-5 text-gray-400" />
+                <Globe className="h-5 w-5 text-neutral-400" />
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Session Timeout</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="font-medium text-secondary-900 dark:text-white">Session Timeout</p>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
                     Automatically log out after inactivity
                   </p>
                 </div>
@@ -271,7 +271,7 @@ const Settings = () => {
         >
           <div className="flex items-center space-x-3 mb-6">
             <Globe className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
               Privacy
             </h3>
           </div>
@@ -279,8 +279,8 @@ const Settings = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">Profile Visibility</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="font-medium text-secondary-900 dark:text-white">Profile Visibility</p>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   Control who can see your profile information
                 </p>
               </div>
@@ -293,8 +293,8 @@ const Settings = () => {
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">Activity Status</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="font-medium text-secondary-900 dark:text-white">Activity Status</p>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   Show when you're active on the platform
                 </p>
               </div>
@@ -314,7 +314,7 @@ const Settings = () => {
         >
           <div className="flex items-center space-x-3 mb-6">
             <CreditCard className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
               Data & Storage
             </h3>
           </div>
@@ -322,8 +322,8 @@ const Settings = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">Download My Data</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="font-medium text-secondary-900 dark:text-white">Download My Data</p>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   Get a copy of all your data
                 </p>
               </div>
@@ -334,8 +334,8 @@ const Settings = () => {
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">Delete Account</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="font-medium text-secondary-900 dark:text-white">Delete Account</p>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   Permanently remove your account and data
                 </p>
               </div>

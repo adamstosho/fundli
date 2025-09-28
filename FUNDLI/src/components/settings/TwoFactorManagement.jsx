@@ -138,10 +138,10 @@ const TwoFactorManagement = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-2xl font-bold text-secondary-900 dark:text-white">
             Two-Factor Authentication
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-neutral-600 dark:text-neutral-400 mt-1">
             Manage your account security settings
           </p>
         </div>
@@ -149,8 +149,8 @@ const TwoFactorManagement = () => {
           <Shield className="h-6 w-6 text-primary-600 dark:text-primary-400" />
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${
             twoFactorStatus?.enabled 
-              ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-              : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
+              ? 'bg-success/20 text-success dark:bg-success/20 dark:text-success/50'
+              : 'bg-neutral-100 text-neutral-800 dark:bg-secondary-800 dark:text-neutral-400'
           }`}>
             {twoFactorStatus?.enabled ? 'Enabled' : 'Disabled'}
           </span>
@@ -159,42 +159,42 @@ const TwoFactorManagement = () => {
 
       {/* Status Messages */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div className="bg-error/10 dark:bg-error/20 border border-error/30 dark:border-error rounded-lg p-4">
           <div className="flex items-center">
-            <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
-            <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+            <AlertCircle className="h-5 w-5 text-error dark:text-error/50 mr-2" />
+            <p className="text-error dark:text-error/30 text-sm">{error}</p>
           </div>
         </div>
       )}
 
       {success && (
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+        <div className="bg-success/10 dark:bg-success/20 border border-success/30 dark:border-success rounded-lg p-4">
           <div className="flex items-center">
-            <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
-            <p className="text-green-800 dark:text-green-200 text-sm">{success}</p>
+            <CheckCircle className="h-5 w-5 text-success dark:text-success/50 mr-2" />
+            <p className="text-success dark:text-success/30 text-sm">{success}</p>
           </div>
         </div>
       )}
 
       {/* 2FA Status Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg border border-neutral-200 dark:border-secondary-700 p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-4">
             <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center">
               <Smartphone className="h-6 w-6 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                 Authenticator App
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+              <p className="text-neutral-600 dark:text-neutral-400 text-sm mt-1">
                 {twoFactorStatus?.enabled 
                   ? 'Two-factor authentication is enabled for your account'
                   : 'Add an extra layer of security to your account'
                 }
               </p>
               {twoFactorStatus?.enabled && twoFactorStatus?.enabledAt && (
-                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                <p className="text-xs text-neutral-500 dark:text-neutral-500 mt-1">
                   Enabled on {new Date(twoFactorStatus.enabledAt).toLocaleDateString()}
                 </p>
               )}
@@ -204,18 +204,18 @@ const TwoFactorManagement = () => {
 
         {/* Backup Codes Status */}
         {twoFactorStatus?.enabled && (
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="mt-6 pt-6 border-t border-neutral-200 dark:border-secondary-700">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-medium text-gray-900 dark:text-white">Backup Codes</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <h4 className="font-medium text-secondary-900 dark:text-white">Backup Codes</h4>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   {twoFactorStatus.backupCodesCount || 0} codes remaining
                 </p>
               </div>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setShowBackupCodes(!showBackupCodes)}
-                  className="flex items-center space-x-1 px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                  className="flex items-center space-x-1 px-3 py-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200"
                 >
                   {showBackupCodes ? (
                     <>
@@ -231,7 +231,7 @@ const TwoFactorManagement = () => {
                 </button>
                 <button
                   onClick={downloadBackupCodes}
-                  className="flex items-center space-x-1 px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                  className="flex items-center space-x-1 px-3 py-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200"
                 >
                   <Download className="h-4 w-4" />
                   <span>Download</span>
@@ -249,7 +249,7 @@ const TwoFactorManagement = () => {
             {showBackupCodes && twoFactorStatus.backupCodes && (
               <div className="mt-4 grid grid-cols-2 gap-2">
                 {twoFactorStatus.backupCodes.map((code, index) => (
-                  <div key={index} className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded text-sm font-mono">
+                  <div key={index} className="bg-neutral-100 dark:bg-neutral-700 px-3 py-2 rounded text-sm font-mono">
                     {code}
                   </div>
                 ))}
@@ -261,21 +261,21 @@ const TwoFactorManagement = () => {
 
       {/* Disable 2FA Section */}
       {twoFactorStatus?.enabled && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:bg-secondary-800 rounded-lg border border-neutral-200 dark:border-secondary-700 p-6">
           <div className="flex items-start space-x-4">
-            <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
-              <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+            <div className="w-12 h-12 bg-error/20 dark:bg-error/20 rounded-lg flex items-center justify-center">
+              <AlertCircle className="h-6 w-6 text-error dark:text-error/50" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                 Disable Two-Factor Authentication
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+              <p className="text-neutral-600 dark:text-neutral-400 text-sm mt-1">
                 This will remove the extra security layer from your account. We recommend keeping 2FA enabled.
               </p>
 
               <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Enter verification code to disable 2FA
                 </label>
                 <div className="flex space-x-3">
@@ -284,13 +284,13 @@ const TwoFactorManagement = () => {
                     value={disableToken}
                     onChange={(e) => setDisableToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     placeholder="000000"
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-center font-mono"
+                    className="flex-1 px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-center font-mono"
                     maxLength={6}
                   />
                   <button
                     onClick={handleDisableTwoFactor}
                     disabled={isDisabling || disableToken.length !== 6}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-error text-white rounded-lg hover:bg-error transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isDisabling ? 'Disabling...' : 'Disable 2FA'}
                   </button>
@@ -302,11 +302,11 @@ const TwoFactorManagement = () => {
       )}
 
       {/* Security Tips */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
-        <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-3">
+      <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-6">
+        <h3 className="font-semibold text-primary-900 dark:text-primary-200 mb-3">
           Security Tips
         </h3>
-        <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-2">
+        <ul className="text-sm text-primary-800 dark:text-primary-300 space-y-2">
           <li>• Keep your authenticator app updated</li>
           <li>• Store backup codes in a secure location</li>
           <li>• Never share your 2FA codes with anyone</li>

@@ -10,7 +10,8 @@ const {
   verifyDeposit,
   withdrawFunds,
   transferFunds,
-  getWalletStats
+  getWalletStats,
+  getApprovedBorrowers
 } = require('../controllers/walletController');
 
 // @route   POST /api/wallet/create
@@ -32,6 +33,11 @@ router.get('/transactions', protect, getWalletTransactions);
 // @desc    Get wallet statistics
 // @access  Private
 router.get('/stats', protect, getWalletStats);
+
+// @route   GET /api/wallet/approved-borrowers
+// @desc    Get approved borrowers for transfer suggestions
+// @access  Private
+router.get('/approved-borrowers', protect, getApprovedBorrowers);
 
 // @route   POST /api/wallet/deposit
 // @desc    Deposit funds to wallet
@@ -75,7 +81,7 @@ router.post('/test-add-funds', protect, async (req, res) => {
     
     res.json({
       status: 'success',
-      message: `Added $${amount} test funds to wallet`,
+      message: `Added ₦${amount} test funds to wallet`,
       data: { wallet: { balance: wallet.balance } }
     });
   } catch (error) {

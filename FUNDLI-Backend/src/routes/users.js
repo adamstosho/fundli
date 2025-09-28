@@ -355,7 +355,7 @@ router.put('/profile', [
   body('phone')
     .optional()
     .trim()
-    .matches(/^[\+]?[1-9][\d]{0,15}$/)
+    .matches(/^[\+]?[1-9][\d]{0,15}₦/)
     .withMessage('Please enter a valid phone number (e.g., +1234567890 or 1234567890)'),
   body('bio')
     .optional()

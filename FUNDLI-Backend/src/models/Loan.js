@@ -316,20 +316,15 @@ loanSchema.index({ nextPaymentDate: 1 });
 
 // Pre-save middleware
 loanSchema.pre('save', function(next) {
-  // Calculate loan amounts if not set
+  // Calculate loan amounts if not set (flat rate calculation)
   if (this.loanAmount && this.interestRate && this.duration && !this.monthlyPayment) {
-    const monthlyRate = this.interestRate / 100 / 12;
     const numberOfPayments = this.duration;
+    const totalInterest = (this.loanAmount * this.interestRate) / 100;
+    const totalRepayment = this.loanAmount + totalInterest;
     
-    if (monthlyRate > 0) {
-      this.monthlyPayment = (this.loanAmount * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / 
-                           (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
-    } else {
-      this.monthlyPayment = this.loanAmount / numberOfPayments;
-    }
-    
-    this.totalRepayment = this.monthlyPayment * numberOfPayments;
-    this.totalInterest = this.totalRepayment - this.loanAmount;
+    this.monthlyPayment = totalRepayment / numberOfPayments;
+    this.totalRepayment = totalRepayment;
+    this.totalInterest = totalInterest;
     this.amountRemaining = this.totalRepayment;
   }
   

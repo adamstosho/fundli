@@ -12,14 +12,14 @@ const userRegistrationRules = {
     required: true,
     minLength: 2,
     maxLength: 50,
-    pattern: /^[a-zA-Z\s]+$/,
+    pattern: /^[a-zA-Z\s]+₦/,
     message: 'First name must be 2-50 characters and contain only letters and spaces'
   },
   lastName: {
     required: true,
     minLength: 2,
     maxLength: 50,
-    pattern: /^[a-zA-Z\s]+$/,
+    pattern: /^[a-zA-Z\s]+₦/,
     message: 'Last name must be 2-50 characters and contain only letters and spaces'
   },
   email: {
@@ -35,7 +35,7 @@ const userRegistrationRules = {
   password: {
     required: true,
     minLength: 8,
-    pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+    pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@₦!%*?&])[A-Za-z\d@₦!%*?&]/,
     message: 'Password must be at least 8 characters with uppercase, lowercase, number, and special character'
   },
   userType: {
@@ -94,7 +94,7 @@ const kycRules = {
     required: true,
     minLength: 3,
     maxLength: 10,
-    pattern: /^[A-Z0-9]+$/,
+    pattern: /^[A-Z0-9]+₦/,
     message: 'Bank code must be 3-10 alphanumeric characters'
   }
 };
@@ -287,7 +287,7 @@ const validate = (data, rules) => {
  * @returns {boolean} True if valid ObjectId
  */
 const isValidObjectId = (id) => {
-  const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+  const objectIdRegex = /^[0-9a-fA-F]{24}₦/;
   return objectIdRegex.test(id);
 };
 

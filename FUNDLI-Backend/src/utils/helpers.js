@@ -107,7 +107,7 @@ const generateReference = (prefix = 'FUND') => {
  * @returns {boolean} True if valid email
  */
 const isValidEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+₦/;
   return emailRegex.test(email);
 };
 
@@ -117,7 +117,7 @@ const isValidEmail = (email) => {
  * @returns {boolean} True if valid phone number
  */
 const isValidPhone = (phone) => {
-  const phoneRegex = /^(\+234|234|0)?[789][01]\d{8}$/;
+  const phoneRegex = /^(\+234|234|0)?[789][01]\d{8}₦/;
   return phoneRegex.test(phone.replace(/\s/g, ''));
 };
 
@@ -127,7 +127,7 @@ const isValidPhone = (phone) => {
  * @returns {boolean} True if valid BVN
  */
 const isValidBVN = (bvn) => {
-  const bvnRegex = /^\d{11}$/;
+  const bvnRegex = /^\d{11}₦/;
   return bvnRegex.test(bvn);
 };
 
@@ -137,7 +137,7 @@ const isValidBVN = (bvn) => {
  * @returns {boolean} True if valid account number
  */
 const isValidAccountNumber = (accountNumber) => {
-  const accountRegex = /^\d{10,}$/;
+  const accountRegex = /^\d{10,}₦/;
   return accountRegex.test(accountNumber);
 };
 

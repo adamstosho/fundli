@@ -330,21 +330,21 @@ router.get('/stats', adminAuth, async (req, res) => {
     const loanStats = await Loan.aggregate([
       {
         $group: {
-          _id: '$status',
+          _id: null,
           count: { $sum: 1 },
-          totalAmount: { $sum: '$loanAmount' }
+          totalAmount: { $sum: 1 }
         }
       }
     ]);
 
     // Get repayment statistics
     const repaymentStats = await Loan.aggregate([
-      { $unwind: '$repayments' },
+      { $unwind: null },
       {
         $group: {
-          _id: '$repayments.status',
+          _id: null,
           count: { $sum: 1 },
-          totalAmount: { $sum: '$repayments.amount' }
+          totalAmount: { $sum: '$amount' }
         }
       }
     ]);
@@ -361,8 +361,8 @@ router.get('/stats', adminAuth, async (req, res) => {
         $group: {
           _id: null,
           totalRepayments: { $sum: 1 },
-          totalAmount: { $sum: '$amount' },
-          avgAmount: { $avg: '$amount' }
+          totalAmount: { $sum: 1 },
+          avgAmount: { $avg: 1 }
         }
       }
     ]);

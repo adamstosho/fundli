@@ -126,19 +126,19 @@ const TwoFactorSetup = ({ onComplete, onCancel }) => {
             <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <Shield className="h-8 w-8 text-primary-600 dark:text-primary-400" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <h2 className="text-2xl font-bold text-secondary-900 dark:text-white mb-2">
               Set Up Two-Factor Authentication
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-neutral-600 dark:text-neutral-400">
               Scan the QR code with your authenticator app to enable 2FA
             </p>
           </div>
 
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <div className="bg-error/10 dark:bg-error/20 border border-error/30 dark:border-error rounded-lg p-4">
               <div className="flex items-center">
-                <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
-                <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+                <AlertCircle className="h-5 w-5 text-error dark:text-error/50 mr-2" />
+                <p className="text-error dark:text-error/30 text-sm">{error}</p>
               </div>
             </div>
           )}
@@ -146,7 +146,7 @@ const TwoFactorSetup = ({ onComplete, onCancel }) => {
           {setupData && (
             <div className="space-y-6">
               {/* QR Code */}
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 text-center">
+              <div className="bg-white dark:bg-secondary-800 p-6 rounded-lg border border-neutral-200 dark:border-secondary-700 text-center">
                 <QRCode
                   value={setupData.qrCodeUrl}
                   size={200}
@@ -157,19 +157,19 @@ const TwoFactorSetup = ({ onComplete, onCancel }) => {
 
               {/* Manual Entry */}
               <div className="space-y-3">
-                <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 text-center">
                   Can't scan? Enter this code manually:
                 </p>
                 <div className="flex items-center justify-center space-x-2">
-                  <code className="bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded text-sm font-mono">
+                  <code className="bg-neutral-100 dark:bg-secondary-800 px-3 py-2 rounded text-sm font-mono">
                     {setupData.manualEntryKey}
                   </code>
                   <button
                     onClick={() => copyToClipboard(setupData.manualEntryKey, 'manual')}
-                    className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    className="p-2 text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
                   >
                     {copiedCode === 'manual' ? (
-                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <CheckCircle className="h-4 w-4 text-success" />
                     ) : (
                       <Copy className="h-4 w-4" />
                     )}
@@ -178,11 +178,11 @@ const TwoFactorSetup = ({ onComplete, onCancel }) => {
               </div>
 
               {/* Instructions */}
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <h3 className="font-medium text-blue-900 dark:text-blue-200 mb-2">
+              <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4">
+                <h3 className="font-medium text-primary-900 dark:text-primary-200 mb-2">
                   How to set up:
                 </h3>
-                <ol className="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-decimal list-inside">
+                <ol className="text-sm text-primary-800 dark:text-primary-300 space-y-1 list-decimal list-inside">
                   <li>Install Google Authenticator or Authy on your phone</li>
                   <li>Scan the QR code or enter the manual code</li>
                   <li>Enter the 6-digit code from your app</li>
@@ -192,7 +192,7 @@ const TwoFactorSetup = ({ onComplete, onCancel }) => {
               <div className="flex space-x-3">
                 <button
                   onClick={onCancel}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="flex-1 px-4 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-secondary-800 transition-colors"
                 >
                   Cancel
                 </button>
@@ -219,26 +219,26 @@ const TwoFactorSetup = ({ onComplete, onCancel }) => {
             <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <Smartphone className="h-8 w-8 text-primary-600 dark:text-primary-400" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <h2 className="text-2xl font-bold text-secondary-900 dark:text-white mb-2">
               Verify Setup
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-neutral-600 dark:text-neutral-400">
               Enter the 6-digit code from your authenticator app
             </p>
           </div>
 
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <div className="bg-error/10 dark:bg-error/20 border border-error/30 dark:border-error rounded-lg p-4">
               <div className="flex items-center">
-                <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
-                <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+                <AlertCircle className="h-5 w-5 text-error dark:text-error/50 mr-2" />
+                <p className="text-error dark:text-error/30 text-sm">{error}</p>
               </div>
             </div>
           )}
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Verification Code
               </label>
               <input
@@ -246,7 +246,7 @@ const TwoFactorSetup = ({ onComplete, onCancel }) => {
                 value={verificationToken}
                 onChange={(e) => setVerificationToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="000000"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-center text-2xl font-mono tracking-widest"
+                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-center text-2xl font-mono tracking-widest"
                 maxLength={6}
               />
             </div>
@@ -254,7 +254,7 @@ const TwoFactorSetup = ({ onComplete, onCancel }) => {
             <div className="flex space-x-3">
               <button
                 onClick={() => setStep(1)}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                className="flex-1 px-4 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-secondary-800 transition-colors"
               >
                 Back
               </button>
@@ -278,21 +278,21 @@ const TwoFactorSetup = ({ onComplete, onCancel }) => {
           className="space-y-6"
         >
           <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+            <div className="w-16 h-16 bg-success/20 dark:bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="h-8 w-8 text-success dark:text-success/50" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <h2 className="text-2xl font-bold text-secondary-900 dark:text-white mb-2">
               2FA Enabled Successfully!
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-neutral-600 dark:text-neutral-400">
               Save these backup codes in a safe place
             </p>
           </div>
 
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+          <div className="bg-warning/10 dark:bg-warning/20 border border-warning/30 dark:border-warning rounded-lg p-4">
             <div className="flex items-start">
-              <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mr-2 mt-0.5" />
-              <div className="text-sm text-yellow-800 dark:text-yellow-300">
+              <AlertCircle className="h-5 w-5 text-warning dark:text-warning/50 mr-2 mt-0.5" />
+              <div className="text-sm text-warning dark:text-warning/40">
                 <p className="font-medium mb-1">Important:</p>
                 <p>These backup codes can be used to access your account if you lose your phone. Each code can only be used once.</p>
               </div>
@@ -301,10 +301,10 @@ const TwoFactorSetup = ({ onComplete, onCancel }) => {
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-medium text-gray-900 dark:text-white">Backup Codes</h3>
+              <h3 className="font-medium text-secondary-900 dark:text-white">Backup Codes</h3>
               <button
                 onClick={() => setShowBackupCodes(!showBackupCodes)}
-                className="flex items-center space-x-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                className="flex items-center space-x-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200"
               >
                 {showBackupCodes ? (
                   <>
@@ -323,14 +323,14 @@ const TwoFactorSetup = ({ onComplete, onCancel }) => {
             {showBackupCodes && (
               <div className="grid grid-cols-2 gap-2">
                 {backupCodes.map((code, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded">
+                  <div key={index} className="flex items-center justify-between bg-neutral-100 dark:bg-secondary-800 px-3 py-2 rounded">
                     <code className="text-sm font-mono">{code}</code>
                     <button
                       onClick={() => copyToClipboard(code, `code-${index}`)}
-                      className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      className="p-1 text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
                     >
                       {copiedCode === `code-${index}` ? (
-                        <CheckCircle className="h-3 w-3 text-green-500" />
+                        <CheckCircle className="h-3 w-3 text-success" />
                       ) : (
                         <Copy className="h-3 w-3" />
                       )}
@@ -342,7 +342,7 @@ const TwoFactorSetup = ({ onComplete, onCancel }) => {
 
             <button
               onClick={downloadBackupCodes}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-secondary-800 transition-colors"
             >
               Download Backup Codes
             </button>

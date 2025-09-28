@@ -164,7 +164,7 @@ const PaymentPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-neutral-50 dark:bg-secondary-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     );
@@ -172,11 +172,11 @@ const PaymentPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-neutral-50 dark:bg-secondary-900 flex items-center justify-center">
         <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Error</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+          <AlertCircle className="h-12 w-12 text-error mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-secondary-900 dark:text-white mb-2">Error</h2>
+          <p className="text-neutral-600 dark:text-neutral-400 mb-4">{error}</p>
           <button
             onClick={() => navigate('/dashboard/lender')}
             className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
@@ -189,21 +189,21 @@ const PaymentPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen bg-neutral-50 dark:bg-secondary-900 py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
           <button
             onClick={() => navigate('/dashboard/lender')}
-            className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors mb-4"
+            className="flex items-center text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 transition-colors mb-4"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back to Dashboard
           </button>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-bold text-secondary-900 dark:text-white">
             Accept Loan Application
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <p className="text-neutral-600 dark:text-neutral-400 mt-2">
             Complete the payment to accept this loan application
           </p>
         </div>
@@ -213,52 +213,52 @@ const PaymentPage = () => {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm"
+            className="bg-white dark:bg-secondary-800 rounded-lg p-6 shadow-sm"
           >
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-              <CreditCard className="h-6 w-6 mr-2 text-blue-600 dark:text-blue-400" />
+            <h2 className="text-xl font-semibold text-secondary-900 dark:text-white mb-6 flex items-center">
+              <CreditCard className="h-6 w-6 mr-2 text-primary-600 dark:text-primary-400" />
               Loan Details
             </h2>
             
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Borrower:</span>
-                <span className="font-medium text-gray-900 dark:text-white">
+                <span className="text-neutral-600 dark:text-neutral-400">Borrower:</span>
+                <span className="font-medium text-secondary-900 dark:text-white">
                   {loan?.borrower?.name}
                 </span>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Loan Amount:</span>
-                <span className="font-medium text-gray-900 dark:text-white">
+                <span className="text-neutral-600 dark:text-neutral-400">Loan Amount:</span>
+                <span className="font-medium text-secondary-900 dark:text-white">
                   ${loan?.loanAmount?.toLocaleString()}
                 </span>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Purpose:</span>
-                <span className="font-medium text-gray-900 dark:text-white capitalize">
+                <span className="text-neutral-600 dark:text-neutral-400">Purpose:</span>
+                <span className="font-medium text-secondary-900 dark:text-white capitalize">
                   {loan?.purpose}
                 </span>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Duration:</span>
-                <span className="font-medium text-gray-900 dark:text-white">
+                <span className="text-neutral-600 dark:text-neutral-400">Duration:</span>
+                <span className="font-medium text-secondary-900 dark:text-white">
                   {loan?.duration} months
                 </span>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Interest Rate:</span>
-                <span className="font-medium text-gray-900 dark:text-white">
+                <span className="text-neutral-600 dark:text-neutral-400">Interest Rate:</span>
+                <span className="font-medium text-secondary-900 dark:text-white">
                   {loan?.interestRate}%
                 </span>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Monthly Payment:</span>
-                <span className="font-medium text-gray-900 dark:text-white">
+                <span className="text-neutral-600 dark:text-neutral-400">Monthly Payment:</span>
+                <span className="font-medium text-secondary-900 dark:text-white">
                   ${loan?.monthlyPayment?.toLocaleString()}
                 </span>
               </div>
@@ -269,39 +269,39 @@ const PaymentPage = () => {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm"
+            className="bg-white dark:bg-secondary-800 rounded-lg p-6 shadow-sm"
           >
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-              <Shield className="h-6 w-6 mr-2 text-green-600 dark:text-green-400" />
+            <h2 className="text-xl font-semibold text-secondary-900 dark:text-white mb-6 flex items-center">
+              <Shield className="h-6 w-6 mr-2 text-success dark:text-success/50" />
               Payment Information
             </h2>
             
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Payment Amount
                 </label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400" />
                   <input
                     type="number"
                     value={paymentAmount}
                     onChange={(e) => setPaymentAmount(Number(e.target.value))}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                    className="w-full pl-10 pr-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-neutral-700 dark:text-white"
                     placeholder="Enter amount"
                     min="0"
                   />
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                   Loan amount: ${loan?.loanAmount?.toLocaleString()}
                 </p>
               </div>
 
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+              <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-4">
+                <h3 className="font-medium text-primary-900 dark:text-primary-100 mb-2">
                   Payment Security
                 </h3>
-                <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                <ul className="text-sm text-primary-800 dark:text-primary-200 space-y-1">
                   <li className="flex items-center">
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Secured by Paystack
@@ -320,7 +320,7 @@ const PaymentPage = () => {
               <button
                 onClick={handlePaystackPayment}
                 disabled={isProcessing || paymentAmount <= 0 || paymentAmount > loan?.loanAmount}
-                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                className="w-full bg-success hover:bg-success disabled:bg-neutral-400 text-white py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
               >
                 {isProcessing ? (
                   <>
@@ -335,7 +335,7 @@ const PaymentPage = () => {
                 )}
               </button>
 
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 text-center">
                 By proceeding, you agree to our terms and conditions
               </p>
             </div>

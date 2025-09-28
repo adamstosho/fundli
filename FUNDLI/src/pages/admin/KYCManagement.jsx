@@ -581,10 +581,10 @@ const KYCManagement = () => {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-secondary-900 dark:text-white mb-2">
           KYC Management
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-neutral-600 dark:text-neutral-400">
           Review and manage Know Your Customer verification submissions
         </p>
       </div>
@@ -599,10 +599,10 @@ const KYCManagement = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Submissions</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Total Submissions</p>
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                 {isLoading ? (
-                  <div className="animate-pulse bg-gray-300 dark:bg-gray-600 h-8 w-16 rounded"></div>
+                  <div className="animate-pulse bg-neutral-300 dark:bg-neutral-600 h-8 w-16 rounded"></div>
                 ) : (
                   kycStats.total
                 )}
@@ -622,10 +622,10 @@ const KYCManagement = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Review</p>
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Pending Review</p>
               <p className="text-2xl font-bold text-warning">
                 {isLoading ? (
-                  <div className="animate-pulse bg-gray-300 dark:bg-gray-600 h-8 w-16 rounded"></div>
+                  <div className="animate-pulse bg-neutral-300 dark:bg-neutral-600 h-8 w-16 rounded"></div>
                 ) : (
                   kycStats.pending
                 )}
@@ -645,10 +645,10 @@ const KYCManagement = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Approved</p>
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Approved</p>
               <p className="text-2xl font-bold text-success">
                 {isLoading ? (
-                  <div className="animate-pulse bg-gray-300 dark:bg-gray-600 h-8 w-16 rounded"></div>
+                  <div className="animate-pulse bg-neutral-300 dark:bg-neutral-600 h-8 w-16 rounded"></div>
                 ) : (
                   kycStats.approved
                 )}
@@ -668,10 +668,10 @@ const KYCManagement = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Rejected</p>
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Rejected</p>
               <p className="text-2xl font-bold text-error">
                 {isLoading ? (
-                  <div className="animate-pulse bg-gray-300 dark:bg-gray-600 h-8 w-16 rounded"></div>
+                  <div className="animate-pulse bg-neutral-300 dark:bg-neutral-600 h-8 w-16 rounded"></div>
                 ) : (
                   kycStats.rejected
                 )}
@@ -693,28 +693,28 @@ const KYCManagement = () => {
           className="mb-8"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4">
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-lg flex items-center justify-center mr-3">
-                  <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <div className="w-8 h-8 bg-primary-100 dark:bg-primary-800 rounded-lg flex items-center justify-center mr-3">
+                  <Users className="h-4 w-4 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Active Users</p>
-                  <p className="text-lg font-semibold text-blue-900 dark:text-blue-100">
+                  <p className="text-sm font-medium text-primary-600 dark:text-primary-400">Active Users</p>
+                  <p className="text-lg font-semibold text-primary-900 dark:text-primary-100">
                     {kycStats.approved + kycStats.pending}
                   </p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+            <div className="bg-success/10 dark:bg-success/20 border border-success/30 dark:border-success rounded-lg p-4">
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center mr-3">
-                  <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <div className="w-8 h-8 bg-success/20 dark:bg-success rounded-lg flex items-center justify-center mr-3">
+                  <CheckCircle className="h-4 w-4 text-success dark:text-success/50" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-green-600 dark:text-green-400">Verification Rate</p>
-                  <p className="text-lg font-semibold text-green-900 dark:text-green-100">
+                  <p className="text-sm font-medium text-success dark:text-success/50">Verification Rate</p>
+                  <p className="text-lg font-semibold text-success dark:text-success/20">
                     {kycStats.total > 0 ? Math.round((kycStats.approved / kycStats.total) * 100) : 0}%
                   </p>
                 </div>
@@ -744,20 +744,20 @@ const KYCManagement = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="mb-8 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center"
+          className="mb-8 bg-neutral-50 dark:bg-secondary-800 border border-neutral-200 dark:border-secondary-700 rounded-lg p-8 text-center"
         >
-          <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Shield className="h-8 w-8 text-gray-400" />
+          <div className="w-16 h-16 bg-neutral-200 dark:bg-neutral-700 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Shield className="h-8 w-8 text-neutral-400" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-2">
             No KYC Submissions Yet
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-neutral-600 dark:text-neutral-400 mb-4">
             Users need to complete their KYC verification before they can access platform features.
           </p>
-          <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex items-center justify-center space-x-4 text-sm text-neutral-500 dark:text-neutral-400">
             <div className="flex items-center">
-              <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+              <div className="w-2 h-2 bg-primary-500 rounded-full mr-2"></div>
               <span>Users register and submit KYC documents</span>
             </div>
             <div className="flex items-center">
@@ -765,7 +765,7 @@ const KYCManagement = () => {
               <span>Admin reviews and approves/rejects</span>
             </div>
             <div className="flex items-center">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+              <div className="w-2 h-2 bg-success rounded-full mr-2"></div>
               <span>Approved users can access platform</span>
             </div>
           </div>
@@ -779,25 +779,25 @@ const KYCManagement = () => {
         transition={{ duration: 0.6, delay: 0.5 }}
         className="card p-6 mb-8"
       >
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-6 py-4 border-b border-neutral-200 dark:border-secondary-700">
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search */}
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
                 <input
                   type="text"
                   placeholder="Search by name or email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                  className="w-full pl-10 pr-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-secondary-800 dark:text-white"
                 />
               </div>
             </div>
 
             {/* Status Filter */}
             <div className="flex items-center space-x-2">
-              <Filter className="h-4 w-4 text-gray-400" />
+              <Filter className="h-4 w-4 text-neutral-400" />
               <select
                 value={statusFilter}
                 onChange={(e) => {
@@ -806,7 +806,7 @@ const KYCManagement = () => {
                     loadAllKYC(1, e.target.value, searchTerm);
                   }
                 }}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                className="px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-secondary-800 dark:text-white"
               >
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
@@ -858,7 +858,7 @@ const KYCManagement = () => {
               onClick={() => {
                 calculateKYCStats();
               }}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+              className="px-4 py-2 bg-success text-white rounded-lg hover:bg-success focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
               title="Refresh KYC Statistics"
             >
               <BarChart3 className="h-4 w-4 inline mr-2" />
@@ -941,21 +941,21 @@ const KYCManagement = () => {
         transition={{ duration: 0.6, delay: 0.6 }}
         className="card overflow-hidden"
       >
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="px-6 py-4 border-b border-neutral-200 dark:border-secondary-700">
+          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
             KYC Management
           </h3>
         </div>
 
         {/* Tab Navigation */}
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+        <div className="px-6 py-4 border-b border-neutral-200 dark:border-secondary-700">
+          <div className="flex space-x-1 bg-neutral-100 dark:bg-secondary-800 rounded-lg p-1">
             <button
               onClick={() => setActiveTab('pending')}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 activeTab === 'pending'
-                  ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-white dark:bg-neutral-700 text-primary-600 dark:text-primary-400 shadow-sm'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-secondary-900 dark:hover:text-white'
               }`}
             >
               Pending ({kycStats.pending})
@@ -964,8 +964,8 @@ const KYCManagement = () => {
               onClick={() => setActiveTab('approved')}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 activeTab === 'approved'
-                  ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-white dark:bg-neutral-700 text-primary-600 dark:text-primary-400 shadow-sm'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-secondary-900 dark:hover:text-white'
               }`}
             >
               Approved ({kycStats.approved})
@@ -974,8 +974,8 @@ const KYCManagement = () => {
               onClick={() => setActiveTab('all')}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 activeTab === 'all'
-                  ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-white dark:bg-neutral-700 text-primary-600 dark:text-primary-400 shadow-sm'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-secondary-900 dark:hover:text-white'
               }`}
             >
               All KYC ({kycStats.total})
@@ -985,32 +985,32 @@ const KYCManagement = () => {
         
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+            <thead className="bg-neutral-50 dark:bg-secondary-800">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   User Type
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Documents
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Submitted
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="bg-white dark:bg-secondary-900 divide-y divide-gray-200 dark:divide-gray-700">
               {isLoading ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan="6" className="px-6 py-4 text-center text-neutral-500 dark:text-neutral-400">
                     <div className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mr-2"></div>
                       Loading KYC applications...
@@ -1023,19 +1023,19 @@ const KYCManagement = () => {
                     key={submission._id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="hover:bg-neutral-50 dark:hover:bg-secondary-800"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        <div className="text-sm font-medium text-secondary-900 dark:text-white">
                           {submission.firstName} {submission.lastName}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                        <div className="text-sm text-neutral-500 dark:text-neutral-400">
                           {submission.email}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400">
                       {submission.userType || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -1043,10 +1043,10 @@ const KYCManagement = () => {
                         {activeTab === 'pending' ? 'Pending' : (submission.kycStatus || 'Pending')}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400">
                       {submission.kycDocuments ? 'Documents Submitted' : 'No Documents'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400">
                       {formatDate(submission.createdAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -1054,7 +1054,7 @@ const KYCManagement = () => {
                         <div className="flex items-center justify-end space-x-2">
                           <button
                             onClick={() => viewKYCDetails(submission)}
-                            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                            className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
                             title="View Details"
                           >
                             <Eye className="h-4 w-4" />
@@ -1088,12 +1088,12 @@ const KYCManagement = () => {
                         <div className="flex items-center justify-end space-x-2">
                           <button
                             onClick={() => viewKYCDetails(submission)}
-                            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                            className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
                             title="View Details"
                           >
                             <Eye className="h-4 w-4" />
                           </button>
-                          <div className="text-gray-400 dark:text-gray-500">
+                          <div className="text-neutral-400 dark:text-neutral-500">
                             {activeTab === 'approved' ? 'Approved' : submission.kycStatus}
                           </div>
                         </div>
@@ -1103,7 +1103,7 @@ const KYCManagement = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan="6" className="px-6 py-4 text-center text-neutral-500 dark:text-neutral-400">
                     {isLoading ? 'Loading...' : `No ${activeTab} KYC applications found`}
                   </td>
                 </tr>
@@ -1114,23 +1114,23 @@ const KYCManagement = () => {
 
         {/* Pagination for All KYC tab */}
         {activeTab === 'all' && totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="px-6 py-4 border-t border-neutral-200 dark:border-secondary-700">
             <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-700 dark:text-gray-300">
+              <div className="text-sm text-neutral-700 dark:text-neutral-300">
                 Showing page {currentPage} of {totalPages} ({totalItems} total items)
               </div>
               <div className="flex space-x-2">
                 <button
                   onClick={() => loadAllKYC(currentPage - 1, statusFilter, searchTerm)}
                   disabled={currentPage <= 1}
-                  className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+                  className="px-3 py-2 text-sm font-medium text-neutral-500 bg-white border border-neutral-300 rounded-md hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-secondary-800 dark:border-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-700"
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => loadAllKYC(currentPage + 1, statusFilter, searchTerm)}
                   disabled={currentPage >= totalPages}
-                  className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+                  className="px-3 py-2 text-sm font-medium text-neutral-500 bg-white border border-neutral-300 rounded-md hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-secondary-800 dark:border-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-700"
                 >
                   Next
                 </button>
@@ -1147,21 +1147,21 @@ const KYCManagement = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-secondary-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
           >
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className="px-6 py-4 border-b border-neutral-200 dark:border-secondary-700 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                 KYC Details - {selectedKYC.firstName} {selectedKYC.lastName}
                 {isLoadingDetails && (
-                  <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                  <span className="ml-2 text-sm text-neutral-500 dark:text-neutral-400">
                     (Loading...)
                   </span>
                 )}
               </h3>
               <button
                 onClick={closeDetailsModal}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
               >
                 <XCircle className="h-6 w-6" />
               </button>
@@ -1172,50 +1172,50 @@ const KYCManagement = () => {
               {isLoadingDetails ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mr-4"></div>
-                  <p className="text-gray-600 dark:text-gray-400">Loading KYC details...</p>
+                  <p className="text-neutral-600 dark:text-neutral-400">Loading KYC details...</p>
                 </div>
               ) : (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Personal Information */}
                     <div className="space-y-4">
-                      <h4 className="text-md font-semibold text-gray-900 dark:text-white flex items-center">
+                      <h4 className="text-md font-semibold text-secondary-900 dark:text-white flex items-center">
                         <User className="h-5 w-5 mr-2 text-primary-600" />
                         Personal Information
                       </h4>
                       
                       <div className="space-y-3">
                         <div className="flex items-center space-x-3">
-                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-24">Name:</span>
-                          <span className="text-sm text-gray-900 dark:text-white">
+                          <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 w-24">Name:</span>
+                          <span className="text-sm text-secondary-900 dark:text-white">
                             {selectedKYC.firstName} {selectedKYC.lastName}
                           </span>
                         </div>
                         
                         <div className="flex items-center space-x-3">
-                          <Mail className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-24">Email:</span>
-                          <span className="text-sm text-gray-900 dark:text-white">{selectedKYC.email}</span>
+                          <Mail className="h-4 w-4 text-neutral-400" />
+                          <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 w-24">Email:</span>
+                          <span className="text-sm text-secondary-900 dark:text-white">{selectedKYC.email}</span>
                         </div>
                         
                         {selectedKYC.phone && (
                           <div className="flex items-center space-x-3">
-                            <Phone className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-24">Phone:</span>
-                            <span className="text-sm text-gray-900 dark:text-white">{selectedKYC.phone}</span>
+                            <Phone className="h-4 w-4 text-neutral-400" />
+                            <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 w-24">Phone:</span>
+                            <span className="text-sm text-secondary-900 dark:text-white">{selectedKYC.phone}</span>
                           </div>
                         )}
                         
                         <div className="flex items-center space-x-3">
-                          <CreditCard className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-24">User Type:</span>
-                          <span className="text-sm text-gray-900 dark:text-white capitalize">{selectedKYC.userType}</span>
+                          <CreditCard className="h-4 w-4 text-neutral-400" />
+                          <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 w-24">User Type:</span>
+                          <span className="text-sm text-secondary-900 dark:text-white capitalize">{selectedKYC.userType}</span>
                         </div>
                         
                         <div className="flex items-center space-x-3">
-                          <Calendar className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-24">Joined:</span>
-                          <span className="text-sm text-gray-900 dark:text-white">
+                          <Calendar className="h-4 w-4 text-neutral-400" />
+                          <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 w-24">Joined:</span>
+                          <span className="text-sm text-secondary-900 dark:text-white">
                             {formatDate(selectedKYC.createdAt)}
                           </span>
                         </div>
@@ -1224,14 +1224,14 @@ const KYCManagement = () => {
 
                     {/* KYC Status */}
                     <div className="space-y-4">
-                      <h4 className="text-md font-semibold text-gray-900 dark:text-white flex items-center">
+                      <h4 className="text-md font-semibold text-secondary-900 dark:text-white flex items-center">
                         <Shield className="h-5 w-5 mr-2 text-primary-600" />
                         KYC Status
                       </h4>
                       
                       <div className="space-y-3">
                         <div className="flex items-center space-x-3">
-                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-24">Status:</span>
+                          <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 w-24">Status:</span>
                           <span className={`badge ${getStatusColor(selectedKYC.kycStatus || 'pending')}`}>
                             {selectedKYC.kycStatus || 'Pending'}
                           </span>
@@ -1239,9 +1239,9 @@ const KYCManagement = () => {
                         
                         {selectedKYC.kycDocuments?.submittedAt && (
                           <div className="flex items-center space-x-3">
-                            <Calendar className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-24">Submitted:</span>
-                            <span className="text-sm text-gray-900 dark:text-white">
+                            <Calendar className="h-4 w-4 text-neutral-400" />
+                            <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 w-24">Submitted:</span>
+                            <span className="text-sm text-secondary-900 dark:text-white">
                               {formatDate(selectedKYC.kycDocuments.submittedAt)}
                             </span>
                           </div>
@@ -1253,7 +1253,7 @@ const KYCManagement = () => {
                   {/* KYC Documents Section */}
                   {selectedKYC.kycDocuments && (
                     <div className="mt-8 space-y-4">
-                      <h4 className="text-md font-semibold text-gray-900 dark:text-white flex items-center">
+                      <h4 className="text-md font-semibold text-secondary-900 dark:text-white flex items-center">
                         <FileText className="h-5 w-5 mr-2 text-primary-600" />
                         KYC Documents
                       </h4>
@@ -1261,27 +1261,27 @@ const KYCManagement = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Identity Information */}
                         <div className="space-y-3">
-                          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300">Identity Information</h5>
+                          <h5 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Identity Information</h5>
                           
                           <div className="space-y-2">
                             <div className="flex items-center space-x-3">
-                              <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-24">ID Type:</span>
-                              <span className="text-sm text-gray-900 dark:text-white capitalize">
+                              <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 w-24">ID Type:</span>
+                              <span className="text-sm text-secondary-900 dark:text-white capitalize">
                                 {selectedKYC.kycDocuments.idType || 'N/A'}
                               </span>
                             </div>
                             
                             <div className="flex items-center space-x-3">
-                              <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-24">ID Number:</span>
-                              <span className="text-sm text-gray-900 dark:text-white">
+                              <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 w-24">ID Number:</span>
+                              <span className="text-sm text-secondary-900 dark:text-white">
                                 {selectedKYC.kycDocuments.idNumber || 'N/A'}
                               </span>
                             </div>
                             
                             {selectedKYC.kycDocuments.dateOfBirth && (
                               <div className="flex items-center space-x-3">
-                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-24">Date of Birth:</span>
-                                <span className="text-sm text-gray-900 dark:text-white">
+                                <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 w-24">Date of Birth:</span>
+                                <span className="text-sm text-secondary-900 dark:text-white">
                                   {formatDate(selectedKYC.kycDocuments.dateOfBirth)}
                                 </span>
                               </div>
@@ -1292,43 +1292,43 @@ const KYCManagement = () => {
                         {/* Address Information */}
                         {selectedKYC.kycDocuments.address && (
                           <div className="space-y-3">
-                            <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300">Address Information</h5>
+                            <h5 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Address Information</h5>
                             
                             <div className="space-y-2">
                               {selectedKYC.kycDocuments.address.street && (
                                 <div className="flex items-center space-x-3">
-                                  <MapPin className="h-4 w-4 text-gray-400" />
-                                  <span className="text-sm text-gray-900 dark:text-white">
+                                  <MapPin className="h-4 w-4 text-neutral-400" />
+                                  <span className="text-sm text-secondary-900 dark:text-white">
                                     {selectedKYC.kycDocuments.address.street}
                                   </span>
                                 </div>
                               )}
                               
                               <div className="flex items-center space-x-3">
-                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-16">City:</span>
-                                <span className="text-sm text-gray-900 dark:text-white">
+                                <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 w-16">City:</span>
+                                <span className="text-sm text-secondary-900 dark:text-white">
                                   {selectedKYC.kycDocuments.address.city || 'N/A'}
                                 </span>
                               </div>
                               
                               <div className="flex items-center space-x-3">
-                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-16">State:</span>
-                                <span className="text-sm text-gray-900 dark:text-white">
+                                <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 w-16">State:</span>
+                                <span className="text-sm text-secondary-900 dark:text-white">
                                   {selectedKYC.kycDocuments.address.state || 'N/A'}
                                 </span>
                               </div>
                               
                               <div className="flex items-center space-x-3">
-                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-16">Country:</span>
-                                <span className="text-sm text-gray-900 dark:text-white">
+                                <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 w-16">Country:</span>
+                                <span className="text-sm text-secondary-900 dark:text-white">
                                   {selectedKYC.kycDocuments.address.country || 'N/A'}
                                 </span>
                               </div>
                               
                               {selectedKYC.kycDocuments.address.postalCode && (
                                 <div className="flex items-center space-x-3">
-                                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-16">Postal Code:</span>
-                                  <span className="text-sm text-gray-900 dark:text-white">
+                                  <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 w-16">Postal Code:</span>
+                                  <span className="text-sm text-secondary-900 dark:text-white">
                                     {selectedKYC.kycDocuments.address.postalCode}
                                   </span>
                                 </div>
@@ -1341,17 +1341,17 @@ const KYCManagement = () => {
                       {/* Document Images */}
                       {selectedKYC.kycDocuments && (
                         <div className="mt-6 space-y-4">
-                          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300">Document Images</h5>
+                          <h5 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Document Images</h5>
                           
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             {selectedKYC.kycDocuments.documents?.idFront?.url && (
                               <div className="space-y-2">
-                                <label className="text-xs font-medium text-gray-600 dark:text-gray-400">ID Front</label>
+                                <label className="text-xs font-medium text-neutral-600 dark:text-neutral-400">ID Front</label>
                                 <img
                                   src={selectedKYC.kycDocuments.documents.idFront.url}
                                   alt="ID Front"
-                                  className="w-full h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                                  className="w-full h-32 object-cover rounded-lg border border-neutral-200 dark:border-secondary-700"
                                   onError={(e) => {
                                     console.error('Failed to load ID Front image:', e.target.src);
                                     e.target.style.display = 'none';
@@ -1362,11 +1362,11 @@ const KYCManagement = () => {
                             
                             {selectedKYC.kycDocuments.documents?.idBack?.url && (
                               <div className="space-y-2">
-                                <label className="text-xs font-medium text-gray-600 dark:text-gray-400">ID Back</label>
+                                <label className="text-xs font-medium text-neutral-600 dark:text-neutral-400">ID Back</label>
                                 <img
                                   src={selectedKYC.kycDocuments.documents.idBack.url}
                                   alt="ID Back"
-                                  className="w-full h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                                  className="w-full h-32 object-cover rounded-lg border border-neutral-200 dark:border-secondary-700"
                                   onError={(e) => {
                                     console.error('Failed to load ID Back image:', e.target.src);
                                     e.target.style.display = 'none';
@@ -1377,11 +1377,11 @@ const KYCManagement = () => {
                             
                             {selectedKYC.kycDocuments.documents?.selfie?.url && (
                               <div className="space-y-2">
-                                <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Selfie</label>
+                                <label className="text-xs font-medium text-neutral-600 dark:text-neutral-400">Selfie</label>
                                 <img
                                   src={selectedKYC.kycDocuments.documents.selfie.url}
                                   alt="Selfie"
-                                  className="w-full h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                                  className="w-full h-32 object-cover rounded-lg border border-neutral-200 dark:border-secondary-700"
                                   onError={(e) => {
                                     console.error('Failed to load Selfie image:', e.target.src);
                                     e.target.style.display = 'none';
@@ -1392,11 +1392,11 @@ const KYCManagement = () => {
                             
                             {selectedKYC.kycDocuments.documents?.proofOfAddress?.url && (
                               <div className="space-y-2">
-                                <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Proof of Address</label>
+                                <label className="text-xs font-medium text-neutral-600 dark:text-neutral-400">Proof of Address</label>
                                 <img
                                   src={selectedKYC.kycDocuments.documents.proofOfAddress.url}
                                   alt="Proof of Address"
-                                  className="w-full h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                                  className="w-full h-32 object-cover rounded-lg border border-neutral-200 dark:border-secondary-700"
                                   onError={(e) => {
                                     console.error('Failed to load Proof of Address image:', e.target.src);
                                     e.target.style.display = 'none';
@@ -1412,8 +1412,8 @@ const KYCManagement = () => {
                              !selectedKYC.kycDocuments.documents.idBack?.url && 
                              !selectedKYC.kycDocuments.documents.selfie?.url && 
                              !selectedKYC.kycDocuments.documents.proofOfAddress?.url)) && (
-                              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                              <div className="text-center py-8 text-neutral-500 dark:text-neutral-400">
+                                <FileText className="h-12 w-12 mx-auto mb-4 text-neutral-300" />
                                 <p>No document images uploaded yet</p>
                               </div>
                             )}
@@ -1424,14 +1424,14 @@ const KYCManagement = () => {
 
                   {/* Action Buttons for Pending KYC */}
                   {activeTab === 'pending' && selectedKYC.kycStatus === 'pending' && (
-                    <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+                    <div className="mt-8 pt-6 border-t border-neutral-200 dark:border-secondary-700 flex justify-end space-x-3">
                       <button
                         onClick={() => {
                           closeDetailsModal();
                           handleRejectKYC(selectedKYC._id, 'Rejected by Admin');
                         }}
                         disabled={isProcessing === selectedKYC._id}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-4 py-2 bg-error text-white rounded-lg hover:bg-error focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isProcessing === selectedKYC._id ? (
                           <>
@@ -1451,7 +1451,7 @@ const KYCManagement = () => {
                           handleApproveKYC(selectedKYC._id);
                         }}
                         disabled={isProcessing === selectedKYC._id}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-4 py-2 bg-success text-white rounded-lg hover:bg-success focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isProcessing === selectedKYC._id ? (
                           <>

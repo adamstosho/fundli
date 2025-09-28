@@ -376,7 +376,7 @@ class TwoFactorService {
    * @returns {boolean} Is valid format
    */
   validateTokenFormat(token) {
-    return /^\d{6}$/.test(token);
+    return /^\d{6}₦/.test(token);
   }
 
   /**

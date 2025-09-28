@@ -283,10 +283,10 @@ const UserManagement = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            <h1 className="text-3xl font-bold text-secondary-900 dark:text-white mb-2">
               User Management
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-neutral-600 dark:text-neutral-400">
               Manage platform users, view profiles, and control access
             </p>
           </div>
@@ -320,8 +320,8 @@ const UserManagement = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Users</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Total Users</p>
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                 {pagination.totalItems}
               </p>
             </div>
@@ -339,7 +339,7 @@ const UserManagement = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Users</p>
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Active Users</p>
               <p className="text-2xl font-bold text-success">
                 {users.filter(u => u.isActive).length}
               </p>
@@ -358,7 +358,7 @@ const UserManagement = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending KYC</p>
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Pending KYC</p>
               <p className="text-2xl font-bold text-warning">
                 {users.filter(u => u.kycStatus === 'pending').length}
               </p>
@@ -377,7 +377,7 @@ const UserManagement = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Suspended</p>
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Suspended</p>
               <p className="text-2xl font-bold text-error">
                 {users.filter(u => !u.isActive).length}
               </p>
@@ -397,10 +397,10 @@ const UserManagement = () => {
         className="card p-6 mb-8"
       >
         {isFiltering && (
-          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="mb-4 p-3 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg">
             <div className="flex items-center space-x-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-              <span className="text-sm text-blue-700 dark:text-blue-300">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
+              <span className="text-sm text-primary-700 dark:text-primary-300">
                 Applying filters...
               </span>
             </div>
@@ -411,7 +411,7 @@ const UserManagement = () => {
           <div className="flex-1">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+                <Search className="h-5 w-5 text-neutral-400" />
               </div>
               <input
                 type="text"
@@ -423,7 +423,7 @@ const UserManagement = () => {
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm('')}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-neutral-400 hover:text-neutral-600"
                 >
                   <XCircle className="h-4 w-4" />
                 </button>
@@ -433,7 +433,7 @@ const UserManagement = () => {
           
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <Filter className="h-5 w-5 text-gray-400" />
+              <Filter className="h-5 w-5 text-neutral-400" />
               <select
                 value={statusFilter}
                 onChange={handleStatusFilterChange}
@@ -474,7 +474,7 @@ const UserManagement = () => {
 
             <button
               onClick={clearFilters}
-              className="px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors"
+              className="px-3 py-2 text-sm font-medium text-neutral-600 bg-neutral-100 border border-neutral-300 rounded-md hover:bg-neutral-200 transition-colors"
             >
               Clear Filters
             </button>
@@ -489,12 +489,12 @@ const UserManagement = () => {
         transition={{ duration: 0.6, delay: 0.6 }}
         className="card overflow-hidden"
       >
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-6 py-4 border-b border-neutral-200 dark:border-secondary-700">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
               Platform Users
             </h3>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm text-neutral-500 dark:text-neutral-400">
               {searchTerm || statusFilter !== 'all' || userTypeFilter !== 'all' || kycStatusFilter !== 'all' ? (
                 <span>
                   Showing {users.length} of {pagination.totalItems} users
@@ -516,39 +516,39 @@ const UserManagement = () => {
         
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+            <thead className="bg-neutral-50 dark:bg-secondary-800">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Type
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   KYC Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Phone
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Join Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="bg-white dark:bg-secondary-900 divide-y divide-gray-200 dark:divide-gray-700">
               {users.length > 0 ? (
                 users.map((user) => (
                   <motion.tr
                     key={user._id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="hover:bg-neutral-50 dark:hover:bg-secondary-800"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -558,10 +558,10 @@ const UserManagement = () => {
                           </span>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          <div className="text-sm font-medium text-secondary-900 dark:text-white">
                             {user.firstName} {user.lastName}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                          <div className="text-sm text-neutral-500 dark:text-neutral-400">
                             {user.email}
                           </div>
                         </div>
@@ -600,10 +600,10 @@ const UserManagement = () => {
                         {user.kycStatus || 'Not Submitted'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400">
                       {user.phone || 'N/A'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400">
                       {formatDate(user.createdAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -651,7 +651,7 @@ const UserManagement = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan="6" className="px-6 py-4 text-center text-neutral-500 dark:text-neutral-400">
                     {isLoading ? 'Loading...' : 'No users found'}
                   </td>
                 </tr>
@@ -670,7 +670,7 @@ const UserManagement = () => {
           className="card p-6 mt-6"
         >
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-700 dark:text-gray-300">
+            <div className="text-sm text-neutral-700 dark:text-neutral-300">
               Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to{' '}
               {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of{' '}
               {pagination.totalItems} results
@@ -680,19 +680,19 @@ const UserManagement = () => {
               <button
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={pagination.currentPage === 1}
-                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-2 text-sm font-medium text-neutral-500 bg-white border border-neutral-300 rounded-md hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous
               </button>
               
-              <span className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md">
+              <span className="px-3 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-md">
                 Page {pagination.currentPage} of {pagination.totalPages}
               </span>
               
               <button
                 onClick={() => setCurrentPage(prev => Math.min(pagination.totalPages, prev + 1))}
                 disabled={pagination.currentPage === pagination.totalPages}
-                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-2 text-sm font-medium text-neutral-500 bg-white border border-neutral-300 rounded-md hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
               </button>
@@ -707,16 +707,16 @@ const UserManagement = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-secondary-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
           >
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="p-6 border-b border-neutral-200 dark:border-secondary-700">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                   User Details
                 </h3>
                 <button
                   onClick={closeUserModal}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
                 >
                   <XCircle className="h-6 w-6" />
                 </button>
@@ -726,29 +726,29 @@ const UserManagement = () => {
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Name</label>
-                  <p className="text-gray-900 dark:text-white">{selectedUser.firstName} {selectedUser.lastName}</p>
+                  <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Name</label>
+                  <p className="text-secondary-900 dark:text-white">{selectedUser.firstName} {selectedUser.lastName}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Email</label>
-                  <p className="text-gray-900 dark:text-white">{selectedUser.email}</p>
+                  <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Email</label>
+                  <p className="text-secondary-900 dark:text-white">{selectedUser.email}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Phone</label>
-                  <p className="text-gray-900 dark:text-white">{selectedUser.phone || 'N/A'}</p>
+                  <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Phone</label>
+                  <p className="text-secondary-900 dark:text-white">{selectedUser.phone || 'N/A'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">User Type</label>
-                  <p className="text-gray-900 dark:text-white capitalize">{selectedUser.userType}</p>
+                  <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">User Type</label>
+                  <p className="text-secondary-900 dark:text-white capitalize">{selectedUser.userType}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</label>
+                  <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Status</label>
                   <span className={`badge ${selectedUser.isActive ? 'badge-success' : 'badge-error'}`}>
                     {selectedUser.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">KYC Status</label>
+                  <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">KYC Status</label>
                   <span className={`badge ${
                     selectedUser.kycStatus === 'approved' ? 'badge-success' : 
                     selectedUser.kycStatus === 'rejected' ? 'badge-error' :
@@ -758,22 +758,22 @@ const UserManagement = () => {
                   </span>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Credit Score</label>
-                  <p className="text-gray-900 dark:text-white">{selectedUser.creditScore || 'N/A'}</p>
+                  <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Credit Score</label>
+                  <p className="text-secondary-900 dark:text-white">{selectedUser.creditScore || 'N/A'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Join Date</label>
-                  <p className="text-gray-900 dark:text-white">{formatDate(selectedUser.createdAt)}</p>
+                  <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Join Date</label>
+                  <p className="text-secondary-900 dark:text-white">{formatDate(selectedUser.createdAt)}</p>
                 </div>
               </div>
               
               {selectedUser.kycDocuments && (
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <h4 className="text-md font-medium text-gray-900 dark:text-white mb-3">KYC Documents</h4>
+                <div className="border-t border-neutral-200 dark:border-secondary-700 pt-4">
+                  <h4 className="text-md font-medium text-secondary-900 dark:text-white mb-3">KYC Documents</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {selectedUser.kycDocuments.documents?.idFront && (
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">ID Front</label>
+                        <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">ID Front</label>
                         <img 
                           src={selectedUser.kycDocuments.documents.idFront.url} 
                           alt="ID Front" 
@@ -783,7 +783,7 @@ const UserManagement = () => {
                     )}
                     {selectedUser.kycDocuments.documents?.selfie && (
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Selfie</label>
+                        <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Selfie</label>
                         <img 
                           src={selectedUser.kycDocuments.documents.selfie.url} 
                           alt="Selfie" 

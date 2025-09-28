@@ -104,7 +104,7 @@ export const chartOptions = {
         label: function(context) {
           const value = context.parsed.y || context.parsed;
           if (typeof value === 'number') {
-            return `${context.dataset.label}: $${value.toLocaleString()}`;
+            return `${context.dataset.label}: ₦${value.toLocaleString()}`;
           }
           return `${context.dataset.label}: ${value}`;
         }
@@ -146,11 +146,11 @@ export const chartOptions = {
         padding: 10,
         callback: function(value) {
           if (value >= 1000000) {
-            return '$' + (value / 1000000).toFixed(1) + 'M';
+            return '₦' + (value / 1000000).toFixed(1) + 'M';
           } else if (value >= 1000) {
-            return '$' + (value / 1000).toFixed(1) + 'k';
+            return '₦' + (value / 1000).toFixed(1) + 'k';
           }
-          return '$' + value.toLocaleString();
+          return '₦' + value.toLocaleString();
         }
       },
       border: {

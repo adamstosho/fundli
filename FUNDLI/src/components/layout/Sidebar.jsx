@@ -23,7 +23,7 @@ const Sidebar = ({ open, onClose }) => {
       ...(userType !== 'admin' ? [{ name: 'KYC Verification', href: '/kyc-upload', icon: Shield }] : []),
       { name: 'Create Pool', href: '/marketplace/create-pool', icon: DollarSign },
       { name: 'Browse Loans', href: '/marketplace/browse', icon: CreditCard },
-      { name: 'My Investments', href: '/dashboard/lender', icon: TrendingUp },
+      { name: 'My Investments', href: '/lender/investments', icon: TrendingUp },
       { name: 'Analytics', href: '/dashboard/lender', icon: BarChart3 },
       { name: 'Notifications', href: '/notifications', icon: Bell },
       { name: 'Profile', href: '/settings/profile', icon: UserCheck },
@@ -43,37 +43,37 @@ const Sidebar = ({ open, onClose }) => {
   const currentNav = navigation[userType] || navigation.borrower;
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
+    <div className="flex flex-col h-full bg-white dark:bg-secondary-900">
       {/* Logo */}
-      <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between h-16 px-6 border-b border-neutral-200 dark:border-secondary-700">
         <Link to="/" className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+          <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center shadow-lg">
             <span className="text-white font-bold text-xl">F</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xl font-bold text-gray-900 dark:text-white">Fundli</span>
-            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Peer-to-Peer Lending</span>
+            <span className="text-xl font-bold text-secondary-900 dark:text-white">Fundli</span>
+            <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Peer-to-Peer Lending</span>
           </div>
         </Link>
         <button
           onClick={onClose}
-          className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+          className="lg:hidden p-2 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-secondary-800 transition-all duration-200"
         >
           <X className="h-5 w-5" />
         </button>
       </div>
 
       {/* User Info */}
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="px-6 py-4 border-b border-neutral-200 dark:border-secondary-700">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center">
             <User className="h-5 w-5 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+            <p className="text-sm font-semibold text-secondary-900 dark:text-white truncate">
               {userType === 'borrower' ? 'Borrower' : userType === 'lender' ? 'Lender' : 'Admin'}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
               {userType === 'borrower' ? 'Access your loans' : userType === 'lender' ? 'Manage investments' : 'Platform management'}
             </p>
           </div>
@@ -92,19 +92,19 @@ const Sidebar = ({ open, onClose }) => {
               className={clsx(
                 'flex items-center px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 group',
                 isActive
-                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800'
+                  : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-secondary-800 hover:text-neutral-900 dark:hover:text-white'
               )}
             >
               <item.icon className={clsx(
                 'h-5 w-5 mr-3 transition-colors',
                 isActive
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300'
+                  ? 'text-primary-600 dark:text-primary-400'
+                  : 'text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300'
               )} />
               <span className="flex-1">{item.name}</span>
               {isActive && (
-                <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-primary-600 dark:bg-primary-400 rounded-full"></div>
               )}
             </Link>
           );
@@ -127,7 +127,7 @@ const Sidebar = ({ open, onClose }) => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-gray-900/75" />
+            <div className="fixed inset-0 bg-secondary-900/75" />
           </Transition.Child>
 
           <div className="fixed inset-0 flex">
@@ -140,7 +140,7 @@ const Sidebar = ({ open, onClose }) => {
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-white dark:bg-gray-900">
+              <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-white dark:bg-secondary-900">
                 <SidebarContent />
               </Dialog.Panel>
             </Transition.Child>
@@ -150,7 +150,7 @@ const Sidebar = ({ open, onClose }) => {
 
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col">
-        <div className="flex flex-col flex-grow bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-lg">
+        <div className="flex flex-col flex-grow bg-white dark:bg-secondary-900 border-r border-neutral-200 dark:border-secondary-700 shadow-lg">
           <SidebarContent />
         </div>
       </div>

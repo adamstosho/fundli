@@ -220,15 +220,15 @@ investmentSchema.statics.getUserInvestmentStats = async function(userId) {
       $group: {
         _id: null,
         totalInvestments: { $sum: 1 },
-        totalAmount: { $sum: '$amount' },
+        totalAmount: { $sum: 1 },
         totalReturns: { $sum: '$returnsReceived' },
         activeInvestments: {
-          $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] }
+          $sum: { $cond: [{ $eq: [null, 'active'] }, 1, 0] }
         },
         completedInvestments: {
-          $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] }
+          $sum: { $cond: [{ $eq: [null, 'completed'] }, 1, 0] }
         },
-        averageReturn: { $avg: '$performance.returnPercentage' }
+        averageReturn: { $avg: 1 }
       }
     }
   ]);

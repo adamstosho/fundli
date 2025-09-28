@@ -106,7 +106,7 @@ class NotificationService {
         recipientId: admin._id,
         type: 'loan_application',
         title: 'New Loan Application Submitted',
-        message: `A new loan application has been submitted by ${loanData.borrowerName} for $${loanData.amount.toLocaleString()}`,
+        message: `A new loan application has been submitted by ${loanData.borrowerName} for ₦${loanData.amount.toLocaleString()}`,
         priority: 'high',
         actionRequired: true,
         action: {
@@ -132,7 +132,7 @@ class NotificationService {
         recipientId: loanData.borrowerId,
         type: 'loan_application',
         title: 'Loan Application Submitted Successfully',
-        message: `Your loan application for $${loanData.amount.toLocaleString()} has been submitted and is under review.`,
+        message: `Your loan application for ₦${loanData.amount.toLocaleString()} has been submitted and is under review.`,
         priority: 'normal',
         action: {
           type: 'view',
@@ -163,7 +163,7 @@ class NotificationService {
         recipientId: loanData.borrowerId,
         type: 'loan_funding',
         title: 'Loan Successfully Funded!',
-        message: `Congratulations! Your loan application for $${loanData.amount.toLocaleString()} has been fully funded and is ready for disbursement.`,
+        message: `Congratulations! Your loan application for ₦${loanData.amount.toLocaleString()} has been fully funded and is ready for disbursement.`,
         priority: 'high',
         action: {
           type: 'view',
@@ -185,7 +185,7 @@ class NotificationService {
         recipientId: loanData.lenderId,
         type: 'loan_funding',
         title: 'Investment Successful',
-        message: `Your investment of $${loanData.investmentAmount.toLocaleString()} has been successfully processed for ${loanData.borrowerName}'s loan.`,
+        message: `Your investment of ₦${loanData.investmentAmount.toLocaleString()} has been successfully processed for ${loanData.borrowerName}'s loan.`,
         priority: 'normal',
         action: {
           type: 'view',
@@ -253,8 +253,8 @@ class NotificationService {
         type: isApproved ? 'loan_approval' : 'loan_rejection',
         title: isApproved ? 'Loan Application Approved!' : 'Loan Application Rejected',
         message: isApproved 
-          ? `Great news! Your loan application for $${loanData.amount.toLocaleString()} has been approved and is now available for funding.`
-          : `Your loan application for $${loanData.amount.toLocaleString()} has been rejected. Reason: ${loanData.rejectionReason || 'Please contact support for details.'}`,
+          ? `Great news! Your loan application for ₦${loanData.amount.toLocaleString()} has been approved and is now available for funding.`
+          : `Your loan application for ₦${loanData.amount.toLocaleString()} has been rejected. Reason: ${loanData.rejectionReason || 'Please contact support for details.'}`,
         priority: isApproved ? 'high' : 'normal',
         action: {
           type: 'view',
@@ -279,7 +279,7 @@ class NotificationService {
           recipientId: lender._id,
           type: 'investment_opportunity',
           title: 'New Investment Opportunity Available',
-          message: `A new loan application for $${loanData.amount.toLocaleString()} has been approved and is available for investment.`,
+          message: `A new loan application for ₦${loanData.amount.toLocaleString()} has been approved and is available for investment.`,
           priority: 'normal',
           action: {
             type: 'view',
@@ -315,7 +315,7 @@ class NotificationService {
         recipientId: paymentData.borrowerId,
         type: 'repayment_due',
         title: 'Payment Due Reminder',
-        message: `Your loan payment of $${paymentData.amount.toLocaleString()} is due on ${new Date(paymentData.dueDate).toLocaleDateString()}. Please make your payment to avoid late fees.`,
+        message: `Your loan payment of ₦${paymentData.amount.toLocaleString()} is due on ${new Date(paymentData.dueDate).toLocaleDateString()}. Please make your payment to avoid late fees.`,
         priority: 'high',
         actionRequired: true,
         action: {
@@ -350,7 +350,7 @@ class NotificationService {
         recipientId: paymentData.borrowerId,
         type: 'payment_failed',
         title: 'Payment Overdue',
-        message: `Your loan payment of $${paymentData.amount.toLocaleString()} is overdue. Late fee of $${paymentData.lateFee.toLocaleString()} has been applied. Please make payment immediately.`,
+        message: `Your loan payment of ₦${paymentData.amount.toLocaleString()} is overdue. Late fee of ₦${paymentData.lateFee.toLocaleString()} has been applied. Please make payment immediately.`,
         priority: 'urgent',
         actionRequired: true,
         action: {
@@ -375,7 +375,7 @@ class NotificationService {
         recipientId: paymentData.lenderId,
         type: 'payment_failed',
         title: 'Borrower Payment Overdue',
-        message: `Payment of $${paymentData.amount.toLocaleString()} from ${paymentData.borrowerName} is overdue. We're working to resolve this.`,
+        message: `Payment of ₦${paymentData.amount.toLocaleString()} from ${paymentData.borrowerName} is overdue. We're working to resolve this.`,
         priority: 'normal',
         action: {
           type: 'view',
@@ -438,7 +438,7 @@ class NotificationService {
         recipientId: referralData.referrerId,
         type: 'referral_completed',
         title: 'Referral Reward Earned!',
-        message: `Congratulations! You've earned $${referralData.rewardAmount.toLocaleString()} for successfully referring ${referralData.referredUserName}.`,
+        message: `Congratulations! You've earned ₦${referralData.rewardAmount.toLocaleString()} for successfully referring ${referralData.referredUserName}.`,
         priority: 'normal',
         action: {
           type: 'view',
@@ -502,8 +502,8 @@ class NotificationService {
         type: 'payment_received',
         title: isDeposit ? 'Wallet Deposit Successful' : 'Wallet Withdrawal Processed',
         message: isDeposit 
-          ? `Your wallet has been credited with $${transactionData.amount.toLocaleString()}. Transaction ID: ${transactionData.transactionId}`
-          : `Your withdrawal of $${transactionData.amount.toLocaleString()} has been processed. Transaction ID: ${transactionData.transactionId}`,
+          ? `Your wallet has been credited with ₦${transactionData.amount.toLocaleString()}. Transaction ID: ${transactionData.transactionId}`
+          : `Your withdrawal of ₦${transactionData.amount.toLocaleString()} has been processed. Transaction ID: ${transactionData.transactionId}`,
         priority: 'normal',
         action: {
           type: 'view',
@@ -536,7 +536,7 @@ class NotificationService {
         type: isApproved ? 'kyc_approval' : 'kyc_rejection',
         title: isApproved ? 'Collateral Verification Approved' : 'Collateral Verification Rejected',
         message: isApproved 
-          ? `Your collateral verification has been approved! Verified value: $${collateralData.verifiedValue.toLocaleString()}`
+          ? `Your collateral verification has been approved! Verified value: ₦${collateralData.verifiedValue.toLocaleString()}`
           : `Your collateral verification has been rejected. Reason: ${collateralData.rejectionReason}`,
         priority: isApproved ? 'normal' : 'high',
         action: {
@@ -566,7 +566,7 @@ class NotificationService {
         recipientId: depositData.userId,
         type: 'payment_received',
         title: 'Wallet Deposit Successful',
-        message: `Your wallet has been credited with $${depositData.amount.toLocaleString()}. Transaction ID: ${depositData.transactionId}`,
+        message: `Your wallet has been credited with ₦${depositData.amount.toLocaleString()}. Transaction ID: ${depositData.transactionId}`,
         priority: 'normal',
         action: {
           type: 'view',
@@ -596,7 +596,7 @@ class NotificationService {
         recipientId: repaymentData.borrowerId,
         type: 'repayment_received',
         title: 'Loan Repayment Successful',
-        message: `Your loan repayment of $${repaymentData.amount.toLocaleString()} has been processed successfully.`,
+        message: `Your loan repayment of ₦${repaymentData.amount.toLocaleString()} has been processed successfully.`,
         priority: 'normal',
         action: {
           type: 'view',
@@ -619,7 +619,7 @@ class NotificationService {
         recipientId: repaymentData.lenderId,
         type: 'repayment_received',
         title: 'Repayment Received',
-        message: `You have received a repayment of $${repaymentData.amount.toLocaleString()} from ${repaymentData.borrowerName}.`,
+        message: `You have received a repayment of ₦${repaymentData.amount.toLocaleString()} from ${repaymentData.borrowerName}.`,
         priority: 'normal',
         action: {
           type: 'view',
@@ -710,7 +710,7 @@ class NotificationService {
         { $match: { recipient: userId } },
         {
           $group: {
-            _id: '$status',
+            _id: null,
             count: { $sum: 1 }
           }
         }
@@ -765,7 +765,7 @@ class NotificationService {
         recipientId: borrowerId,
         type: 'loan_approved',
         title: 'Loan Application Approved! 🎉',
-        message: `Congratulations! Your loan application for $${loanAmount.toLocaleString()} (${purpose}) has been approved and is now available for funding.`,
+        message: `Congratulations! Your loan application for ₦${loanAmount.toLocaleString()} (${purpose}) has been approved and is now available for funding.`,
         priority: 'high',
         actionRequired: false,
         metadata: {
@@ -790,7 +790,7 @@ class NotificationService {
         recipientId: lenderId,
         type: 'new_approved_loan',
         title: 'New Loan Available for Funding! 💰',
-        message: `A new loan application has been approved: $${loanAmount.toLocaleString()} for ${purpose} by ${borrowerName}. Check it out!`,
+        message: `A new loan application has been approved: ₦${loanAmount.toLocaleString()} for ${purpose} by ${borrowerName}. Check it out!`,
         priority: 'high',
         actionRequired: true,
         metadata: {
@@ -840,7 +840,7 @@ class NotificationService {
         recipientId: lenderId,
         type: 'loan_rejected_by_admin',
         title: 'Loan Application Rejected',
-        message: `A loan application from ${borrowerName} for $${loanAmount.toLocaleString()} has been rejected by admin. Reason: ${rejectionReason}`,
+        message: `A loan application from ${borrowerName} for ₦${loanAmount.toLocaleString()} has been rejected by admin. Reason: ${rejectionReason}`,
         priority: 'normal',
         actionRequired: false,
         metadata: {
@@ -854,6 +854,410 @@ class NotificationService {
       console.log(`📧 Loan rejection notification sent to lender ${lenderId}`);
     } catch (error) {
       console.error('Error sending loan rejection notification to lender:', error);
+    }
+  }
+
+  /**
+   * Notify lenders about new loan application submitted
+   */
+  static async notifyNewLoanApplication({ lenderId, lenderName, loanId, borrowerName, loanAmount, purpose }) {
+    try {
+      await this.createNotification({
+        recipientId: lenderId,
+        type: 'loan_application',
+        title: 'New Loan Application Submitted! 📝',
+        message: `${borrowerName} has submitted a loan application for ₦${loanAmount.toLocaleString()} for ${purpose}. Review and consider funding!`,
+        priority: 'high',
+        actionRequired: true,
+        action: {
+          type: 'view',
+          url: `/lender/loan-applications`,
+          buttonText: 'Review Application'
+        },
+        metadata: {
+          loanId,
+          loanAmount,
+          purpose,
+          borrowerName,
+          action: 'review_loan'
+        }
+      });
+      console.log(`📧 New loan application notification sent to lender ${lenderId}`);
+    } catch (error) {
+      console.error('Error sending new loan application notification:', error);
+    }
+  }
+
+  /**
+   * Notify lender about loan repayment received
+   */
+  static async notifyRepaymentReceived({ lenderId, lenderName, loanId, borrowerName, repaymentAmount, loanAmount }) {
+    try {
+      await this.createNotification({
+        recipientId: lenderId,
+        type: 'repayment_received',
+        title: 'Loan Repayment Received! 💰',
+        message: `You received ₦${repaymentAmount.toLocaleString()} repayment from ${borrowerName} for loan ₦${loanAmount.toLocaleString()}.`,
+        priority: 'normal',
+        actionRequired: false,
+        action: {
+          type: 'view',
+          url: `/lender/investments`,
+          buttonText: 'View Investment'
+        },
+        metadata: {
+          loanId,
+          repaymentAmount,
+          borrowerName,
+          loanAmount,
+          action: 'view_investment'
+        }
+      });
+      console.log(`📧 Repayment received notification sent to lender ${lenderId}`);
+    } catch (error) {
+      console.error('Error sending repayment received notification:', error);
+    }
+  }
+
+  /**
+   * Notify lender about loan due for repayment
+   */
+  static async notifyRepaymentDue({ lenderId, lenderName, loanId, borrowerName, loanAmount, dueDate, daysUntilDue }) {
+    try {
+      const urgencyLevel = daysUntilDue <= 3 ? 'urgent' : daysUntilDue <= 7 ? 'high' : 'normal';
+      const urgencyEmoji = daysUntilDue <= 3 ? '🚨' : daysUntilDue <= 7 ? '⚠️' : '📅';
+      
+      await this.createNotification({
+        recipientId: lenderId,
+        type: 'repayment_due',
+        title: `Loan Repayment Due ${urgencyEmoji}`,
+        message: `Loan of ₦${loanAmount.toLocaleString()} from ${borrowerName} is due for repayment ${daysUntilDue <= 0 ? 'today' : `in ${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'}`}. Due date: ${new Date(dueDate).toLocaleDateString()}`,
+        priority: urgencyLevel,
+        actionRequired: true,
+        action: {
+          type: 'view',
+          url: `/lender/investments`,
+          buttonText: 'View Investment',
+          expiresAt: new Date(dueDate)
+        },
+        metadata: {
+          loanId,
+          loanAmount,
+          borrowerName,
+          dueDate,
+          daysUntilDue,
+          action: 'view_investment'
+        }
+      });
+      console.log(`📧 Repayment due notification sent to lender ${lenderId}`);
+    } catch (error) {
+      console.error('Error sending repayment due notification:', error);
+    }
+  }
+
+  /**
+   * Notify lender about loan fully repaid
+   */
+  static async notifyLoanFullyRepaid({ lenderId, lenderName, loanId, borrowerName, totalRepayment, loanAmount }) {
+    try {
+      await this.createNotification({
+        recipientId: lenderId,
+        type: 'repayment_received',
+        title: 'Loan Fully Repaid! 🎉',
+        message: `Congratulations! ${borrowerName} has fully repaid their loan of ₦${loanAmount.toLocaleString()}. Total received: ₦${totalRepayment.toLocaleString()}`,
+        priority: 'normal',
+        actionRequired: false,
+        action: {
+          type: 'view',
+          url: `/lender/investments`,
+          buttonText: 'View Investment'
+        },
+        metadata: {
+          loanId,
+          totalRepayment,
+          borrowerName,
+          loanAmount,
+          action: 'view_investment'
+        }
+      });
+      console.log(`📧 Loan fully repaid notification sent to lender ${lenderId}`);
+    } catch (error) {
+      console.error('Error sending loan fully repaid notification:', error);
+    }
+  }
+
+  // ==================== ADMIN NOTIFICATIONS ====================
+
+  /**
+   * Notify admin about new user registration
+   */
+  static async notifyAdminNewUserRegistration({ userId, userType, userName, userEmail }) {
+    try {
+      // Get all admins
+      const admins = await User.find({ userType: 'admin' });
+      
+      for (const admin of admins) {
+        await this.createNotification({
+          recipientId: admin._id,
+          type: 'new_user_registration',
+          title: 'New User Registration! 👤',
+          message: `A new ${userType} has registered: ${userName} (${userEmail})`,
+          priority: 'normal',
+          actionRequired: false,
+          action: {
+            type: 'view',
+            url: `/admin/users`,
+            buttonText: 'View Users'
+          },
+          metadata: {
+            userId,
+            userType,
+            userName,
+            userEmail,
+            action: 'view_users'
+          }
+        });
+      }
+      
+      console.log(`📧 New user registration notifications sent to ${admins.length} admins`);
+    } catch (error) {
+      console.error('Error sending new user registration notifications:', error);
+    }
+  }
+
+  /**
+   * Notify admin about new loan pool creation
+   */
+  static async notifyAdminNewLoanPool({ poolId, poolName, lenderName, lenderEmail, poolSize, interestRate }) {
+    try {
+      // Get all admins
+      const admins = await User.find({ userType: 'admin' });
+      
+      for (const admin of admins) {
+        await this.createNotification({
+          recipientId: admin._id,
+          type: 'new_loan_pool',
+          title: 'New Loan Pool Created! 🏦',
+          message: `${lenderName} created a new loan pool "${poolName}" with ₦${poolSize.toLocaleString()} at ${interestRate}% interest`,
+          priority: 'normal',
+          actionRequired: false,
+          action: {
+            type: 'view',
+            url: `/admin/pools`,
+            buttonText: 'View Pools'
+          },
+          metadata: {
+            poolId,
+            poolName,
+            lenderName,
+            lenderEmail,
+            poolSize,
+            interestRate,
+            action: 'view_pools'
+          }
+        });
+      }
+      
+      console.log(`📧 New loan pool notifications sent to ${admins.length} admins`);
+    } catch (error) {
+      console.error('Error sending new loan pool notifications:', error);
+    }
+  }
+
+  /**
+   * Notify admin about new loan application
+   */
+  static async notifyAdminNewLoanApplication({ loanId, borrowerName, borrowerEmail, loanAmount, purpose }) {
+    try {
+      // Get all admins
+      const admins = await User.find({ userType: 'admin' });
+      
+      for (const admin of admins) {
+        await this.createNotification({
+          recipientId: admin._id,
+          type: 'new_loan_application',
+          title: 'New Loan Application! 📝',
+          message: `${borrowerName} applied for a loan of ₦${loanAmount.toLocaleString()} for ${purpose}`,
+          priority: 'high',
+          actionRequired: true,
+          action: {
+            type: 'view',
+            url: `/admin/loan-applications`,
+            buttonText: 'Review Application'
+          },
+          metadata: {
+            loanId,
+            borrowerName,
+            borrowerEmail,
+            loanAmount,
+            purpose,
+            action: 'review_application'
+          }
+        });
+      }
+      
+      console.log(`📧 New loan application notifications sent to ${admins.length} admins`);
+    } catch (error) {
+      console.error('Error sending new loan application notifications:', error);
+    }
+  }
+
+  /**
+   * Notify admin about loan funding
+   */
+  static async notifyAdminLoanFunded({ loanId, borrowerName, lenderName, fundedAmount, loanAmount }) {
+    try {
+      // Get all admins
+      const admins = await User.find({ userType: 'admin' });
+      
+      for (const admin of admins) {
+        await this.createNotification({
+          recipientId: admin._id,
+          type: 'loan_funded',
+          title: 'Loan Funded! 💰',
+          message: `${lenderName} funded ${borrowerName}'s loan of ₦${loanAmount.toLocaleString()} with ₦${fundedAmount.toLocaleString()}`,
+          priority: 'normal',
+          actionRequired: false,
+          action: {
+            type: 'view',
+            url: `/admin/loans`,
+            buttonText: 'View Loans'
+          },
+          metadata: {
+            loanId,
+            borrowerName,
+            lenderName,
+            fundedAmount,
+            loanAmount,
+            action: 'view_loans'
+          }
+        });
+      }
+      
+      console.log(`📧 Loan funded notifications sent to ${admins.length} admins`);
+    } catch (error) {
+      console.error('Error sending loan funded notifications:', error);
+    }
+  }
+
+  /**
+   * Notify admin about loan repayment
+   */
+  static async notifyAdminLoanRepayment({ loanId, borrowerName, lenderName, repaymentAmount, loanAmount }) {
+    try {
+      // Get all admins
+      const admins = await User.find({ userType: 'admin' });
+      
+      for (const admin of admins) {
+        await this.createNotification({
+          recipientId: admin._id,
+          type: 'loan_repayment',
+          title: 'Loan Repayment Made! 💳',
+          message: `${borrowerName} made a repayment of ₦${repaymentAmount.toLocaleString()} to ${lenderName} for loan ₦${loanAmount.toLocaleString()}`,
+          priority: 'normal',
+          actionRequired: false,
+          action: {
+            type: 'view',
+            url: `/admin/loans`,
+            buttonText: 'View Loans'
+          },
+          metadata: {
+            loanId,
+            borrowerName,
+            lenderName,
+            repaymentAmount,
+            loanAmount,
+            action: 'view_loans'
+          }
+        });
+      }
+      
+      console.log(`📧 Loan repayment notifications sent to ${admins.length} admins`);
+    } catch (error) {
+      console.error('Error sending loan repayment notifications:', error);
+    }
+  }
+
+  /**
+   * Notify admin about loan due for repayment
+   */
+  static async notifyAdminLoanDueForRepayment({ loanId, borrowerName, lenderName, loanAmount, dueDate, daysUntilDue }) {
+    try {
+      // Get all admins
+      const admins = await User.find({ userType: 'admin' });
+      
+      const urgencyLevel = daysUntilDue <= 3 ? 'urgent' : daysUntilDue <= 7 ? 'high' : 'normal';
+      const urgencyEmoji = daysUntilDue <= 3 ? '🚨' : daysUntilDue <= 7 ? '⚠️' : '📅';
+      
+      for (const admin of admins) {
+        await this.createNotification({
+          recipientId: admin._id,
+          type: 'loan_due_for_repayment',
+          title: `Loan Due for Repayment ${urgencyEmoji}`,
+          message: `Loan of ₦${loanAmount.toLocaleString()} from ${borrowerName} to ${lenderName} is due ${daysUntilDue <= 0 ? 'today' : `in ${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'}`}. Due date: ${new Date(dueDate).toLocaleDateString()}`,
+          priority: urgencyLevel,
+          actionRequired: true,
+          action: {
+            type: 'view',
+            url: `/admin/loans`,
+            buttonText: 'View Loans',
+            expiresAt: new Date(dueDate)
+          },
+          metadata: {
+            loanId,
+            borrowerName,
+            lenderName,
+            loanAmount,
+            dueDate,
+            daysUntilDue,
+            action: 'view_loans'
+          }
+        });
+      }
+      
+      console.log(`📧 Loan due for repayment notifications sent to ${admins.length} admins`);
+    } catch (error) {
+      console.error('Error sending loan due for repayment notifications:', error);
+    }
+  }
+
+  /**
+   * Notify borrower about credit score update
+   */
+  static async notifyCreditScoreUpdate({ borrowerId, newPoints, totalPoints, creditScore }) {
+    try {
+      await this.createNotification({
+        recipientId: borrowerId,
+        type: 'credit_score_update',
+        title: 'Great job! Points earned 🎯',
+        message: `You earned ${newPoints} reliability point${newPoints === 1 ? '' : 's'}. Total points: ${totalPoints}.`,
+        priority: 'normal',
+        actionRequired: false,
+        action: { type: 'view', url: '/borrower/loans', buttonText: 'View Loans' },
+        metadata: { totalPoints, creditScore }
+      });
+    } catch (error) {
+      console.error('Error sending credit score update notification:', error);
+    }
+  }
+
+  /**
+   * Notify borrower about new badge earned
+   */
+  static async notifyBadgeEarned({ borrowerId, badgeKey, badgeName, icon }) {
+    try {
+      await this.createNotification({
+        recipientId: borrowerId,
+        type: 'badge_earned',
+        title: 'Badge Unlocked! 🏅',
+        message: `You earned the “${badgeName}” badge. Keep it up!`,
+        priority: 'high',
+        actionRequired: false,
+        action: { type: 'view', url: '/profile', buttonText: 'View Badges' },
+        metadata: { badgeKey, badgeName, icon }
+      });
+    } catch (error) {
+      console.error('Error sending badge earned notification:', error);
     }
   }
 }

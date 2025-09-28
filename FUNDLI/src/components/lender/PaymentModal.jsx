@@ -149,13 +149,13 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
 
     // Check if payment amount exceeds loan amount
     if (paymentAmount > loanAmount) {
-      setError(`Payment amount cannot exceed the loan amount of $${loanAmount.toLocaleString()}`);
+      setError(`Payment amount cannot exceed the loan amount of ₦${loanAmount.toLocaleString()}`);
       return false;
     }
 
     // Check if lender has sufficient balance
     if (paymentAmount > walletBalance) {
-      setError(`Insufficient balance. You have $${walletBalance.toLocaleString()} available, but trying to fund $${paymentAmount.toLocaleString()}`);
+      setError(`Insufficient balance. You have ₦${walletBalance.toLocaleString()} available, but trying to fund ₦${paymentAmount.toLocaleString()}`);
       return false;
     }
 
@@ -294,7 +294,7 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
         userId: loanApplication.borrower.id,
         type: 'loan_funded',
         title: 'Loan Funded Successfully!',
-        message: `Your loan application for $${fundingAmount.toLocaleString()} has been funded and the amount has been added to your account balance. Your new balance is $${paymentData.borrowerNewBalance?.toLocaleString() || 'updated'}.`,
+        message: `Your loan application for ₦${fundingAmount.toLocaleString()} has been funded and the amount has been added to your account balance. Your new balance is ₦${paymentData.borrowerNewBalance?.toLocaleString() || 'updated'}.`,
         metadata: {
           loanId: loanApplication.id,
           amount: fundingAmount,
@@ -313,7 +313,7 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
         userId: 'admin', // You might need to get admin ID from context
         type: 'loan_funded',
         title: 'Loan Funding Completed',
-        message: `A loan application for $${fundingAmount.toLocaleString()} has been funded by a lender. Wallet transfer completed successfully.`,
+        message: `A loan application for ₦${fundingAmount.toLocaleString()} has been funded by a lender. Wallet transfer completed successfully.`,
         metadata: {
           loanId: loanApplication.id,
           amount: fundingAmount,
@@ -334,7 +334,7 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
       updateLocalWallet('borrower', borrowerNewBalance);
       
       // Update notification with actual balance
-      borrowerNotification.message = `Your loan application for $${fundingAmount.toLocaleString()} has been funded and the amount has been added to your account balance. Your new balance is $${borrowerNewBalance.toLocaleString()}.`;
+      borrowerNotification.message = `Your loan application for ₦${fundingAmount.toLocaleString()} has been funded and the amount has been added to your account balance. Your new balance is ₦${borrowerNewBalance.toLocaleString()}.`;
       borrowerNotification.metadata.borrowerBalance = borrowerNewBalance;
 
       // Try to send notifications to backend, but don't fail if it doesn't work
@@ -421,26 +421,26 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-secondary-800 rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-              <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+            <div className="w-10 h-10 bg-success/20 dark:bg-success/20 rounded-lg flex items-center justify-center">
+              <CheckCircle className="h-6 w-6 text-success dark:text-success/50" />
             </div>
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-xl font-semibold text-secondary-900 dark:text-white">
                 Fund Loan Application
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">
                 Complete the funding process for this loan
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
           >
             <X className="h-6 w-6" />
           </button>
@@ -453,17 +453,17 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-8"
           >
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+            <div className="w-16 h-16 bg-success/20 dark:bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="h-8 w-8 text-success dark:text-success/50" />
             </div>
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <h4 className="text-lg font-semibold text-secondary-900 dark:text-white mb-2">
               Payment Successful!
             </h4>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-neutral-600 dark:text-neutral-400 mb-4">
               The loan has been funded successfully. The borrower will be notified.
             </p>
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-              <p className="text-sm text-green-800 dark:text-green-200">
+            <div className="bg-success/10 dark:bg-success/20 rounded-lg p-4">
+              <p className="text-sm text-success dark:text-success/30">
                 <strong>Amount Funded:</strong> ${parseFloat(paymentData.amount).toLocaleString()}
               </p>
             </div>
@@ -472,34 +472,34 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
           /* Payment Form */
           <div className="space-y-6">
             {/* Loan Details */}
-            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-              <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Loan Details</h4>
+            <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-4">
+              <h4 className="font-semibold text-secondary-900 dark:text-white mb-3">Loan Details</h4>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center space-x-2">
-                  <User className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-600 dark:text-gray-400">Borrower:</span>
-                  <span className="font-medium text-gray-900 dark:text-white">
+                  <User className="h-4 w-4 text-neutral-500" />
+                  <span className="text-neutral-600 dark:text-neutral-400">Borrower:</span>
+                  <span className="font-medium text-secondary-900 dark:text-white">
                     {loanApplication.borrower?.name}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <DollarSign className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-600 dark:text-gray-400">Amount:</span>
-                  <span className="font-medium text-gray-900 dark:text-white">
+                  <DollarSign className="h-4 w-4 text-neutral-500" />
+                  <span className="text-neutral-600 dark:text-neutral-400">Amount:</span>
+                  <span className="font-medium text-secondary-900 dark:text-white">
                     ${loanApplication.loanAmount?.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Calendar className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-600 dark:text-gray-400">Duration:</span>
-                  <span className="font-medium text-gray-900 dark:text-white">
+                  <Calendar className="h-4 w-4 text-neutral-500" />
+                  <span className="text-neutral-600 dark:text-neutral-400">Duration:</span>
+                  <span className="font-medium text-secondary-900 dark:text-white">
                     {loanApplication.duration} months
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <TrendingUp className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-600 dark:text-gray-400">Purpose:</span>
-                  <span className="font-medium text-gray-900 dark:text-white capitalize">
+                  <TrendingUp className="h-4 w-4 text-neutral-500" />
+                  <span className="text-neutral-600 dark:text-neutral-400">Purpose:</span>
+                  <span className="font-medium text-secondary-900 dark:text-white capitalize">
                     {loanApplication.purpose}
                   </span>
                 </div>
@@ -509,50 +509,50 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
             {/* Wallet Balance */}
             <div className={`rounded-lg p-4 ${
               walletBalance <= 0 
-                ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' 
+                ? 'bg-error/10 dark:bg-error/20 border border-error/30 dark:border-error' 
                 : walletBalance < parseFloat(paymentData.amount || 0)
-                ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'
-                : 'bg-blue-50 dark:bg-blue-900/20'
+                ? 'bg-warning/10 dark:bg-warning/20 border border-warning/30 dark:border-warning'
+                : 'bg-primary-50 dark:bg-primary-900/20'
             }`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <CreditCard className={`h-5 w-5 ${
                     walletBalance <= 0 
-                      ? 'text-red-600 dark:text-red-400' 
+                      ? 'text-error dark:text-error/50' 
                       : walletBalance < parseFloat(paymentData.amount || 0)
-                      ? 'text-yellow-600 dark:text-yellow-400'
-                      : 'text-blue-600 dark:text-blue-400'
+                      ? 'text-warning dark:text-warning/50'
+                      : 'text-primary-600 dark:text-primary-400'
                   }`} />
                   <span className={`font-medium ${
                     walletBalance <= 0 
-                      ? 'text-red-900 dark:text-red-200' 
+                      ? 'text-error dark:text-error/30' 
                       : walletBalance < parseFloat(paymentData.amount || 0)
-                      ? 'text-yellow-900 dark:text-yellow-200'
-                      : 'text-blue-900 dark:text-blue-200'
+                      ? 'text-warning dark:text-warning/30'
+                      : 'text-primary-900 dark:text-primary-200'
                   }`}>
                     Available Balance
                   </span>
                 </div>
                 {isLoadingBalance ? (
-                  <Loader className="h-4 w-4 animate-spin text-blue-600" />
+                  <Loader className="h-4 w-4 animate-spin text-primary-600" />
                 ) : (
                   <div className="text-right">
                     <span className={`text-lg font-bold ${
                       walletBalance <= 0 
-                        ? 'text-red-900 dark:text-red-200' 
+                        ? 'text-error dark:text-error/30' 
                         : walletBalance < parseFloat(paymentData.amount || 0)
-                        ? 'text-yellow-900 dark:text-yellow-200'
-                        : 'text-blue-900 dark:text-blue-200'
+                        ? 'text-warning dark:text-warning/30'
+                        : 'text-primary-900 dark:text-primary-200'
                     }`}>
                       ${walletBalance.toLocaleString()}
                     </span>
                     {walletBalance <= 0 && (
-                      <p className="text-xs text-red-700 dark:text-red-300 mt-1">
+                      <p className="text-xs text-error dark:text-error/40 mt-1">
                         Insufficient funds
                       </p>
                     )}
                     {walletBalance > 0 && walletBalance < parseFloat(paymentData.amount || 0) && (
-                      <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                      <p className="text-xs text-warning dark:text-warning/40 mt-1">
                         Insufficient for this payment
                       </p>
                     )}
@@ -564,8 +564,8 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
             {/* Payment Form */}
             <div className="space-y-4">
               <div>
-                <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Funding Amount ($) *
+                <label htmlFor="amount" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                  Funding Amount (₦) *
                 </label>
                 <input
                   type="number"
@@ -575,15 +575,15 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
                   onChange={handleInputChange}
                   placeholder="Enter amount to fund"
                   min="1"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-neutral-700 text-secondary-900 dark:text-neutral-100"
                 />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                   Loan amount: ${loanApplication.loanAmount?.toLocaleString()}
                 </p>
               </div>
 
               <div>
-                <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="paymentMethod" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Payment Method
                 </label>
                 <select
@@ -591,7 +591,7 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
                   name="paymentMethod"
                   value={paymentData.paymentMethod}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-neutral-700 text-secondary-900 dark:text-neutral-100"
                 >
                   <option value="bank_transfer">Bank Transfer</option>
                   <option value="wallet">Wallet Balance</option>
@@ -600,7 +600,7 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
               </div>
 
               <div>
-                <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="notes" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Notes (Optional)
                 </label>
                 <textarea
@@ -610,7 +610,7 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
                   onChange={handleInputChange}
                   placeholder="Add any notes about this funding..."
                   rows="3"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-neutral-700 text-secondary-900 dark:text-neutral-100"
                 />
               </div>
             </div>
@@ -620,11 +620,11 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
+                className="bg-error/10 dark:bg-error/20 border border-error/30 dark:border-error rounded-lg p-4"
               >
                 <div className="flex items-center space-x-2">
-                  <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
-                  <span className="text-red-800 dark:text-red-200 text-sm">{error}</span>
+                  <AlertCircle className="h-5 w-5 text-error dark:text-error/50" />
+                  <span className="text-error dark:text-error/30 text-sm">{error}</span>
                 </div>
               </motion.div>
             )}
@@ -634,18 +634,18 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4"
+                className="bg-success/10 dark:bg-success/20 border border-success/30 dark:border-success rounded-lg p-4"
               >
                 <div className="flex items-center space-x-3">
-                  <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+                  <CheckCircle className="h-6 w-6 text-success dark:text-success/50" />
                   <div>
-                    <h4 className="font-semibold text-green-900 dark:text-green-200">
+                    <h4 className="font-semibold text-success dark:text-success/30">
                       Payment Successful!
                     </h4>
-                    <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                    <p className="text-sm text-success dark:text-success/40 mt-1">
                       Loan funded successfully. Amount deducted from your wallet and added to borrower's account.
                     </p>
-                    <div className="mt-2 text-xs text-green-600 dark:text-green-400">
+                    <div className="mt-2 text-xs text-success dark:text-success/50">
                       <p>• Your new balance: ${(walletBalance - parseFloat(paymentData.amount)).toLocaleString()}</p>
                       <p>• Borrower's balance updated</p>
                       <p>• Transaction recorded</p>
@@ -656,14 +656,14 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
             )}
 
             {/* Security Notice */}
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+            <div className="bg-warning/10 dark:bg-warning/20 border border-warning/30 dark:border-warning rounded-lg p-4">
               <div className="flex items-start space-x-2">
-                <Shield className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+                <Shield className="h-5 w-5 text-warning dark:text-warning/50 mt-0.5" />
                 <div>
-                  <h5 className="font-medium text-yellow-800 dark:text-yellow-200 text-sm">
+                  <h5 className="font-medium text-warning dark:text-warning/30 text-sm">
                     Security Notice
                   </h5>
-                  <p className="text-yellow-700 dark:text-yellow-300 text-xs mt-1">
+                  <p className="text-warning dark:text-warning/40 text-xs mt-1">
                     This transaction is secured and will be processed immediately. The borrower will receive the funds in their account balance.
                   </p>
                 </div>
@@ -674,14 +674,14 @@ const PaymentModal = ({ isOpen, onClose, loanApplication, onPaymentSuccess }) =>
             <div className="flex space-x-4 pt-4">
               <button
                 onClick={onClose}
-                className="flex-1 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+                className="flex-1 px-6 py-3 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={handlePayment}
                 disabled={isProcessing || !paymentData.amount || parseFloat(paymentData.amount) <= 0}
-                className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-lg transition-colors disabled:cursor-not-allowed font-medium flex items-center justify-center space-x-2"
+                className="flex-1 px-6 py-3 bg-success hover:bg-success disabled:bg-success/50 text-white rounded-lg transition-colors disabled:cursor-not-allowed font-medium flex items-center justify-center space-x-2"
               >
                 {isProcessing ? (
                   <>

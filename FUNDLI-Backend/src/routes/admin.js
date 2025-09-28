@@ -4,6 +4,7 @@ const { protect } = require('../middleware/auth');
 const User = require('../models/User');
 const Loan = require('../models/Loan');
 const Wallet = require('../models/Wallet');
+const Notification = require('../models/Notification');
 const ReferralService = require('../services/referralService');
 const NotificationService = require('../services/notificationService');
 
@@ -325,7 +326,7 @@ router.get('/referrals/stats', protect, requireAdmin, async (req, res) => {
     const pendingReferrals = await Referral.countDocuments({ status: 'pending' });
     const completedReferrals = await Referral.countDocuments({ status: 'completed' });
     const totalRewards = await Referral.aggregate([
-      { $group: { _id: null, total: { $sum: '$rewardAmount' } } }
+      { $group: { _id: null, total: { $sum: 1 } } }
     ]);
 
     res.status(200).json({
@@ -607,6 +608,14 @@ router.get('/loans', protect, requireAdmin, async (req, res) => {
     
     const loans = await Loan.find(query)
       .populate('borrower', 'firstName lastName email')
+      .populate({
+        path: 'lendingPool',
+        select: 'name creator',
+        populate: {
+          path: 'creator',
+          select: 'firstName lastName email userType _id'
+        }
+      })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -615,7 +624,26 @@ router.get('/loans', protect, requireAdmin, async (req, res) => {
 
     console.log('📊 Found loans:', loans.length);
     console.log('📊 Total loans in database:', total);
-    console.log('📊 Loan statuses:', loans.map(loan => ({ id: loan._id, status: loan.status, borrower: loan.borrower?.firstName })));
+    console.log('📊 Loan statuses:', loans.map(loan => ({ 
+      id: loan._id, 
+      status: loan.status, 
+      borrower: loan.borrower?.firstName,
+      lender: loan.lendingPool?.creator?.firstName || 'No lender data'
+    })));
+    
+    // Debug lender data
+    loans.forEach((loan, index) => {
+      if (loan.lendingPool?.creator) {
+        console.log(`🔍 Loan ${index + 1} lender data:`, {
+          lenderId: loan.lendingPool.creator._id,
+          lenderName: loan.lendingPool.creator.firstName,
+          lenderEmail: loan.lendingPool.creator.email,
+          lenderType: loan.lendingPool.creator.userType
+        });
+      } else {
+        console.log(`❌ Loan ${index + 1} has no lender data`);
+      }
+    });
 
     res.status(200).json({
       status: 'success',
@@ -1205,6 +1233,38 @@ router.get('/wallet/balance', protect, requireAdmin, async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to fetch admin wallet details'
+    });
+  }
+});
+
+// @desc    Get notifications for admin
+// @route   GET /api/admin/notifications
+// @access  Private (Admin only)
+router.get('/notifications', protect, requireAdmin, async (req, res) => {
+  try {
+    // Get notifications for this admin
+    const notifications = await Notification.find({
+      recipient: req.user.id
+    })
+    .populate('recipient', 'firstName lastName email userType')
+    .sort({ createdAt: -1 })
+    .limit(50); // Limit to last 50 notifications
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        notifications,
+        total: notifications.length,
+        unread: notifications.filter(n => !n.readAt).length
+      }
+    });
+
+  } catch (error) {
+    console.error('Get admin notifications error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch admin notifications',
+      error: error.message
     });
   }
 });

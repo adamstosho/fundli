@@ -104,29 +104,29 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-2xl mx-auto"
     >
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg p-6">
         {/* Header */}
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <Shield className="h-8 w-8 text-primary-600 dark:text-primary-400" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-secondary-900 dark:text-white mb-2">
             Complete KYC Verification
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-neutral-600 dark:text-neutral-400">
             Please provide your BVN and bank account details for verification
           </p>
         </div>
 
         {/* KYC Notice */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+        <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4 mb-6">
           <div className="flex items-start space-x-3">
-            <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+            <AlertCircle className="h-5 w-5 text-primary-600 dark:text-primary-400 mt-0.5" />
             <div>
-              <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">
+              <h4 className="text-sm font-medium text-primary-800 dark:text-primary-200 mb-1">
                 Why KYC is Required
               </h4>
-              <p className="text-sm text-blue-700 dark:text-blue-300">
+              <p className="text-sm text-primary-700 dark:text-primary-300">
                 KYC (Know Your Customer) verification is mandatory for loan applications. 
                 This helps ensure the security of our platform and protects all users.
               </p>
@@ -137,11 +137,11 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* BVN Field */}
           <div>
-            <label htmlFor="bvn" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="bvn" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
               BVN (Bank Verification Number)
             </label>
             <div className="relative">
-              <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400" />
               <input
                 type="text"
                 id="bvn"
@@ -152,29 +152,29 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
                 maxLength="11"
                 className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
                   errors.bvn 
-                    ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20' 
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                } text-gray-900 dark:text-gray-100`}
+                    ? 'border-error/40 dark:border-error bg-error/10 dark:bg-error/20' 
+                    : 'border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700'
+                } text-secondary-900 dark:text-neutral-100`}
               />
             </div>
             {errors.bvn && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center">
+              <p className="mt-1 text-sm text-error dark:text-error/50 flex items-center">
                 <AlertCircle className="h-4 w-4 mr-1" />
                 {errors.bvn}
               </p>
             )}
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
               Your BVN is a unique 11-digit number that identifies you in the Nigerian banking system
             </p>
           </div>
 
           {/* Bank Selection */}
           <div>
-            <label htmlFor="bankCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="bankCode" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
               Select Bank
             </label>
             <div className="relative">
-              <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400" />
               <select
                 id="bankCode"
                 name="bankCode"
@@ -182,9 +182,9 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
                 onChange={handleInputChange}
                 className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
                   errors.bankCode 
-                    ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20' 
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                } text-gray-900 dark:text-gray-100`}
+                    ? 'border-error/40 dark:border-error bg-error/10 dark:bg-error/20' 
+                    : 'border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700'
+                } text-secondary-900 dark:text-neutral-100`}
               >
                 <option value="">Select a bank</option>
                 {isLoadingBanks ? (
@@ -199,7 +199,7 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
               </select>
             </div>
             {errors.bankCode && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center">
+              <p className="mt-1 text-sm text-error dark:text-error/50 flex items-center">
                 <AlertCircle className="h-4 w-4 mr-1" />
                 {errors.bankCode}
               </p>
@@ -208,7 +208,7 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
 
           {/* Account Number */}
           <div>
-            <label htmlFor="accountNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="accountNumber" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
               Account Number
             </label>
             <input
@@ -221,30 +221,30 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
               maxLength="10"
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
                 errors.accountNumber 
-                  ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20' 
-                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-              } text-gray-900 dark:text-gray-100`}
+                  ? 'border-error/40 dark:border-error bg-error/10 dark:bg-error/20' 
+                  : 'border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700'
+              } text-secondary-900 dark:text-neutral-100`}
             />
             {errors.accountNumber && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center">
+              <p className="mt-1 text-sm text-error dark:text-error/50 flex items-center">
                 <AlertCircle className="h-4 w-4 mr-1" />
                 {errors.accountNumber}
               </p>
             )}
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
               Enter the account number without spaces or special characters
             </p>
           </div>
 
           {/* Security Notice */}
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+          <div className="bg-success/10 dark:bg-success/20 border border-success/30 dark:border-success rounded-lg p-4">
             <div className="flex items-start space-x-3">
-              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" />
+              <CheckCircle className="h-5 w-5 text-success dark:text-success/50 mt-0.5" />
               <div>
-                <h4 className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">
+                <h4 className="text-sm font-medium text-success dark:text-success/30 mb-1">
                   Your Data is Secure
                 </h4>
-                <p className="text-sm text-green-700 dark:text-green-300">
+                <p className="text-sm text-success dark:text-success/40">
                   All information is encrypted and securely transmitted. We use industry-standard 
                   security measures to protect your personal and financial information.
                 </p>
@@ -258,7 +258,7 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
               type="button"
               onClick={onCancel}
               disabled={isSubmitting}
-              className="flex-1 px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 px-6 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Cancel
             </button>

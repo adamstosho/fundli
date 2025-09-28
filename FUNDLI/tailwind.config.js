@@ -145,6 +145,9 @@ export default {
         'medium': '0 8px 30px rgba(0,0,0,0.12)',
         'large': '0 12px 40px rgba(0,0,0,0.15)',
         'glow': '0 0 20px rgba(46, 204, 113, 0.3)',
+        'glow-primary': '0 0 20px rgba(46, 204, 113, 0.3)',
+        'glow-accent': '0 0 20px rgba(245, 183, 0, 0.3)',
+        'glow-white': '0 0 20px rgba(255, 255, 255, 0.3)',
       },
       screens: {
         'xs': '475px',

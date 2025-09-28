@@ -115,10 +115,10 @@ const ReferralPage = () => {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-secondary-900 dark:text-white mb-2">
           Referral Program
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-neutral-600 dark:text-neutral-400">
           Invite friends and earn rewards for every successful referral
         </p>
       </div>
@@ -134,16 +134,16 @@ const ReferralPage = () => {
           <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <Award className="h-8 w-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-secondary-900 dark:text-white mb-2">
             Your Referral Code
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-neutral-600 dark:text-neutral-400">
             Share this code with friends and earn 2% of their transactions after meeting requirements
           </p>
         </div>
 
         <div className="flex items-center justify-center space-x-4 mb-6">
-          <div className="bg-white dark:bg-gray-800 px-6 py-4 rounded-lg border-2 border-primary-200 dark:border-primary-700">
+          <div className="bg-white dark:bg-secondary-800 px-6 py-4 rounded-lg border-2 border-primary-200 dark:border-primary-700">
             <span className="text-3xl font-bold text-primary-600 dark:text-primary-400 tracking-wider">
               {referralData.referralCode}
             </span>
@@ -187,8 +187,8 @@ const ReferralPage = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Referrals</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Total Referrals</p>
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">
                 {referralData.totalReferred}
               </p>
             </div>
@@ -206,7 +206,7 @@ const ReferralPage = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Successful</p>
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Successful</p>
               <p className="text-2xl font-bold text-success">
                 {referralData.completedActions}
               </p>
@@ -225,7 +225,7 @@ const ReferralPage = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Earnings</p>
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Total Earnings</p>
               <p className="text-2xl font-bold text-accent">
                 ${referralData.referralEarnings}
               </p>
@@ -244,7 +244,7 @@ const ReferralPage = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending</p>
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Pending</p>
               <p className="text-2xl font-bold text-warning">
                 ${referralData.walletBalance}
               </p>
@@ -263,16 +263,16 @@ const ReferralPage = () => {
         transition={{ duration: 0.6, delay: 0.7 }}
         className="card p-6 mb-8"
       >
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">
+        <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4 text-center">
           Your Progress Towards Rewards
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="text-center">
-            <h4 className="font-medium text-gray-900 dark:text-white mb-2">Referrals (Need 5)</h4>
+            <h4 className="font-medium text-secondary-900 dark:text-white mb-2">Referrals (Need 5)</h4>
             <p className="text-2xl font-bold text-primary-600 dark:text-primary-400 mb-2">
               {referralData.requirements?.currentTotal || 0} / {referralData.requirements?.totalNeeded || 5}
             </p>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+            <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-3">
               <div
                 className="bg-primary-600 h-3 rounded-full transition-all duration-300"
                 style={{ 
@@ -283,11 +283,11 @@ const ReferralPage = () => {
           </div>
           
           <div className="text-center">
-            <h4 className="font-medium text-gray-900 dark:text-white mb-2">Actions (Need 3)</h4>
+            <h4 className="font-medium text-secondary-900 dark:text-white mb-2">Actions (Need 3)</h4>
             <p className="text-2xl font-bold text-success-600 dark:text-success-400 mb-2">
               {referralData.requirements?.currentActions || 0} / {referralData.requirements?.actionsNeeded || 3}
             </p>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+            <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-3">
               <div
                 className="bg-success-600 h-3 rounded-full transition-all duration-300"
                 style={{ 
@@ -318,7 +318,7 @@ const ReferralPage = () => {
         transition={{ duration: 0.6, delay: 0.5 }}
         className="card p-8 mb-8"
       >
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 text-center">
+        <h3 className="text-xl font-semibold text-secondary-900 dark:text-white mb-6 text-center">
           How the Referral Program Works
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -326,8 +326,8 @@ const ReferralPage = () => {
             <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">1</span>
             </div>
-            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Share Your Code</h4>
-            <p className="text-gray-600 dark:text-gray-400">
+            <h4 className="font-semibold text-secondary-900 dark:text-white mb-2">Share Your Code</h4>
+            <p className="text-neutral-600 dark:text-neutral-400">
               Share your unique referral code with friends and family
             </p>
           </div>
@@ -335,8 +335,8 @@ const ReferralPage = () => {
             <div className="w-16 h-16 bg-secondary-100 dark:bg-secondary-900 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl font-bold text-secondary-600 dark:text-secondary-400">2</span>
             </div>
-            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">They Sign Up</h4>
-            <p className="text-gray-600 dark:text-gray-400">
+            <h4 className="font-semibold text-secondary-900 dark:text-white mb-2">They Sign Up</h4>
+            <p className="text-neutral-600 dark:text-neutral-400">
               Your friends use your code when creating their account
             </p>
           </div>
@@ -344,9 +344,9 @@ const ReferralPage = () => {
             <div className="w-16 h-16 bg-accent-100 dark:bg-accent-900 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl font-bold text-accent-600 dark:text-accent-400">3</span>
             </div>
-            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Earn Rewards</h4>
-            <p className="text-gray-600 dark:text-gray-400">
-              Get $30 for each successful referral after they complete KYC
+            <h4 className="font-semibold text-secondary-900 dark:text-white mb-2">Earn Rewards</h4>
+            <p className="text-neutral-600 dark:text-neutral-400">
+              Get ₦30 for each successful referral after they complete KYC
             </p>
           </div>
         </div>
@@ -359,36 +359,36 @@ const ReferralPage = () => {
         transition={{ duration: 0.6, delay: 0.6 }}
         className="card overflow-hidden"
       >
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="px-6 py-4 border-b border-neutral-200 dark:border-secondary-700">
+          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
             Referral History
           </h3>
         </div>
         
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+            <thead className="bg-neutral-50 dark:bg-secondary-800">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Referred User
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                   Earnings
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="bg-white dark:bg-secondary-900 divide-y divide-gray-200 dark:divide-gray-700">
               {/* Referral history data is not available in the current API response,
                   so we'll display a placeholder or remove this section if not needed.
                   For now, we'll keep it as is, but it will show an empty table. */}
               <tr>
-                <td colSpan="4" className="px-6 py-4 whitespace-nowrap text-center text-gray-500 dark:text-gray-400">
+                <td colSpan="4" className="px-6 py-4 whitespace-nowrap text-center text-neutral-500 dark:text-neutral-400">
                   Referral history data not available in this version.
                 </td>
               </tr>
@@ -402,12 +402,12 @@ const ReferralPage = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.7 }}
-        className="card p-6 mt-8 bg-gray-50 dark:bg-gray-800"
+        className="card p-6 mt-8 bg-neutral-50 dark:bg-secondary-800"
       >
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+        <h3 className="font-semibold text-secondary-900 dark:text-white mb-3">
           Referral Program Terms
         </h3>
-        <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+        <ul className="text-sm text-neutral-600 dark:text-neutral-400 space-y-2">
           <li>• You must refer at least 5 new users to be eligible for rewards</li>
           <li>• At least 3 of your referred users must complete platform actions (KYC, loans, investments, etc.)</li>
           <li>• Once eligible, you earn 2% of every transaction made by your referred users</li>

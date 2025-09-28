@@ -286,6 +286,50 @@ router.post('/loan/:loanId/apply', protect, async (req, res) => {
       purpose: loan.purpose
     });
 
+    // Send notifications to all lenders about new loan application
+    try {
+      const NotificationService = require('../services/notificationService');
+      const User = require('../models/User');
+      
+      // Get all lenders
+      const lenders = await User.find({ userType: 'lender' });
+      
+      // Send notification to each lender
+      for (const lender of lenders) {
+        await NotificationService.notifyNewLoanApplication({
+          lenderId: lender._id,
+          lenderName: `${lender.firstName} ${lender.lastName}`,
+          loanId: loan._id,
+          borrowerName: `${req.user.firstName} ${req.user.lastName}`,
+          loanAmount: loan.loanAmount,
+          purpose: loan.purpose
+        });
+      }
+      
+      console.log(`📧 Notifications sent to ${lenders.length} lenders for new loan application: ${loan._id}`);
+    } catch (notificationError) {
+      console.error('Error sending lender notifications:', notificationError);
+      // Don't fail the loan application if notifications fail
+    }
+
+    // Send notification to admins about new loan application
+    try {
+      const NotificationService = require('../services/notificationService');
+      
+      await NotificationService.notifyAdminNewLoanApplication({
+        loanId: loan._id,
+        borrowerName: `${req.user.firstName} ${req.user.lastName}`,
+        borrowerEmail: req.user.email,
+        loanAmount: loan.loanAmount,
+        purpose: loan.purpose
+      });
+      
+      console.log(`📧 New loan application notification sent to admins: ${loan._id}`);
+    } catch (notificationError) {
+      console.error('Error sending admin loan application notification:', notificationError);
+      // Don't fail the loan application if notifications fail
+    }
+
     res.status(201).json({
       status: 'success',
       message: 'Loan application submitted successfully',
@@ -504,6 +548,50 @@ router.post('/loan/apply', protect, async (req, res) => {
         amount: loan.loanAmount,
         purpose: loan.purpose
       });
+
+      // Send notifications to all lenders about new loan application
+      try {
+        const NotificationService = require('../services/notificationService');
+        const User = require('../models/User');
+        
+        // Get all lenders
+        const lenders = await User.find({ userType: 'lender' });
+        
+        // Send notification to each lender
+        for (const lender of lenders) {
+          await NotificationService.notifyNewLoanApplication({
+            lenderId: lender._id,
+            lenderName: `${lender.firstName} ${lender.lastName}`,
+            loanId: loan._id,
+            borrowerName: `${req.user.firstName} ${req.user.lastName}`,
+            loanAmount: loan.loanAmount,
+            purpose: loan.purpose
+          });
+        }
+        
+        console.log(`📧 Notifications sent to ${lenders.length} lenders for new loan application: ${loan._id}`);
+      } catch (notificationError) {
+        console.error('Error sending lender notifications:', notificationError);
+        // Don't fail the loan application if notifications fail
+      }
+
+      // Send notification to admins about new loan application
+      try {
+        const NotificationService = require('../services/notificationService');
+        
+        await NotificationService.notifyAdminNewLoanApplication({
+          loanId: loan._id,
+          borrowerName: `${req.user.firstName} ${req.user.lastName}`,
+          borrowerEmail: req.user.email,
+          loanAmount: loan.loanAmount,
+          purpose: loan.purpose
+        });
+        
+        console.log(`📧 New loan application notification sent to admins: ${loan._id}`);
+      } catch (notificationError) {
+        console.error('Error sending admin loan application notification:', notificationError);
+        // Don't fail the loan application if notifications fail
+      }
     } catch (loanError) {
       console.error('❌ Loan creation failed:', loanError);
       return res.status(400).json({
@@ -953,22 +1041,22 @@ router.get('/wallet/balance-with-stats', protect, async (req, res) => {
       {
         $group: {
           _id: null,
-          totalBorrowed: { $sum: '$loanAmount' },
-          totalRepaid: { $sum: '$amountPaid' },
-          totalRemaining: { $sum: '$amountRemaining' },
+          totalBorrowed: { $sum: 1 },
+          totalRepaid: { $sum: null },
+          totalRemaining: { $sum: 1 },
           activeLoans: {
             $sum: {
-              $cond: [{ $eq: ['$status', 'active'] }, 1, 0]
+              $cond: [{ $eq: [null, 'active'] }, 1, 0]
             }
           },
           completedLoans: {
             $sum: {
-              $cond: [{ $eq: ['$status', 'completed'] }, 1, 0]
+              $cond: [{ $eq: [null, 'completed'] }, 1, 0]
             }
           },
           pendingLoans: {
             $sum: {
-              $cond: [{ $eq: ['$status', 'pending'] }, 1, 0]
+              $cond: [{ $eq: [null, 'pending'] }, 1, 0]
             }
           }
         }
@@ -1078,8 +1166,13 @@ router.get('/wallet/balance', protect, async (req, res) => {
 // @access  Private (Borrowers only)
 router.post('/repay-loan/:loanId', protect, async (req, res) => {
   try {
+    console.log('🔍 Simple loan repayment called:', {
+      loanId: req.params.loanId,
+      userId: req.user?.id,
+      userType: req.user?.userType
+    });
+    
     const loanId = req.params.loanId;
-    const { installmentNumber } = req.body;
 
     // Check if user is a borrower
     if (req.user.userType !== 'borrower') {
@@ -1091,8 +1184,8 @@ router.post('/repay-loan/:loanId', protect, async (req, res) => {
 
     // Find the loan
     const loan = await Loan.findById(loanId)
-      .populate('borrowerId', 'email firstName lastName walletBalance')
-      .populate('lenderId', 'email firstName lastName');
+      .populate('borrower', 'email firstName lastName')
+      .populate('lendingPool', 'creator');
 
     if (!loan) {
       return res.status(404).json({
@@ -1102,83 +1195,232 @@ router.post('/repay-loan/:loanId', protect, async (req, res) => {
     }
 
     // Check if the borrower owns this loan
-    if (loan.borrowerId._id.toString() !== req.user.id) {
+    if (loan.borrower._id.toString() !== req.user.id) {
       return res.status(403).json({
         status: 'error',
         message: 'You can only repay your own loans'
       });
     }
 
-    // Check if loan is active
-    if (loan.status !== 'active') {
+    // Check if loan is funded
+    if (loan.status !== 'funded') {
       return res.status(400).json({
         status: 'error',
-        message: 'This loan is not active and cannot be repaid'
+        message: 'This loan is not funded and cannot be repaid'
       });
     }
 
-    // Find the specific installment to repay
-    let repayment;
-    if (installmentNumber) {
-      repayment = loan.repayments.find(r => r.installmentNumber === installmentNumber && r.status === 'pending');
-    } else {
-      // Find the next due payment
-      repayment = loan.repayments.find(r => r.status === 'pending');
-    }
-
-    if (!repayment) {
+    // Calculate repayment amount (Principal + Interest)
+    const principal = loan.loanAmount || 0;
+    const interestRate = loan.interestRate || 0;
+    const interestAmount = principal * (interestRate / 100);
+    const totalRepayment = principal + interestAmount;
+    const amountPaid = loan.amountPaid || 0;
+    const remainingAmount = totalRepayment - amountPaid;
+    
+    if (remainingAmount <= 0) {
       return res.status(400).json({
         status: 'error',
-        message: 'No pending repayment found for this loan'
+        message: 'This loan has already been fully repaid'
       });
     }
-
-    // Check if payment is overdue
-    const isOverdue = repayment.dueDate < new Date();
-    const daysOverdue = isOverdue ? 
-      Math.floor((new Date() - repayment.dueDate) / (1000 * 60 * 60 * 24)) : 0;
-
-    // Calculate late fee if applicable
-    const repaymentService = require('../services/repaymentService');
-    const lateFee = repaymentService.calculateLateFee(repayment.amount, daysOverdue);
-    const totalAmount = repayment.amount + lateFee;
 
     // Check borrower's wallet balance
-    const borrower = loan.borrowerId;
-    if (borrower.walletBalance < totalAmount) {
+    const borrowerWallet = await Wallet.findOne({ user: loan.borrower._id });
+    const borrowerBalance = borrowerWallet ? borrowerWallet.balance : 0;
+    
+    console.log('🔍 Wallet balance check:', {
+      borrowerId: loan.borrower._id,
+      borrowerEmail: loan.borrower.email,
+      borrowerBalance: borrowerBalance,
+      remainingAmount: remainingAmount,
+      sufficient: borrowerBalance >= remainingAmount
+    });
+    
+    if (borrowerBalance < remainingAmount) {
       return res.status(400).json({
         status: 'error',
-        message: `Insufficient funds. Required: $${totalAmount.toFixed(2)}, Available: $${borrower.walletBalance.toFixed(2)}`
+        message: `Insufficient funds. Required: $${remainingAmount.toFixed(2)}, Available: $${borrowerBalance.toFixed(2)}`
       });
     }
 
-    // Process the repayment
-    const result = await repaymentService.processLoanPayment(loan);
-
-    if (result.success) {
-      res.status(200).json({
-        status: 'success',
-        message: 'Loan repayment processed successfully',
-        data: {
-          amount: result.amount,
-          lateFee: result.lateFee,
-          installmentNumber: repayment.installmentNumber,
-          paymentId: result.paymentId,
-          lender: {
-            name: `${loan.lenderId.firstName} ${loan.lenderId.lastName}`,
-            email: loan.lenderId.email
-          }
-        }
-      });
-    } else {
-      res.status(400).json({
+    // Get lender from lending pool
+    const lender = loan.lendingPool?.creator;
+    if (!lender) {
+      return res.status(400).json({
         status: 'error',
-        message: result.error || 'Failed to process repayment'
+        message: 'Lender not found for this loan'
       });
     }
+
+    // Platform fee (1%) and distributions
+    const platformFee = Math.round(remainingAmount * 0.01);
+    const amountToLender = remainingAmount - platformFee;
+
+    console.log('🔍 Processing wallet transfers with platform fee:', {
+      borrower: loan.borrower._id,
+      lender: lender._id || lender,
+      remainingAmount,
+      platformFee,
+      amountToLender
+    });
+
+    // Update borrower wallet (subtract total amount)
+    await Wallet.findOneAndUpdate(
+      { user: loan.borrower._id },
+      { $inc: { balance: -remainingAmount } },
+      { upsert: true }
+    );
+
+    // Credit lender with net amount (after platform fee)
+    await Wallet.findOneAndUpdate(
+      { user: lender._id || lender },
+      { $inc: { balance: amountToLender } },
+      { upsert: true }
+    );
+
+    // Credit platform fee to admin wallet
+    try {
+      const adminUser = await (await require('../models/User')).findOne({ userType: 'admin' });
+      if (adminUser) {
+        await Wallet.findOneAndUpdate(
+          { user: adminUser._id },
+          { $inc: { balance: platformFee } },
+          { upsert: true }
+        );
+      } else {
+        console.warn('⚠️ No admin user found to credit platform fee');
+      }
+    } catch (adminCreditError) {
+      console.error('Failed to credit platform fee to admin wallet:', adminCreditError);
+    }
+
+    // Award reliability points and badges for on-time payments
+    try {
+      const NotificationService = require('../services/notificationService');
+      const borrower = await User.findById(loan.borrower._id || loan.borrower);
+      if (borrower) {
+        // Determine on-time: compare today with loan.endDate (or nextPaymentDate if available)
+        const today = new Date();
+        const dueDate = loan.endDate || loan.nextPaymentDate || today;
+        const onTime = today <= new Date(dueDate);
+
+        const earnedPoints = onTime ? 10 : 2; // 10 points on-time, 2 points late but completed
+
+        borrower.reliabilityPoints = (borrower.reliabilityPoints || 0) + earnedPoints;
+
+        // Badge thresholds
+        const badgesCatalog = [
+          { key: 'seed', name: 'Seed Starter', min: 10, icon: '🌱' },
+          { key: 'sprout', name: 'Sprout Saver', min: 30, icon: '🌿' },
+          { key: 'ember', name: 'Ember Earner', min: 60, icon: '🔥' },
+          { key: 'river', name: 'River Reliable', min: 100, icon: '🌊' },
+          { key: 'steel', name: 'Steel Steady', min: 150, icon: '🛡️' },
+          { key: 'hawk', name: 'Hawk Honest', min: 210, icon: '🦅' },
+          { key: 'oak', name: 'Oak On‑time', min: 280, icon: '🌳' },
+          { key: 'aurum', name: 'Aurum Achiever', min: 360, icon: '🏅' },
+          { key: 'titan', name: 'Titan Trustworthy', min: 450, icon: '🏆' },
+          { key: 'legend', name: 'Legendary Lender‑Friend', min: 550, icon: '👑' }
+        ];
+
+        const ownedKeys = new Set((borrower.badges || []).map(b => b.key));
+        const newlyEarned = badgesCatalog.filter(b => borrower.reliabilityPoints >= b.min && !ownedKeys.has(b.key));
+
+        // Persist user with points and any new badges
+        if (newlyEarned.length > 0) {
+          borrower.badges = [...(borrower.badges || []), ...newlyEarned.map(b => ({ key: b.key, name: b.name, icon: b.icon, earnedAt: new Date() }))];
+        }
+        await borrower.save();
+
+        // Notify borrower about points
+        await NotificationService.notifyCreditScoreUpdate({
+          borrowerId: borrower._id,
+          newPoints: earnedPoints,
+          totalPoints: borrower.reliabilityPoints,
+          creditScore: borrower.creditScore
+        });
+
+        // Notify for each new badge
+        for (const badge of newlyEarned) {
+          await NotificationService.notifyBadgeEarned({
+            borrowerId: borrower._id,
+            badgeKey: badge.key,
+            badgeName: badge.name,
+            icon: badge.icon
+          });
+        }
+      }
+    } catch (pointsError) {
+      console.error('Failed to award reliability points/badges:', pointsError);
+    }
+    
+    // Update loan status
+    await Loan.findByIdAndUpdate(loanId, {
+      $inc: { amountPaid: remainingAmount },
+      $set: { 
+        amountRemaining: 0,
+        status: 'completed'
+      }
+    });
+    
+    console.log('✅ Loan repayment completed successfully');
+
+    // Send notification to lender about repayment received (net amount)
+    try {
+      const NotificationService = require('../services/notificationService');
+      
+      await NotificationService.notifyLoanFullyRepaid({
+        lenderId: lender._id || lender,
+        lenderName: `${lender.firstName} ${lender.lastName}`,
+        loanId: loan._id,
+        borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+        totalRepayment: amountToLender,
+        loanAmount: loan.loanAmount
+      });
+      
+      console.log(`📧 Loan fully repaid notification sent to lender ${lender._id || lender}`);
+    } catch (notificationError) {
+      console.error('Error sending lender repayment notification:', notificationError);
+      // Don't fail the repayment if notifications fail
+    }
+
+    // Send notification to admins about loan repayment (with platform fee)
+    try {
+      const NotificationService = require('../services/notificationService');
+      
+      await NotificationService.notifyAdminLoanRepayment({
+        loanId: loan._id,
+        borrowerName: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+        lenderName: `${lender.firstName} ${lender.lastName}`,
+        repaymentAmount: remainingAmount,
+        loanAmount: loan.loanAmount
+      });
+      
+      console.log(`📧 Loan repayment notification sent to admins: ${loan._id}`);
+    } catch (notificationError) {
+      console.error('Error sending admin repayment notification:', notificationError);
+      // Don't fail the repayment if notifications fail
+    }
+    
+    res.status(200).json({
+      status: 'success',
+      message: 'Loan repayment processed successfully',
+      data: {
+        amount: remainingAmount,
+        principal: principal,
+        interest: interestAmount,
+        totalRepayment: totalRepayment,
+        platformFee,
+        amountToLender,
+        lender: {
+          name: `${lender.firstName} ${lender.lastName}`,
+          email: lender.email
+        }
+      }
+    });
 
   } catch (error) {
-    console.error('Error processing loan repayment:', error);
+    console.error('❌ Error processing loan repayment:', error);
     res.status(500).json({
       status: 'error',
       message: 'Failed to process loan repayment'

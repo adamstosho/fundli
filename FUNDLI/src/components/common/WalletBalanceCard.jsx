@@ -221,14 +221,14 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
       {
         label: 'Deposit',
         icon: <Plus className="h-4 w-4" />,
-        color: 'bg-green-600 hover:bg-green-700',
+        color: 'bg-success hover:bg-success/80',
         onClick: () => navigate('/deposit')
       },
       {
-        label: 'Transfer',
+        label: 'Withdraw',
         icon: <ArrowUpDown className="h-4 w-4" />,
-        color: 'bg-blue-600 hover:bg-blue-700',
-        onClick: () => navigate('/transfer')
+        color: 'bg-primary-600 hover:bg-primary-700',
+        onClick: () => navigate('/withdraw')
       }
     ];
 
@@ -366,7 +366,7 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
             console.log('🔄 Manual wallet refresh triggered');
             loadWalletData();
           }}
-          className="ml-2 text-xs text-blue-600 hover:text-blue-800 underline"
+          className="ml-2 text-xs text-primary-600 hover:text-primary-800 underline"
         >
           Refresh
         </button>

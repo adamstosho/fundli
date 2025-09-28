@@ -383,8 +383,8 @@ router.get('/stats', protect, async (req, res) => {
             day: { $dayOfMonth: '$createdAt' }
           },
           count: { $sum: 1 },
-          totalAmount: { $sum: '$amount' },
-          totalFees: { $sum: '$fees.total' }
+          totalAmount: { $sum: 1 },
+          totalFees: { $sum: '$fee' }
         }
       },
       { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 } }

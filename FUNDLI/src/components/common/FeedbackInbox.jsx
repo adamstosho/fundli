@@ -186,21 +186,21 @@ const FeedbackInbox = ({ onClose }) => {
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'urgent': return 'text-red-600 bg-red-100';
+      case 'urgent': return 'text-error bg-error/20';
       case 'high': return 'text-orange-600 bg-orange-100';
-      case 'medium': return 'text-blue-600 bg-blue-100';
-      case 'low': return 'text-gray-600 bg-gray-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'medium': return 'text-primary-600 bg-primary-100';
+      case 'low': return 'text-neutral-600 bg-neutral-100';
+      default: return 'text-neutral-600 bg-neutral-100';
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'sent': return 'text-blue-600 bg-blue-100';
-      case 'delivered': return 'text-green-600 bg-green-100';
-      case 'read': return 'text-purple-600 bg-purple-100';
+      case 'sent': return 'text-primary-600 bg-primary-100';
+      case 'delivered': return 'text-success bg-success/20';
+      case 'read': return 'text-accent-600 bg-accent-100';
       case 'replied': return 'text-indigo-600 bg-indigo-100';
-      default: return 'text-gray-600 bg-gray-100';
+      default: return 'text-neutral-600 bg-neutral-100';
     }
   };
 
@@ -225,41 +225,41 @@ const FeedbackInbox = ({ onClose }) => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden"
+        className="bg-white dark:bg-secondary-800 rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-6 border-b border-neutral-200 dark:border-secondary-700">
           <div className="flex items-center space-x-3">
-            <MessageSquare className="h-6 w-6 text-blue-600" />
+            <MessageSquare className="h-6 w-6 text-primary-600" />
             <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              <h2 className="text-xl font-bold text-secondary-900 dark:text-white">
                 Feedback Inbox
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">
                 {unreadCount > 0 && `${unreadCount} unread messages`}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
           >
             <X className="h-6 w-6" />
           </button>
         </div>
 
         {/* Filters and Search */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="p-6 border-b border-neutral-200 dark:border-secondary-700">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
                 <input
                   type="text"
                   placeholder="Search feedback..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  className="w-full pl-10 pr-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-neutral-700 dark:text-white"
                 />
               </div>
             </div>
@@ -275,8 +275,8 @@ const FeedbackInbox = ({ onClose }) => {
                   onClick={() => setFilter(filterOption.id)}
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                     filter === filterOption.id
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600'
                   }`}
                 >
                   {filterOption.label} ({filterOption.count})
@@ -289,14 +289,14 @@ const FeedbackInbox = ({ onClose }) => {
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center">
+            <div className="mb-4 p-4 bg-error/10 border border-error/30 text-error rounded-lg flex items-center">
               <AlertCircle className="h-5 w-5 mr-2" />
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center">
+            <div className="mb-4 p-4 bg-success/10 border border-success/30 text-success rounded-lg flex items-center">
               <CheckCircle className="h-5 w-5 mr-2" />
               {success}
             </div>
@@ -304,10 +304,10 @@ const FeedbackInbox = ({ onClose }) => {
 
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-600 border-t-transparent"></div>
             </div>
           ) : filteredFeedback.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <div className="text-center py-8 text-neutral-500 dark:text-neutral-400">
               <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No feedback found</p>
             </div>
@@ -322,10 +322,10 @@ const FeedbackInbox = ({ onClose }) => {
                 return (
                 <div
                   key={fb.id}
-                  className={`bg-white dark:bg-gray-700 border rounded-lg p-4 hover:shadow-md transition-shadow ${
+                  className={`bg-white dark:bg-neutral-700 border rounded-lg p-4 hover:shadow-md transition-shadow ${
                     fb.status === 'sent' || fb.status === 'delivered' 
-                      ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900' 
-                      : 'border-gray-200 dark:border-gray-600'
+                      ? 'border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-900' 
+                      : 'border-neutral-200 dark:border-neutral-600'
                   }`}
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -333,25 +333,25 @@ const FeedbackInbox = ({ onClose }) => {
                       <div className="flex-shrink-0">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                           fb.status === 'sent' || fb.status === 'delivered'
-                            ? 'bg-blue-100 dark:bg-blue-900'
-                            : 'bg-gray-100 dark:bg-gray-600'
+                            ? 'bg-primary-100 dark:bg-primary-900'
+                            : 'bg-neutral-100 dark:bg-neutral-600'
                         }`}>
                           <MessageSquare className={`h-5 w-5 ${
                             fb.status === 'sent' || fb.status === 'delivered'
-                              ? 'text-blue-600 dark:text-blue-400'
-                              : 'text-gray-600 dark:text-gray-400'
+                              ? 'text-primary-600 dark:text-primary-400'
+                              : 'text-neutral-600 dark:text-neutral-400'
                           }`} />
                         </div>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-900 dark:text-white">
+                        <h4 className="font-semibold text-secondary-900 dark:text-white">
                           {fb.subject}
                         </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
                           {fb.sender._id === localStorage.getItem('userId') ? 'To' : 'From'}: {fb.sender.name} ({fb.sender.userType})
                         </p>
                         {fb.loan && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                          <p className="text-xs text-neutral-500 dark:text-neutral-400">
                             Loan: {fb.loan.purpose} - ${fb.loan.amount?.toLocaleString()}
                           </p>
                         )}
@@ -367,11 +367,11 @@ const FeedbackInbox = ({ onClose }) => {
                     </div>
                   </div>
 
-                  <p className="text-gray-700 dark:text-gray-300 mb-3">
+                  <p className="text-neutral-700 dark:text-neutral-300 mb-3">
                     {fb.message}
                   </p>
 
-                  <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center justify-between text-sm text-neutral-500 dark:text-neutral-400">
                     <div className="flex items-center space-x-4">
                       <span className="flex items-center">
                         <Calendar className="h-4 w-4 mr-1" />
@@ -386,7 +386,7 @@ const FeedbackInbox = ({ onClose }) => {
                     </div>
                     <div className="flex items-center space-x-2">
                       {/* Debug info */}
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-neutral-400">
                         Debug: recipient.id={fb.recipient?.id}, user.id={user?._id || user?.id}
                       </div>
                       
@@ -396,7 +396,7 @@ const FeedbackInbox = ({ onClose }) => {
                           console.log('Mark as Read clicked for feedback:', fb);
                           markAsRead(fb.id);
                         }}
-                        className="text-blue-600 hover:text-blue-800 text-sm px-2 py-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                        className="text-primary-600 hover:text-primary-800 text-sm px-2 py-1 rounded hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
                       >
                         Mark as Read
                       </button>
@@ -424,16 +424,16 @@ const FeedbackInbox = ({ onClose }) => {
         {/* Message Details Modal */}
         {selectedFeedback && showMessageDetails && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-start">
+            <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-xl w-full max-w-3xl">
+              <div className="p-6 border-b border-neutral-200 dark:border-secondary-700 flex justify-between items-start">
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  <h3 className="text-xl font-semibold text-secondary-900 dark:text-white">
                     Message Details
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
                     From: {selectedFeedback.sender?.name || 'Admin'} ({selectedFeedback.sender?.email})
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500">
+                  <p className="text-xs text-neutral-500 dark:text-neutral-500">
                     {new Date(selectedFeedback.createdAt).toLocaleString()}
                   </p>
                 </div>
@@ -442,7 +442,7 @@ const FeedbackInbox = ({ onClose }) => {
                     setShowMessageDetails(false);
                     setSelectedFeedback(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
                 >
                   <X className="h-6 w-6" />
                 </button>
@@ -451,34 +451,34 @@ const FeedbackInbox = ({ onClose }) => {
               <div className="p-6">
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                       Subject
                     </label>
-                    <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
+                    <div className="px-3 py-2 bg-neutral-50 dark:bg-neutral-700 rounded-lg text-secondary-900 dark:text-white">
                       {selectedFeedback.subject}
                     </div>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                       Message
                     </label>
-                    <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white min-h-[120px] whitespace-pre-wrap">
+                    <div className="px-3 py-2 bg-neutral-50 dark:bg-neutral-700 rounded-lg text-secondary-900 dark:text-white min-h-[120px] whitespace-pre-wrap">
                       {selectedFeedback.message}
                     </div>
                   </div>
                   
                   {selectedFeedback.priority && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                         Priority
                       </label>
-                      <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div className="px-3 py-2 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          selectedFeedback.priority === 'urgent' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' :
+                          selectedFeedback.priority === 'urgent' ? 'bg-error/20 text-error dark:bg-error/20 dark:text-error/50' :
                           selectedFeedback.priority === 'high' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400' :
-                          selectedFeedback.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                          'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                          selectedFeedback.priority === 'medium' ? 'bg-warning/20 text-warning dark:bg-warning/20 dark:text-warning/50' :
+                          'bg-success/20 text-success dark:bg-success/20 dark:text-success/50'
                         }`}>
                           {selectedFeedback.priority.charAt(0).toUpperCase() + selectedFeedback.priority.slice(1)}
                         </span>
@@ -487,13 +487,13 @@ const FeedbackInbox = ({ onClose }) => {
                   )}
                 </div>
                 
-                <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-neutral-200 dark:border-secondary-700">
                   <button
                     onClick={() => {
                       setShowMessageDetails(false);
                       setSelectedFeedback(null);
                     }}
-                    className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    className="px-4 py-2 text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-600 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                   >
                     Close
                   </button>
@@ -505,7 +505,7 @@ const FeedbackInbox = ({ onClose }) => {
                         subject: `Re: ${selectedFeedback.subject}`
                       });
                     }}
-                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
+                    className="px-6 py-2 bg-success text-white rounded-lg hover:bg-success transition-colors flex items-center space-x-2"
                   >
                     <Reply className="h-4 w-4" />
                     <span>Reply to Admin</span>
@@ -519,22 +519,22 @@ const FeedbackInbox = ({ onClose }) => {
         {/* Reply Modal */}
         {selectedFeedback && !showMessageDetails && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-start">
+            <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-xl w-full max-w-2xl">
+              <div className="p-6 border-b border-neutral-200 dark:border-secondary-700 flex justify-between items-start">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                     Reply to Admin
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
                     Replying to: {selectedFeedback.subject}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                  <p className="text-xs text-neutral-500 dark:text-neutral-500 mt-1">
                     From: {selectedFeedback.sender?.name || 'Admin'} • {new Date(selectedFeedback.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 <button
                   onClick={() => setSelectedFeedback(null)}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -542,39 +542,39 @@ const FeedbackInbox = ({ onClose }) => {
               <div className="p-6">
                 <div className="space-y-4">
                   {/* Original Message Preview */}
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border-l-4 border-blue-500">
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-4 border-l-4 border-primary-500">
+                    <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">
                       <strong>Original message from {selectedFeedback.sender?.name || 'Admin'}:</strong>
                     </div>
-                    <div className="text-sm text-gray-800 dark:text-gray-200 font-medium mb-1">
+                    <div className="text-sm text-neutral-800 dark:text-neutral-200 font-medium mb-1">
                       {selectedFeedback.subject}
                     </div>
-                    <div className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                    <div className="text-sm text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap">
                       {selectedFeedback.message}
                     </div>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                       Subject
                     </label>
                     <input
                       type="text"
                       value={replyForm.subject}
                       onChange={(e) => setReplyForm(prev => ({ ...prev, subject: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                      className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-secondary-800 dark:text-white"
                       placeholder={`Re: ${selectedFeedback.subject}`}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                       Your Reply *
                     </label>
                     <textarea
                       value={replyForm.message}
                       onChange={(e) => setReplyForm(prev => ({ ...prev, message: e.target.value }))}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                      className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-secondary-800 dark:text-white"
                       placeholder="Enter your reply message..."
                       required
                     />
@@ -583,14 +583,14 @@ const FeedbackInbox = ({ onClose }) => {
                 <div className="flex justify-end space-x-3 mt-6">
                   <button
                     onClick={() => setSelectedFeedback(null)}
-                    className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                    className="px-4 py-2 text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-600 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-700"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={() => handleReplyToFeedback(selectedFeedback.id)}
                     disabled={isLoading}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                   >
                     {isLoading ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
@@ -618,26 +618,26 @@ const FeedbackInbox = ({ onClose }) => {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl"
+              className="bg-white dark:bg-secondary-800 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="text-center">
-                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 mb-4">
-                  <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-success/20 dark:bg-success mb-4">
+                  <CheckCircle className="h-8 w-8 text-success dark:text-success/50" />
                 </div>
                 
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-xl font-semibold text-secondary-900 dark:text-white mb-2">
                   Success!
                 </h3>
                 
-                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                <p className="text-neutral-600 dark:text-neutral-300 mb-6">
                   {success}
                 </p>
                 
                 <div className="flex justify-center space-x-3">
                   <button
                     onClick={() => setShowSuccessModal(false)}
-                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
+                    className="px-6 py-2 bg-success text-white rounded-lg hover:bg-success transition-colors flex items-center space-x-2"
                   >
                     <CheckCircle className="h-4 w-4" />
                     <span>Great!</span>

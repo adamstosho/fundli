@@ -1,6 +1,8 @@
 const Wallet = require('../models/Wallet');
 const User = require('../models/User');
+const Loan = require('../models/Loan');
 const axios = require('axios');
+const NotificationService = require('../services/notificationService');
 
 // Generate unique transaction reference
 const generateTransactionReference = (type) => {
@@ -558,7 +560,7 @@ const verifyDeposit = async (req, res) => {
   }
 };
 
-// Withdraw funds from wallet
+// Withdraw funds from wallet (Paystack Transfers)
 const withdrawFunds = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -624,33 +626,105 @@ const withdrawFunds = async (req, res) => {
     wallet.addTransaction(transaction);
     await wallet.save();
 
-    // TODO: Integrate with bank transfer service (Paystack Transfer, etc.)
-    // For now, we'll mark it as completed after a delay
-    setTimeout(async () => {
-      try {
-        const updatedWallet = await Wallet.findOne({ user: userId });
-        const updatedTransaction = updatedWallet.transactions.find(t => t.reference === reference);
-        if (updatedTransaction && updatedTransaction.status === 'pending') {
-          updatedTransaction.status = 'completed';
-          updatedWallet.updateBalance(amount, 'withdrawal');
-          await updatedWallet.save();
+    // If Paystack keys are missing, simulate success in development
+    if (!process.env.PAYSTACK_SECRET_KEY) {
+      const updatedWallet = await Wallet.findOne({ user: userId });
+      const updatedTransaction = updatedWallet.transactions.find(t => t.reference === reference);
+      updatedTransaction.status = 'completed';
+      updatedWallet.updateBalance(amount, 'withdrawal');
+      await updatedWallet.save();
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'Withdrawal processed (simulated)',
+        data: {
+          transaction: {
+            reference: reference,
+            amount: amount,
+            status: 'completed',
+            createdAt: transaction.createdAt
+          }
         }
-      } catch (error) {
-        console.error('Error processing withdrawal:', error);
+      });
+    }
+
+    // Real Paystack transfer flow
+    const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
+    const baseUrl = 'https://api.paystack.co';
+
+    // 1) Resolve account name (optional)
+    let resolvedAccountName = bankDetails.accountName;
+    try {
+      const resolveRes = await axios.get(
+        `${baseUrl}/bank/resolve?account_number=${bankDetails.accountNumber}&bank_code=${bankDetails.bankCode}`,
+        { headers: { Authorization: `Bearer ${paystackSecret}` } }
+      );
+      if (resolveRes.data?.status) {
+        resolvedAccountName = resolveRes.data.data.account_name;
       }
-    }, 5000); // 5 seconds delay for demo
+    } catch (e) {
+      console.warn('Paystack resolve failed, proceeding with provided details');
+    }
+
+    // 2) Create transfer recipient
+    const recipientRes = await axios.post(
+      `${baseUrl}/transferrecipient`,
+      {
+        type: 'nuban',
+        name: resolvedAccountName || `${req.user.firstName} ${req.user.lastName}`,
+        account_number: bankDetails.accountNumber,
+        bank_code: bankDetails.bankCode,
+        currency: 'NGN'
+      },
+      { headers: { Authorization: `Bearer ${paystackSecret}` } }
+    );
+
+    if (!recipientRes.data?.status) {
+      return res.status(400).json({ status: 'error', message: 'Failed to create transfer recipient' });
+    }
+
+    const recipientCode = recipientRes.data.data.recipient_code;
+
+    // 3) Initiate transfer
+    const transferRes = await axios.post(
+      `${baseUrl}/transfer`,
+      {
+        source: 'balance',
+        reason: `Wallet withdrawal ${reference}`,
+        amount: Math.round(amount * 100),
+        recipient: recipientCode,
+        reference
+      },
+      { headers: { Authorization: `Bearer ${paystackSecret}` } }
+    );
+
+    // Paystack may return pending; we update accordingly
+    const paystackStatus = transferRes.data?.data?.status || 'pending';
+
+    const updatedWallet = await Wallet.findOne({ user: userId });
+    const updatedTransaction = updatedWallet.transactions.find(t => t.reference === reference);
+    updatedTransaction.status = paystackStatus === 'success' ? 'completed' : 'pending';
+    updatedTransaction.metadata.paystack = {
+      recipientCode,
+      transferCode: transferRes.data?.data?.transfer_code,
+      integration: 'paystack'
+    };
+    if (updatedTransaction.status === 'completed') {
+      updatedWallet.updateBalance(amount, 'withdrawal');
+    }
+    await updatedWallet.save();
 
     res.status(200).json({
       status: 'success',
-      message: 'Withdrawal request submitted successfully',
+      message: updatedTransaction.status === 'completed' ? 'Withdrawal completed successfully' : 'Withdrawal initiated and pending',
       data: {
         transaction: {
           reference: reference,
           amount: amount,
-          status: 'pending',
+          status: updatedTransaction.status,
           createdAt: transaction.createdAt
         },
-        estimatedProcessingTime: '24-48 hours'
+        estimatedProcessingTime: updatedTransaction.status === 'completed' ? 'Completed' : 'Within 24 hours'
       }
     });
 
@@ -667,7 +741,7 @@ const withdrawFunds = async (req, res) => {
 const transferFunds = async (req, res) => {
   try {
     const fromUserId = req.user.id;
-    const { toUserId, amount, description } = req.body;
+    const { toUserId, amount, description, loanId } = req.body;
 
     // Validation
     if (!toUserId || !amount || amount <= 0) {
@@ -708,7 +782,7 @@ const transferFunds = async (req, res) => {
     if (fromWallet.balance < transferAmount) {
       return res.status(400).json({
         status: 'error',
-        message: `Insufficient balance. Available: $${fromWallet.balance.toFixed(2)}`
+        message: `Insufficient balance. Available: ₦${fromWallet.balance.toFixed(2)}`
       });
     }
 
@@ -732,13 +806,15 @@ const transferFunds = async (req, res) => {
     }
 
     // Get recipient user details
-    const toUser = await User.findById(toUserId).select('firstName lastName email');
+    const toUser = await User.findById(toUserId).select('firstName lastName email userType');
     if (!toUser) {
       return res.status(404).json({
         status: 'error',
         message: 'Recipient not found'
       });
     }
+    
+    console.log(`Transfer recipient: ${toUser.firstName} ${toUser.lastName} (${toUser.userType})`);
 
     // Generate transaction references
     const transferReference = generateTransactionReference('transfer');
@@ -788,6 +864,146 @@ const transferFunds = async (req, res) => {
 
     await Promise.all([fromWallet.save(), toWallet.save()]);
 
+    // Update loan status if recipient has approved/pending loans
+    let updatedLoan = null;
+    try {
+      console.log(`Checking for loans for borrower: ${toUserId}`);
+      
+      // Find the recipient's approved or pending loans
+      let recipientLoans;
+      if (loanId) {
+        // If specific loan ID provided, find that specific loan
+        const specificLoan = await Loan.findOne({
+          _id: loanId,
+          borrower: toUserId,
+          status: { $in: ['approved', 'pending'] }
+        });
+        recipientLoans = specificLoan ? [specificLoan] : [];
+      } else {
+        // Find the recipient's approved or pending loans (most recent first)
+        recipientLoans = await Loan.find({
+          borrower: toUserId,
+          status: { $in: ['approved', 'pending'] }
+        }).sort({ createdAt: -1 });
+      }
+
+      console.log(`Found ${recipientLoans.length} approved/pending loans for borrower ${toUserId}`);
+      
+      if (recipientLoans.length > 0) {
+        console.log(`Updating loan ${recipientLoans[0]._id} from status '${recipientLoans[0].status}' to 'funded'`);
+        // Update the most recent approved/pending loan to funded
+        updatedLoan = recipientLoans[0];
+        updatedLoan.status = 'funded';
+        
+        // Initialize fundingProgress if it doesn't exist
+        if (!updatedLoan.fundingProgress) {
+          updatedLoan.fundingProgress = {
+            fundedAmount: 0,
+            investors: [],
+            targetAmount: updatedLoan.loanAmount
+          };
+        }
+        
+        // Update funded amount
+        updatedLoan.fundingProgress.fundedAmount = transferAmount;
+        
+        // Add investor information
+        updatedLoan.fundingProgress.investors.push({
+          user: fromUserId,
+          amount: transferAmount,
+          investedAt: new Date(),
+          notes: `Transfer reference: ${transferReference}${description ? ` - ${description}` : ''}`
+        });
+        
+        await updatedLoan.save();
+        console.log(`Loan ${updatedLoan._id} status updated to 'funded' for borrower ${toUserId}`);
+        console.log(`Funded amount: ₦${transferAmount}, Investors: ${updatedLoan.fundingProgress.investors.length}`);
+      }
+    } catch (loanUpdateError) {
+      // Log error but don't fail the transfer
+      console.error('Error updating loan status:', loanUpdateError);
+      console.error('Loan update error details:', loanUpdateError.message);
+      console.error('Stack trace:', loanUpdateError.stack);
+    }
+
+    // Create notifications for both users
+    try {
+      // Notification for the recipient (borrower)
+      await NotificationService.createNotification({
+        recipientId: toUserId,
+        type: 'money_received',
+        title: '💰 Money Received!',
+        message: `You received ₦${transferAmount.toFixed(2)} from ${req.user.firstName} ${req.user.lastName}${description ? ` - "${description}"` : ''}${updatedLoan ? ' - Loan Status Updated!' : ''}`,
+        content: `Transfer Reference: ${transferReference}\n\nAmount: ₦${transferAmount.toFixed(2)} ${fromWallet.currency}\nFrom: ${req.user.firstName} ${req.user.lastName}\n\n${description ? `📝 Note from ${req.user.firstName}:\n"${description}"\n\n` : ''}${updatedLoan ? `🎉 Great news! Your loan application has been funded!\nLoan Amount: ₦${updatedLoan.loanAmount.toFixed(2)}\nStatus: Funded ✅\n\n` : ''}Your new wallet balance: ₦${toWallet.balance.toFixed(2)}`,
+        priority: 'high',
+        actionRequired: false,
+        action: {
+          type: 'view',
+          url: '/dashboard',
+          buttonText: 'View Dashboard'
+        },
+        relatedEntities: {
+          transferId: transferReference,
+          fromUserId: fromUserId,
+          amount: transferAmount,
+          currency: fromWallet.currency
+        },
+        metadata: {
+          transferReference: transferReference,
+          senderName: `${req.user.firstName} ${req.user.lastName}`,
+          senderEmail: req.user.email,
+          amount: transferAmount,
+          currency: fromWallet.currency,
+          newBalance: toWallet.balance,
+          description: description,
+          hasDescription: !!description,
+          loanUpdated: !!updatedLoan,
+          loanId: updatedLoan ? updatedLoan._id : null,
+          loanAmount: updatedLoan ? updatedLoan.loanAmount : null
+        }
+      });
+
+      // Notification for the sender (lender)
+      await NotificationService.createNotification({
+        recipientId: fromUserId,
+        type: 'money_sent',
+        title: '✅ Transfer Sent Successfully!',
+        message: `You sent ₦${transferAmount.toFixed(2)} to ${toUser.firstName} ${toUser.lastName}${description ? ` with note: "${description}"` : ''}${updatedLoan ? ' - Loan Funded!' : ''}`,
+        content: `Transfer Reference: ${transferReference}\n\nAmount: ₦${transferAmount.toFixed(2)} ${fromWallet.currency}\nTo: ${toUser.firstName} ${toUser.lastName}\n\n${description ? `📝 Your note:\n"${description}"\n\n` : ''}${updatedLoan ? `🎯 You've successfully funded a loan!\nBorrower: ${toUser.firstName} ${toUser.lastName}\nLoan Amount: ₦${updatedLoan.loanAmount.toFixed(2)}\nYour Contribution: ₦${transferAmount.toFixed(2)}\n\n` : ''}Your remaining wallet balance: ₦${fromWallet.balance.toFixed(2)}`,
+        priority: 'normal',
+        actionRequired: false,
+        action: {
+          type: 'view',
+          url: '/dashboard',
+          buttonText: 'View Dashboard'
+        },
+        relatedEntities: {
+          transferId: transferReference,
+          toUserId: toUserId,
+          amount: transferAmount,
+          currency: fromWallet.currency
+        },
+        metadata: {
+          transferReference: transferReference,
+          recipientName: `${toUser.firstName} ${toUser.lastName}`,
+          recipientEmail: toUser.email,
+          amount: transferAmount,
+          currency: fromWallet.currency,
+          remainingBalance: fromWallet.balance,
+          description: description,
+          hasDescription: !!description,
+          loanFunded: !!updatedLoan,
+          loanId: updatedLoan ? updatedLoan._id : null,
+          loanAmount: updatedLoan ? updatedLoan.loanAmount : null
+        }
+      });
+
+      console.log(`Notifications created for transfer ${transferReference}`);
+    } catch (notificationError) {
+      // Log notification error but don't fail the transfer
+      console.error('Error creating transfer notifications:', notificationError);
+    }
+
     res.status(200).json({
       status: 'success',
       message: 'Transfer completed successfully',
@@ -810,7 +1026,14 @@ const transferFunds = async (req, res) => {
         fromWallet: {
           balance: fromWallet.balance,
           currency: fromWallet.currency
-        }
+        },
+        loanUpdated: !!updatedLoan,
+        loan: updatedLoan ? {
+          id: updatedLoan._id,
+          amount: updatedLoan.loanAmount,
+          status: updatedLoan.status,
+          purpose: updatedLoan.purpose
+        } : null
       }
     });
 
@@ -890,6 +1113,70 @@ const getWalletStats = async (req, res) => {
   }
 };
 
+// Get approved borrowers for transfer suggestions
+const getApprovedBorrowers = async (req, res) => {
+  try {
+    const Loan = require('../models/Loan');
+    const User = require('../models/User');
+
+    // Get all loans that are approved by admin (only approved, not funded)
+    const approvedLoans = await Loan.find({
+      status: 'approved'
+    })
+      .populate('borrower', 'firstName lastName email userType')
+      .select('borrower status loanAmount purpose createdAt')
+      .sort({ createdAt: -1 });
+
+    // Extract unique borrowers and format the response
+    const borrowerMap = new Map();
+    
+    approvedLoans.forEach(loan => {
+      if (loan.borrower && loan.borrower.userType === 'borrower') {
+        const borrowerId = loan.borrower._id.toString();
+        
+        if (!borrowerMap.has(borrowerId)) {
+          borrowerMap.set(borrowerId, {
+            id: loan.borrower._id,
+            name: `${loan.borrower.firstName} ${loan.borrower.lastName}`,
+            email: loan.borrower.email,
+            firstName: loan.borrower.firstName,
+            lastName: loan.borrower.lastName,
+            approvedLoans: []
+          });
+        }
+        
+        borrowerMap.get(borrowerId).approvedLoans.push({
+          loanId: loan._id,
+          amount: loan.loanAmount,
+          purpose: loan.purpose,
+          status: loan.status,
+          createdAt: loan.createdAt
+        });
+      }
+    });
+
+    // Convert map to array and sort by name
+    const approvedBorrowers = Array.from(borrowerMap.values())
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Approved borrowers retrieved successfully',
+      data: {
+        borrowers: approvedBorrowers,
+        totalCount: approvedBorrowers.length
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching approved borrowers:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch approved borrowers'
+    });
+  }
+};
+
 module.exports = {
   createWallet,
   getWallet,
@@ -899,6 +1186,7 @@ module.exports = {
   withdrawFunds,
   transferFunds,
   getWalletStats,
+  getApprovedBorrowers,
   handleCardPayment,
   handleBankTransfer,
   handleMobileMoney

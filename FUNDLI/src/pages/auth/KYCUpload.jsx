@@ -170,7 +170,7 @@ const KYCUpload = () => {
 
     for (const doc of requiredDocs) {
       if (!documents[doc]) {
-        setError(`Please upload ${doc.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+        setError(`Please upload ${doc.replace(/([A-Z])/g, ' ₦1').toLowerCase()}`);
         return false;
       }
     }
@@ -272,26 +272,26 @@ const KYCUpload = () => {
         {!documents[field] ? (
           <div
             onClick={() => fileInputRefs.current[field]?.click()}
-            className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 transition-colors"
+            className="border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-lg p-6 text-center cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 transition-colors"
           >
-            <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <Upload className="h-8 w-8 text-neutral-400 mx-auto mb-2" />
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">
               Click to upload or drag and drop
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+            <p className="text-xs text-neutral-500 dark:text-neutral-500 mt-1">
               {description}
             </p>
           </div>
         ) : (
-          <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+          <div className="border border-neutral-200 dark:border-secondary-700 rounded-lg p-4 bg-neutral-50 dark:bg-secondary-800">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <FileText className="h-5 w-5 text-primary-600 dark:text-primary-400" />
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  <p className="text-sm font-medium text-secondary-900 dark:text-white">
                     {documents[field].name}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
                     {(documents[field].size / 1024 / 1024).toFixed(2)} MB
                   </p>
                 </div>
@@ -303,7 +303,7 @@ const KYCUpload = () => {
                 <button
                   type="button"
                   onClick={() => removeDocument(field)}
-                  className="text-gray-400 hover:text-error transition-colors"
+                  className="text-neutral-400 hover:text-error transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -311,13 +311,13 @@ const KYCUpload = () => {
             </div>
             {uploadProgress[field] < 100 && (
               <div className="mt-3">
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
                   <div
                     className="bg-primary-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${uploadProgress[field]}%` }}
                   />
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                   Uploading... {uploadProgress[field]}%
                 </p>
               </div>
@@ -336,7 +336,7 @@ const KYCUpload = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-neutral-50 dark:bg-secondary-900 py-12 px-4 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -356,10 +356,10 @@ const KYCUpload = () => {
             <Shield className="h-8 w-8 text-primary-600 dark:text-primary-400" />
           </div>
           
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-3xl font-bold text-secondary-900 dark:text-white">
             Complete Your KYC Verification
           </h2>
-          <p className="mt-2 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="mt-2 text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
             To ensure the security and trust of our platform, we need to verify your identity. 
             This process is required for all users and helps protect everyone on Fundli.
           </p>
@@ -394,7 +394,7 @@ const KYCUpload = () => {
 
             {/* Personal Information */}
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white border-b border-neutral-200 dark:border-secondary-700 pb-2">
                 Personal Information
               </h3>
               
@@ -454,7 +454,7 @@ const KYCUpload = () => {
 
             {/* Address Information */}
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white border-b border-neutral-200 dark:border-secondary-700 pb-2">
                 Address Information
               </h3>
               
@@ -532,7 +532,7 @@ const KYCUpload = () => {
 
             {/* Document Upload */}
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white border-b border-neutral-200 dark:border-secondary-700 pb-2">
                 Document Upload
               </h3>
               
@@ -567,10 +567,10 @@ const KYCUpload = () => {
             </div>
 
             {/* Submit Button */}
-            <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="pt-6 border-t border-neutral-200 dark:border-secondary-700">
               {!isUserDataLoaded && (
-                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <p className="text-sm text-blue-700 dark:text-blue-300 text-center">
+                <div className="mb-4 p-3 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg">
+                  <p className="text-sm text-primary-700 dark:text-primary-300 text-center">
                     Loading user data... Please wait before submitting KYC.
                   </p>
                 </div>
@@ -594,7 +594,7 @@ const KYCUpload = () => {
               </button>
               
               
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-3">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 text-center mt-3">
                 By submitting this form, you agree to our verification process and confirm that all information provided is accurate.
               </p>
             </div>
@@ -605,7 +605,7 @@ const KYCUpload = () => {
         <div className="text-center mt-6">
           <Link
             to="/verify-otp"
-            className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            className="inline-flex items-center text-neutral-600 dark:text-neutral-400 hover:text-secondary-900 dark:hover:text-white transition-colors"
           >
             ← Back to OTP verification
           </Link>

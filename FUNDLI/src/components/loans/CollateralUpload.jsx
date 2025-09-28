@@ -174,13 +174,13 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'verified':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className="h-5 w-5 text-success" />;
       case 'rejected':
-        return <AlertCircle className="h-5 w-5 text-red-500" />;
+        return <AlertCircle className="h-5 w-5 text-error" />;
       case 'submitted':
-        return <Clock className="h-5 w-5 text-yellow-500" />;
+        return <Clock className="h-5 w-5 text-warning" />;
       default:
-        return <Clock className="h-5 w-5 text-gray-400" />;
+        return <Clock className="h-5 w-5 text-neutral-400" />;
     }
   };
 
@@ -200,13 +200,13 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'verified':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        return 'bg-success/20 text-success dark:bg-success dark:text-success/30';
       case 'rejected':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+        return 'bg-error/20 text-error dark:bg-error dark:text-error/30';
       case 'submitted':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+        return 'bg-warning/20 text-warning dark:bg-warning dark:text-warning/30';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+        return 'bg-neutral-100 text-neutral-800 dark:bg-secondary-900 dark:text-neutral-200';
     }
   };
 
@@ -214,10 +214,10 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
             Collateral Documentation
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
             Upload documents to secure your loan with verified collateral
           </p>
         </div>
@@ -235,7 +235,7 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg text-sm flex items-center"
+          className="bg-error/10 dark:bg-error/20 border border-error/30 dark:border-error text-error dark:text-error/40 px-4 py-3 rounded-lg text-sm flex items-center"
         >
           <AlertCircle className="h-4 w-4 mr-2" />
           {error}
@@ -247,22 +247,22 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-gray-50 dark:bg-gray-800"
+          className="border border-neutral-200 dark:border-secondary-700 rounded-lg p-6 bg-neutral-50 dark:bg-secondary-800"
         >
-          <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+          <h4 className="text-lg font-medium text-secondary-900 dark:text-white mb-4">
             Add New Collateral
           </h4>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                 Collateral Type
               </label>
               <select
                 name="type"
                 value={newCollateral.type}
                 onChange={handleCollateralChange}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-neutral-700 text-secondary-900 dark:text-white"
                 required
               >
                 <option value="">Select type</option>
@@ -275,7 +275,7 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                 Description
               </label>
               <input
@@ -283,14 +283,14 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
                 name="description"
                 value={newCollateral.description}
                 onChange={handleCollateralChange}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-neutral-700 text-secondary-900 dark:text-white"
                 placeholder="e.g., 2020 Toyota Camry"
                 required
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                 Estimated Value (USD)
               </label>
               <input
@@ -298,7 +298,7 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
                 name="estimatedValue"
                 value={newCollateral.estimatedValue}
                 onChange={handleCollateralChange}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-neutral-700 text-secondary-900 dark:text-white"
                 placeholder="0.00"
                 min="0"
                 step="0.01"
@@ -308,16 +308,16 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
               Upload Documents
             </label>
-            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary-400 transition-colors">
-              <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+            <div className="border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-lg p-6 text-center hover:border-primary-400 transition-colors">
+              <Upload className="mx-auto h-8 w-8 text-neutral-400 mb-2" />
               <label htmlFor="collateral-docs" className="cursor-pointer">
                 <span className="text-primary-600 hover:text-primary-500 font-medium">
                   Click to upload
                 </span>
-                <span className="text-gray-500"> or drag and drop</span>
+                <span className="text-neutral-500"> or drag and drop</span>
               </label>
               <input
                 id="collateral-docs"
@@ -328,7 +328,7 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                 className="hidden"
               />
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-neutral-500 mt-2">
                 PDF, DOC, DOCX, JPG, PNG up to 10MB each
               </p>
             </div>
@@ -336,25 +336,25 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
 
           {newCollateral.documents.length > 0 && (
             <div className="mb-4">
-              <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <h5 className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Uploaded Documents:
               </h5>
               <div className="space-y-2">
                 {newCollateral.documents.map((doc, index) => (
-                  <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-700 p-3 rounded border">
+                  <div key={index} className="flex items-center justify-between bg-white dark:bg-neutral-700 p-3 rounded border">
                     <div className="flex items-center space-x-2">
-                      <FileText className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                      <FileText className="h-4 w-4 text-neutral-400" />
+                      <span className="text-sm text-neutral-600 dark:text-neutral-400">
                         {doc.name}
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-neutral-500">
                         ({(doc.size / 1024 / 1024).toFixed(2)} MB)
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={() => removeFile(index)}
-                      className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                      className="p-1 text-neutral-400 hover:text-error transition-colors"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -368,7 +368,7 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+              className="px-4 py-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 transition-colors"
             >
               Cancel
             </button>
@@ -385,7 +385,7 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
 
       {collateralItems.length > 0 && (
         <div className="space-y-4">
-          <h4 className="text-lg font-medium text-gray-900 dark:text-white">
+          <h4 className="text-lg font-medium text-secondary-900 dark:text-white">
             Your Collateral
           </h4>
           {collateralItems.map((item) => (
@@ -393,7 +393,7 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
               key={item.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-white dark:bg-gray-800"
+              className="border border-neutral-200 dark:border-secondary-700 rounded-lg p-6 bg-white dark:bg-secondary-800"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-start space-x-3">
@@ -402,14 +402,14 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
                   </div>
                   <div>
                     <div className="flex items-center space-x-3 mb-2">
-                      <h5 className="font-medium text-gray-900 dark:text-white">
+                      <h5 className="font-medium text-secondary-900 dark:text-white">
                         {getCollateralTypeLabel(item.type)}
                       </h5>
                       <span className="text-lg font-semibold text-primary-600 dark:text-primary-400">
                         ${item.estimatedValue.toLocaleString()}
                       </span>
                     </div>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-neutral-600 dark:text-neutral-400">
                       {item.description}
                     </p>
                   </div>
@@ -423,7 +423,7 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
                   <button
                     type="button"
                     onClick={() => removeCollateral(item.id)}
-                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                    className="p-2 text-neutral-400 hover:text-error transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -431,22 +431,22 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
               </div>
 
               <div className="mb-4">
-                <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <h6 className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Documents:
                 </h6>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {item.documents.map((doc, index) => (
-                    <div key={index} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded border">
+                    <div key={index} className="flex items-center justify-between bg-neutral-50 dark:bg-neutral-700 p-3 rounded border">
                       <div className="flex items-center space-x-2">
-                        <FileText className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                        <FileText className="h-4 w-4 text-neutral-400" />
+                        <span className="text-sm text-neutral-600 dark:text-neutral-400">
                           {doc.name}
                         </span>
                       </div>
                       <div className="flex items-center space-x-1">
                         <button
                           type="button"
-                          className="p-1 text-gray-400 hover:text-primary-500 transition-colors"
+                          className="p-1 text-neutral-400 hover:text-primary-500 transition-colors"
                           title="Preview document"
                         >
                           <Eye className="h-4 w-4" />
@@ -463,7 +463,7 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
                     type="button"
                     onClick={() => submitForVerification(item.id)}
                     disabled={isSubmitting}
-                    className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center space-x-2 bg-success text-white px-4 py-2 rounded-lg hover:bg-success transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? (
                       <>
@@ -481,16 +481,16 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
               )}
 
               {item.verificationStatus !== 'pending' && (
-                <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="mt-4 p-3 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
                     <strong>Status:</strong> {getStatusText(item.verificationStatus)}
                   </p>
                   {item.verificationId && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
                       <strong>Verification ID:</strong> {item.verificationId}
                     </p>
                   )}
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
                     <strong>Submitted:</strong> {new Date(item.timestamp).toLocaleDateString()}
                   </p>
                 </div>
@@ -501,8 +501,8 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
       )}
 
       {collateralItems.length === 0 && !showForm && (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-          <Shield className="mx-auto h-16 w-16 mb-4 text-gray-300" />
+        <div className="text-center py-12 text-neutral-500 dark:text-neutral-400">
+          <Shield className="mx-auto h-16 w-16 mb-4 text-neutral-300" />
           <h4 className="text-lg font-medium mb-2">No Collateral Added</h4>
           <p className="text-sm mb-4">
             Adding collateral can improve your loan terms and approval chances

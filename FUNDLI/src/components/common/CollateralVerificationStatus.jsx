@@ -49,28 +49,28 @@ const CollateralVerificationStatus = ({ userId, userType = 'borrower', onReapply
   const getStatusIcon = (status) => {
     switch (status) {
       case 'approved':
-        return <CheckCircle className="h-5 w-5 text-green-600" />;
+        return <CheckCircle className="h-5 w-5 text-success" />;
       case 'rejected':
-        return <XCircle className="h-5 w-5 text-red-600" />;
+        return <XCircle className="h-5 w-5 text-error" />;
       case 'under_review':
       case 'submitted':
-        return <Clock className="h-5 w-5 text-yellow-600" />;
+        return <Clock className="h-5 w-5 text-warning" />;
       default:
-        return <AlertCircle className="h-5 w-5 text-gray-600" />;
+        return <AlertCircle className="h-5 w-5 text-neutral-600" />;
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
       case 'approved':
-        return 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800';
+        return 'bg-success/10 border-success/30 dark:bg-success/20 dark:border-success';
       case 'rejected':
-        return 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800';
+        return 'bg-error/10 border-error/30 dark:bg-error/20 dark:border-error';
       case 'under_review':
       case 'submitted':
-        return 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800';
+        return 'bg-warning/10 border-warning/30 dark:bg-warning/20 dark:border-warning';
       default:
-        return 'bg-gray-50 border-gray-200 dark:bg-gray-900/20 dark:border-gray-800';
+        return 'bg-neutral-50 border-neutral-200 dark:bg-secondary-900/20 dark:border-secondary-800';
     }
   };
 
@@ -110,10 +110,10 @@ const CollateralVerificationStatus = ({ userId, userType = 'borrower', onReapply
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg p-4 shadow-sm border border-neutral-200 dark:border-secondary-700">
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-2"></div>
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+          <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-1/3 mb-2"></div>
+          <div className="h-3 bg-neutral-200 dark:bg-neutral-700 rounded w-1/2"></div>
         </div>
       </div>
     );
@@ -123,14 +123,14 @@ const CollateralVerificationStatus = ({ userId, userType = 'borrower', onReapply
     // Show different content based on user type
     if (userType === 'lender') {
       return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-secondary-800 rounded-lg p-4 shadow-sm border border-neutral-200 dark:border-secondary-700">
           <div className="flex items-center space-x-3">
-            <CheckCircle className="h-5 w-5 text-green-600" />
+            <CheckCircle className="h-5 w-5 text-success" />
             <div>
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+              <h3 className="text-sm font-medium text-secondary-900 dark:text-white">
                 Lender Account
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
                 You can fund loans and manage investments
               </p>
             </div>
@@ -140,14 +140,14 @@ const CollateralVerificationStatus = ({ userId, userType = 'borrower', onReapply
     }
     
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg p-4 shadow-sm border border-neutral-200 dark:border-secondary-700">
         <div className="flex items-center space-x-3">
-          <AlertCircle className="h-5 w-5 text-gray-600" />
+          <AlertCircle className="h-5 w-5 text-neutral-600" />
           <div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+            <h3 className="text-sm font-medium text-secondary-900 dark:text-white">
               Collateral Verification Required
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
               Complete collateral verification to proceed with loan applications
             </p>
           </div>
@@ -160,16 +160,16 @@ const CollateralVerificationStatus = ({ userId, userType = 'borrower', onReapply
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border ${getStatusColor(verificationStatus.verificationStatus)}`}
+      className={`bg-white dark:bg-secondary-800 rounded-lg p-4 shadow-sm border ${getStatusColor(verificationStatus.verificationStatus)}`}
     >
       <div className="flex items-start space-x-3">
         {getStatusIcon(verificationStatus.verificationStatus)}
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+            <h3 className="text-sm font-medium text-secondary-900 dark:text-white">
               {getStatusText(verificationStatus.verificationStatus)}
             </h3>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="text-xs text-neutral-500 dark:text-neutral-400">
               {formatDate(verificationStatus.submittedAt)}
             </span>
           </div>
@@ -177,8 +177,8 @@ const CollateralVerificationStatus = ({ userId, userType = 'borrower', onReapply
           {verificationStatus.verificationStatus === 'approved' && (
             <div className="mt-2 space-y-1">
               <div className="flex items-center space-x-2 text-sm">
-                <FileText className="h-4 w-4 text-gray-500" />
-                <span className="text-gray-700 dark:text-gray-300">
+                <FileText className="h-4 w-4 text-neutral-500" />
+                <span className="text-neutral-700 dark:text-neutral-300">
                   Collateral Type: <span className="font-medium capitalize">
                     {verificationStatus.collateralType.replace('_', ' ')}
                   </span>
@@ -187,8 +187,8 @@ const CollateralVerificationStatus = ({ userId, userType = 'borrower', onReapply
               
               {verificationStatus.adminReview?.verifiedValue && (
                 <div className="flex items-center space-x-2 text-sm">
-                  <DollarSign className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-700 dark:text-gray-300">
+                  <DollarSign className="h-4 w-4 text-neutral-500" />
+                  <span className="text-neutral-700 dark:text-neutral-300">
                     Verified Value: <span className="font-medium">
                       {formatCurrency(verificationStatus.adminReview.verifiedValue)}
                     </span>
@@ -197,8 +197,8 @@ const CollateralVerificationStatus = ({ userId, userType = 'borrower', onReapply
               )}
               
               <div className="flex items-center space-x-2 text-sm">
-                <Calendar className="h-4 w-4 text-gray-500" />
-                <span className="text-gray-700 dark:text-gray-300">
+                <Calendar className="h-4 w-4 text-neutral-500" />
+                <span className="text-neutral-700 dark:text-neutral-300">
                   Verification Date: <span className="font-medium">
                     {formatDate(verificationStatus.adminReview?.reviewedAt)}
                   </span>
@@ -209,13 +209,13 @@ const CollateralVerificationStatus = ({ userId, userType = 'borrower', onReapply
 
           {verificationStatus.verificationStatus === 'rejected' && verificationStatus.adminReview?.rejectionReason && (
             <div className="mt-2">
-              <p className="text-sm text-red-600 dark:text-red-400 mb-3">
+              <p className="text-sm text-error dark:text-error/50 mb-3">
                 Reason: {verificationStatus.adminReview.rejectionReason}
               </p>
               {userType === 'borrower' && onReapply && (
                 <button
                   onClick={onReapply}
-                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 transition-colors"
                 >
                   Re-apply for Collateral Verification
                 </button>
@@ -225,7 +225,7 @@ const CollateralVerificationStatus = ({ userId, userType = 'borrower', onReapply
 
           {verificationStatus.adminReview?.verificationNotes && (
             <div className="mt-2">
-              <p className="text-xs text-gray-600 dark:text-gray-400">
+              <p className="text-xs text-neutral-600 dark:text-neutral-400">
                 {verificationStatus.adminReview.verificationNotes}
               </p>
             </div>

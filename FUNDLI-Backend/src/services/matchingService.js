@@ -387,7 +387,7 @@ class AdvancedMatchingService {
       
       const avgCreditScore = await User.aggregate([
         { $match: { userType: 'borrower', isActive: true } },
-        { $group: { _id: null, avgScore: { $avg: '$creditScore' } } }
+        { $group: { _id: null, avgScore: { $avg: 1 } } }
       ]);
 
       return {

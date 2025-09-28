@@ -107,10 +107,10 @@ const LoanStatus = () => {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-secondary-900 dark:text-white mb-2">
           Loan Status
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-neutral-600 dark:text-neutral-400">
           Track the status of your loan applications
         </p>
       </div>
@@ -121,11 +121,11 @@ const LoanStatus = () => {
           animate={{ opacity: 1, y: 0 }}
           className="card p-12 text-center"
         >
-          <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+          <FileText className="mx-auto h-16 w-16 text-neutral-400 mb-4" />
+          <h3 className="text-xl font-semibold text-secondary-900 dark:text-white mb-2">
             No Loan Applications
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-neutral-600 dark:text-neutral-400 mb-6">
             You haven't submitted any loan applications yet.
           </p>
           <a
@@ -149,10 +149,10 @@ const LoanStatus = () => {
                 <div className="flex items-center space-x-3">
                   {getStatusIcon(loan.status)}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                       ${loan.loanAmount.toLocaleString()} - {loan.purpose}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
                       Applied on {new Date(loan.createdAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -162,16 +162,16 @@ const LoanStatus = () => {
                 </span>
               </div>
 
-              <p className="text-gray-700 dark:text-gray-300 mb-4">
+              <p className="text-neutral-700 dark:text-neutral-300 mb-4">
                 {loan.purposeDescription}
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex items-center space-x-2 text-sm text-neutral-600 dark:text-neutral-400">
                   <DollarSign className="h-4 w-4" />
                   <span>Amount: ${loan.loanAmount.toLocaleString()}</span>
                 </div>
-                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex items-center space-x-2 text-sm text-neutral-600 dark:text-neutral-400">
                   <Calendar className="h-4 w-4" />
                   <span>Applied: {new Date(loan.createdAt).toLocaleDateString()}</span>
                 </div>
@@ -235,7 +235,7 @@ const LoanStatus = () => {
                 </div>
               )}
 
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between pt-4 border-t border-neutral-200 dark:border-secondary-700">
                 <div className="flex space-x-3">
                   <button className="btn-outline text-sm py-2 px-4">
                     <Eye className="h-4 w-4 mr-2" />
@@ -250,7 +250,7 @@ const LoanStatus = () => {
                 </div>
                 
                 {loan.status === 'pending' && (
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-neutral-500">
                     <Clock className="h-4 w-4 inline mr-1" />
                     Review in progress
                   </div>
@@ -265,10 +265,10 @@ const LoanStatus = () => {
       <div className="card p-6 mt-8 bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-2">
               Need Another Loan?
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-neutral-600 dark:text-neutral-400">
               Apply for additional funding or check your eligibility
             </p>
           </div>

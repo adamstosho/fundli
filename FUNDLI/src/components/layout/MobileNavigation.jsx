@@ -64,9 +64,9 @@ const MobileNavigation = () => {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
+        className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-white dark:bg-secondary-800 rounded-lg shadow-lg border border-neutral-200 dark:border-secondary-700"
       >
-        <Menu className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+        <Menu className="h-6 w-6 text-neutral-700 dark:text-neutral-300" />
       </button>
 
       {/* Mobile Navigation Overlay */}
@@ -88,47 +88,47 @@ const MobileNavigation = () => {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed left-0 top-0 h-full w-80 bg-white dark:bg-gray-900 z-50 lg:hidden"
+              className="fixed left-0 top-0 h-full w-80 bg-white dark:bg-secondary-900 z-50 lg:hidden"
             >
               <div className="flex flex-col h-full">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-secondary-700">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center shadow-lg">
                       <span className="text-white font-bold text-xl">F</span>
                     </div>
                     <div>
-                      <h1 className="text-lg font-bold text-gray-900 dark:text-white">Fundli</h1>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Mobile</p>
+                      <h1 className="text-lg font-bold text-secondary-900 dark:text-white">Fundli</h1>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">Mobile</p>
                     </div>
                   </div>
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                    className="p-2 hover:bg-neutral-100 dark:hover:bg-secondary-800 rounded-lg transition-colors"
                   >
-                    <X className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+                    <X className="h-6 w-6 text-neutral-700 dark:text-neutral-300" />
                   </button>
                 </div>
 
                 {/* User Info */}
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="p-4 border-b border-neutral-200 dark:border-secondary-700">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center">
                       <User className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900 dark:text-white">
+                      <p className="font-medium text-secondary-900 dark:text-white">
                         {user?.firstName} {user?.lastName}
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">
                         {user?.email}
                       </p>
                       <span className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${
                         user?.userType === 'borrower' 
-                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                          ? 'bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-400'
                           : user?.userType === 'lender'
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                          : 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
+                          ? 'bg-success/20 text-success dark:bg-success/20 dark:text-success/50'
+                          : 'bg-accent-100 text-accent-800 dark:bg-accent-900/20 dark:text-accent-400'
                       }`}>
                         {user?.userType?.charAt(0).toUpperCase() + user?.userType?.slice(1)}
                       </span>
@@ -147,8 +147,8 @@ const MobileNavigation = () => {
                             onClick={() => handleNavigation(item.path)}
                             className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors ${
                               isActive(item.path)
-                                ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
+                                : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-secondary-800'
                             }`}
                           >
                             <Icon className="h-5 w-5" />
@@ -161,17 +161,17 @@ const MobileNavigation = () => {
                 </nav>
 
                 {/* Footer Actions */}
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                <div className="p-4 border-t border-neutral-200 dark:border-secondary-700 space-y-2">
                   <button 
                     onClick={() => handleNavigation('/notifications')}
-                    className="w-full flex items-center space-x-3 px-3 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                    className="w-full flex items-center space-x-3 px-3 py-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-secondary-800 rounded-lg transition-colors"
                   >
                     <Bell className="h-5 w-5" />
                     <span className="font-medium">Notifications</span>
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center space-x-3 px-3 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    className="w-full flex items-center space-x-3 px-3 py-3 text-error dark:text-error/50 hover:bg-error/10 dark:hover:bg-error/20 rounded-lg transition-colors"
                   >
                     <LogOut className="h-5 w-5" />
                     <span className="font-medium">Sign Out</span>

@@ -64,11 +64,11 @@ const InProgressLoansSection = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'approved':
-        return 'text-blue-600 bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400';
+        return 'text-primary-600 bg-primary-100 dark:bg-primary-900/20 dark:text-primary-400';
       case 'funded':
-        return 'text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400';
+        return 'text-success bg-success/20 dark:bg-success/20 dark:text-success/50';
       default:
-        return 'text-gray-600 bg-gray-100 dark:bg-gray-900/20 dark:text-gray-400';
+        return 'text-neutral-600 bg-neutral-100 dark:bg-secondary-900/20 dark:text-neutral-400';
     }
   };
 
@@ -85,12 +85,12 @@ const InProgressLoansSection = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg p-6 shadow-sm">
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-4"></div>
+          <div className="h-6 bg-neutral-200 dark:bg-neutral-700 rounded w-48 mb-4"></div>
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div key={i} className="h-20 bg-neutral-200 dark:bg-neutral-700 rounded"></div>
             ))}
           </div>
         </div>
@@ -100,11 +100,11 @@ const InProgressLoansSection = () => {
 
   if (error) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg p-6 shadow-sm">
         <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Error</h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+          <AlertCircle className="h-12 w-12 text-error mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-2">Error</h3>
+          <p className="text-neutral-600 dark:text-neutral-400 mb-4">{error}</p>
           <button
             onClick={loadInProgressLoans}
             className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
@@ -118,13 +118,13 @@ const InProgressLoansSection = () => {
 
   if (loans.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg p-6 shadow-sm">
         <div className="text-center">
-          <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          <Clock className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-2">
             No Loans in Progress
           </h3>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-neutral-600 dark:text-neutral-400">
             You don't have any loans that are currently in progress.
           </p>
         </div>
@@ -134,13 +134,13 @@ const InProgressLoansSection = () => {
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
-            <TrendingUp className="h-6 w-6 mr-2 text-green-600" />
+          <h2 className="text-xl font-semibold text-secondary-900 dark:text-white flex items-center">
+            <TrendingUp className="h-6 w-6 mr-2 text-success" />
             Loans in Progress
           </h2>
-          <span className="px-3 py-1 bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-full text-sm font-medium">
+          <span className="px-3 py-1 bg-success/20 dark:bg-success/20 text-success dark:text-success/50 rounded-full text-sm font-medium">
             {loans.length} Active
           </span>
         </div>
@@ -151,12 +151,12 @@ const InProgressLoansSection = () => {
               key={loan.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
+              className="border border-neutral-200 dark:border-secondary-700 rounded-lg p-4 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                       {loan.purpose}
                     </h3>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1 ${getStatusColor(loan.status)}`}>
@@ -167,27 +167,27 @@ const InProgressLoansSection = () => {
                   
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">Amount:</span>
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        ₦{loan.loanAmount?.toLocaleString()}
+                      <span className="text-neutral-600 dark:text-neutral-400">Principal:</span>
+                      <p className="font-semibold text-secondary-900 dark:text-white">
+                        ${loan.loanAmount?.toLocaleString()}
                       </p>
                     </div>
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">Duration:</span>
-                      <p className="font-semibold text-gray-900 dark:text-white">
+                      <span className="text-neutral-600 dark:text-neutral-400">Duration:</span>
+                      <p className="font-semibold text-secondary-900 dark:text-white">
                         {loan.duration} months
                       </p>
                     </div>
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">Interest Rate:</span>
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        {loan.interestRate}%
+                      <span className="text-neutral-600 dark:text-neutral-400">Interest Rate:</span>
+                      <p className="font-semibold text-secondary-900 dark:text-white">
+                        {loan.interestRate || 0}% (Flat)
                       </p>
                     </div>
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">Monthly Payment:</span>
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        ₦{loan.monthlyPayment?.toLocaleString()}
+                      <span className="text-neutral-600 dark:text-neutral-400">Total Repayment:</span>
+                      <p className="font-semibold text-secondary-900 dark:text-white">
+                        ${((loan.loanAmount || 0) + ((loan.loanAmount || 0) * (loan.interestRate || 0) / 100)).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -214,16 +214,16 @@ const InProgressLoansSection = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-secondary-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
           >
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-xl font-semibold text-secondary-900 dark:text-white">
                   Loan Details
                 </h3>
                 <button
                   onClick={handleCloseModal}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
                 >
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -238,7 +238,7 @@ const InProgressLoansSection = () => {
                     {getStatusIcon(selectedLoan.status)}
                     <span className="capitalize">{selectedLoan.status}</span>
                   </span>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                  <span className="text-sm text-neutral-600 dark:text-neutral-400">
                     {selectedLoan.status === 'approved' ? 'Approved by lender' : 'Fully funded and disbursed'}
                   </span>
                 </div>
@@ -246,79 +246,120 @@ const InProgressLoansSection = () => {
                 {/* Loan Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Loan Information</h4>
+                    <h4 className="font-semibold text-secondary-900 dark:text-white mb-3">Loan Information</h4>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Purpose:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">{selectedLoan.purpose}</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">Purpose:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">{selectedLoan.purpose}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Amount:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">₦{selectedLoan.loanAmount?.toLocaleString()}</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">Amount:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">${selectedLoan.loanAmount?.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Duration:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">{selectedLoan.duration} months</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">Duration:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">{selectedLoan.duration} months</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Interest Rate:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">{selectedLoan.interestRate}%</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">Interest Rate:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">{selectedLoan.interestRate}%</span>
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Payment Information</h4>
+                    <h4 className="font-semibold text-secondary-900 dark:text-white mb-3">Repayment Information</h4>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Monthly Payment:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">₦{selectedLoan.monthlyPayment?.toLocaleString()}</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">Principal Amount:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">${selectedLoan.loanAmount?.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Total Repayment:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">₦{selectedLoan.totalRepayment?.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Applied Date:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">
-                          {new Date(selectedLoan.createdAt).toLocaleDateString()}
+                        <span className="text-neutral-600 dark:text-neutral-400">Interest Amount:</span>
+                        <span className="font-medium text-orange-600 dark:text-orange-400">
+                          ${((selectedLoan.loanAmount || 0) * (selectedLoan.interestRate || 0) / 100).toLocaleString()}
                         </span>
+                      </div>
+                      <div className="flex justify-between border-t border-neutral-200 dark:border-secondary-700 pt-2">
+                        <span className="text-neutral-600 dark:text-neutral-400">Total Repayment:</span>
+                        <span className="font-bold text-lg text-secondary-900 dark:text-white">
+                          ${((selectedLoan.loanAmount || 0) + ((selectedLoan.loanAmount || 0) * (selectedLoan.interestRate || 0) / 100)).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-neutral-600 dark:text-neutral-400">Applied Date:</span>
+                        <span className="font-medium text-secondary-900 dark:text-white">
+                          {new Date(selectedLoan.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                      {selectedLoan.fundedAt && (
+                        <div className="flex justify-between">
+                          <span className="text-neutral-600 dark:text-neutral-400">Funded Date:</span>
+                          <span className="font-medium text-secondary-900 dark:text-white">
+                            {new Date(selectedLoan.fundedAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </span>
+                        </div>
+                      )}
+                      {selectedLoan.fundedAt && selectedLoan.duration && (
+                        <div className="flex justify-between">
+                          <span className="text-neutral-600 dark:text-neutral-400">Due Date:</span>
+                          <span className="font-medium text-secondary-900 dark:text-white">
+                            {(() => {
+                              const fundedDate = new Date(selectedLoan.fundedAt);
+                              const dueDate = new Date(fundedDate);
+                              dueDate.setMonth(dueDate.getMonth() + selectedLoan.duration);
+                              return dueDate.toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              });
+                            })()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Flat Rate Explanation */}
+                    <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                      <div className="flex items-start space-x-2">
+                        <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center mt-0.5">
+                          <span className="text-white text-xs font-bold">i</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">Flat Interest Rate System</p>
+                          <p className="text-xs text-blue-700 dark:text-blue-300">
+                            Interest is calculated once for the entire {selectedLoan.duration || 0}-month period. 
+                            You pay the principal amount plus {selectedLoan.interestRate || 0}% interest at the end of the loan term.
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Description */}
-                {selectedLoan.purposeDescription && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Description</h4>
-                    <p className="text-gray-600 dark:text-gray-400">{selectedLoan.purposeDescription}</p>
+                {/* Loan Purpose */}
+                <div>
+                  <h4 className="font-semibold text-secondary-900 dark:text-white mb-3">Loan Purpose</h4>
+                  <div className="p-4 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
+                    <p className="text-neutral-600 dark:text-neutral-400">
+                      {selectedLoan.purposeDescription || `This loan is for ${selectedLoan.purpose} purposes.`}
+                    </p>
                   </div>
-                )}
-
-                {/* Collateral */}
-                {selectedLoan.collateral && selectedLoan.collateral.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Collateral</h4>
-                    <div className="space-y-2">
-                      {selectedLoan.collateral.map((item, index) => (
-                        <div key={index} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                          <p className="font-medium text-gray-900 dark:text-white">{item.type}</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{item.description}</p>
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            Value: ₦{item.value?.toLocaleString()}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
 
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={handleCloseModal}
-                  className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                  className="px-6 py-2 bg-neutral-600 hover:bg-neutral-700 text-white rounded-lg transition-colors"
                 >
                   Close
                 </button>

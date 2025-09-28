@@ -104,34 +104,62 @@ const NotificationCenter = () => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'loan_approved':
-        return <CheckCircle className="h-5 w-5 text-green-600" />;
+      case 'loan_approval':
+        return <CheckCircle className="h-5 w-5 text-success" />;
       case 'loan_rejected':
-        return <XCircle className="h-5 w-5 text-red-600" />;
+      case 'loan_rejection':
+        return <XCircle className="h-5 w-5 text-error" />;
       case 'loan_pending':
-        return <Clock className="h-5 w-5 text-yellow-600" />;
+      case 'loan_application':
+        return <Clock className="h-5 w-5 text-warning" />;
       case 'payment_due':
+      case 'repayment_due':
         return <AlertCircle className="h-5 w-5 text-orange-600" />;
       case 'system':
-        return <Bell className="h-5 w-5 text-blue-600" />;
+      case 'system_announcement':
+        return <Bell className="h-5 w-5 text-primary-600" />;
+      case 'money_received':
+        return <DollarSign className="h-5 w-5 text-success" />;
+      case 'money_sent':
+        return <DollarSign className="h-5 w-5 text-primary-600" />;
+      case 'loan_funding':
+        return <DollarSign className="h-5 w-5 text-success" />;
+      case 'loan_funded':
+        return <DollarSign className="h-5 w-5 text-success" />;
+      case 'investment_successful':
+        return <CheckCircle className="h-5 w-5 text-success" />;
+      case 'repayment_received':
+        return <CheckCircle className="h-5 w-5 text-success" />;
       default:
-        return <Bell className="h-5 w-5 text-gray-600" />;
+        return <Bell className="h-5 w-5 text-neutral-600" />;
     }
   };
 
   const getNotificationColor = (type) => {
     switch (type) {
       case 'loan_approved':
-        return 'border-l-green-500 bg-green-50 dark:bg-green-900/10';
+      case 'loan_approval':
+      case 'money_received':
+      case 'loan_funding':
+      case 'loan_funded':
+      case 'investment_successful':
+      case 'repayment_received':
+        return 'border-l-green-500 bg-success/10 dark:bg-success/10';
       case 'loan_rejected':
-        return 'border-l-red-500 bg-red-50 dark:bg-red-900/10';
+      case 'loan_rejection':
+        return 'border-l-red-500 bg-error/10 dark:bg-error/10';
       case 'loan_pending':
-        return 'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-900/10';
+      case 'loan_application':
+        return 'border-l-yellow-500 bg-warning/10 dark:bg-warning/10';
       case 'payment_due':
+      case 'repayment_due':
         return 'border-l-orange-500 bg-orange-50 dark:bg-orange-900/10';
       case 'system':
-        return 'border-l-blue-500 bg-blue-50 dark:bg-blue-900/10';
+      case 'system_announcement':
+      case 'money_sent':
+        return 'border-l-blue-500 bg-primary-50 dark:bg-primary-900/10';
       default:
-        return 'border-l-gray-500 bg-gray-50 dark:bg-gray-900/10';
+        return 'border-l-gray-500 bg-neutral-50 dark:bg-secondary-900/10';
     }
   };
 
@@ -154,8 +182,8 @@ const NotificationCenter = () => {
   if (error) {
     return (
       <div className="text-center py-8">
-        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-        <p className="text-red-600 dark:text-red-400">{error}</p>
+        <AlertCircle className="h-12 w-12 text-error mx-auto mb-4" />
+        <p className="text-error dark:text-error/50">{error}</p>
       </div>
     );
   }
@@ -175,7 +203,7 @@ const NotificationCenter = () => {
         <div className="flex items-center space-x-2">
           <Bell className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
           {unreadCount > 0 && (
-            <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
+            <span className="bg-error text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
               {unreadCount}
             </span>
           )}
@@ -266,25 +294,25 @@ const NotificationCenter = () => {
                     
                     {/* Additional Details for Loan Notifications */}
                     {notification.type === 'loan_rejected' && notification.metadata?.reason && (
-                      <div className="bg-red-100 dark:bg-red-900/20 rounded-lg p-3 mb-3">
-                        <p className="text-sm text-red-800 dark:text-red-200">
+                      <div className="bg-error/20 dark:bg-error/20 rounded-lg p-3 mb-3">
+                        <p className="text-sm text-error dark:text-error/30">
                           <strong>Reason:</strong> {notification.metadata.reason}
                         </p>
                       </div>
                     )}
                     
                     {notification.type === 'loan_approved' && notification.metadata && (
-                      <div className="bg-green-100 dark:bg-green-900/20 rounded-lg p-3 mb-3">
+                      <div className="bg-success/20 dark:bg-success/20 rounded-lg p-3 mb-3">
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           <div>
-                            <span className="text-green-800 dark:text-green-200 font-medium">Amount:</span>
-                            <span className="text-green-700 dark:text-green-300 ml-2">
+                            <span className="text-success dark:text-success/30 font-medium">Amount:</span>
+                            <span className="text-success dark:text-success/40 ml-2">
                               ${notification.metadata.amount?.toLocaleString()}
                             </span>
                           </div>
                           <div>
-                            <span className="text-green-800 dark:text-green-200 font-medium">Duration:</span>
-                            <span className="text-green-700 dark:text-green-300 ml-2">
+                            <span className="text-success dark:text-success/30 font-medium">Duration:</span>
+                            <span className="text-success dark:text-success/40 ml-2">
                               {notification.metadata.duration} months
                             </span>
                           </div>
@@ -318,7 +346,7 @@ const NotificationCenter = () => {
                       
                       <button
                         onClick={() => deleteNotification(notification.id)}
-                        className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium flex items-center space-x-1"
+                        className="text-error dark:text-error/50 hover:text-error dark:hover:text-error/40 text-sm font-medium flex items-center space-x-1"
                       >
                         <Trash2 className="h-4 w-4" />
                         <span>Delete</span>
@@ -348,7 +376,7 @@ const NotificationCenter = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-secondary-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()} // Prevent event bubbling
           >
             <div className="flex items-center justify-between mb-6">
@@ -385,11 +413,11 @@ const NotificationCenter = () => {
                     {Object.entries(selectedNotification.metadata).map(([key, value]) => (
                       <div key={key} className="flex justify-between">
                         <span className="text-neutral-600 dark:text-neutral-400 capitalize">
-                          {key.replace(/([A-Z])/g, ' $1').trim()}:
+                          {key.replace(/([A-Z])/g, ' ₦1').trim()}:
                         </span>
                         <span className="font-medium text-neutral-900 dark:text-white">
                           {typeof value === 'number' && key.includes('amount') 
-                            ? `$${value.toLocaleString()}` 
+                            ? `₦${value.toLocaleString()}` 
                             : value
                           }
                         </span>

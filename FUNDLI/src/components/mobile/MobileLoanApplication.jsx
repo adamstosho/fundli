@@ -115,16 +115,16 @@ const MobileLoanApplication = ({ onSubmit, onCancel }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-neutral-50 dark:bg-secondary-900">
       {/* Mobile Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-4">
+      <div className="bg-white dark:bg-secondary-800 border-b border-neutral-200 dark:border-secondary-700 px-4 py-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Apply for Loan</h1>
+          <h1 className="text-xl font-bold text-secondary-900 dark:text-white">Apply for Loan</h1>
           <button
             onClick={onCancel}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg"
           >
-            <X className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+            <X className="h-6 w-6 text-neutral-600 dark:text-neutral-400" />
           </button>
         </div>
         
@@ -135,13 +135,13 @@ const MobileLoanApplication = ({ onSubmit, onCancel }) => {
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                 currentStep >= step.number
                   ? 'bg-primary-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                  : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400'
               }`}>
                 <step.icon className="h-4 w-4" />
               </div>
               {index < steps.length - 1 && (
                 <div className={`w-8 h-0.5 mx-2 ${
-                  currentStep > step.number ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
+                  currentStep > step.number ? 'bg-primary-600' : 'bg-neutral-200 dark:bg-neutral-700'
                 }`} />
               )}
             </div>
@@ -161,7 +161,7 @@ const MobileLoanApplication = ({ onSubmit, onCancel }) => {
           {currentStep === 1 && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Loan Amount (₦)
                 </label>
                 <input
@@ -169,21 +169,21 @@ const MobileLoanApplication = ({ onSubmit, onCancel }) => {
                   value={formData.amount}
                   onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
                   placeholder="Enter amount"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
                 {errors.amount && (
-                  <p className="text-red-600 dark:text-red-400 text-sm mt-1">{errors.amount}</p>
+                  <p className="text-error dark:text-error/50 text-sm mt-1">{errors.amount}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Loan Purpose
                 </label>
                 <select
                   value={formData.purpose}
                   onChange={(e) => setFormData(prev => ({ ...prev, purpose: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
                   <option value="">Select purpose</option>
                   {loanPurposes.map(purpose => (
@@ -191,12 +191,12 @@ const MobileLoanApplication = ({ onSubmit, onCancel }) => {
                   ))}
                 </select>
                 {errors.purpose && (
-                  <p className="text-red-600 dark:text-red-400 text-sm mt-1">{errors.purpose}</p>
+                  <p className="text-error dark:text-error/50 text-sm mt-1">{errors.purpose}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Duration (months)
                 </label>
                 <input
@@ -206,10 +206,10 @@ const MobileLoanApplication = ({ onSubmit, onCancel }) => {
                   placeholder="Enter duration"
                   min="1"
                   max="60"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
                 {errors.duration && (
-                  <p className="text-red-600 dark:text-red-400 text-sm mt-1">{errors.duration}</p>
+                  <p className="text-error dark:text-error/50 text-sm mt-1">{errors.duration}</p>
                 )}
               </div>
             </div>
@@ -219,7 +219,7 @@ const MobileLoanApplication = ({ onSubmit, onCancel }) => {
           {currentStep === 2 && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Monthly Income (₦)
                 </label>
                 <input
@@ -227,21 +227,21 @@ const MobileLoanApplication = ({ onSubmit, onCancel }) => {
                   value={formData.monthlyIncome}
                   onChange={(e) => setFormData(prev => ({ ...prev, monthlyIncome: e.target.value }))}
                   placeholder="Enter monthly income"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
                 {errors.monthlyIncome && (
-                  <p className="text-red-600 dark:text-red-400 text-sm mt-1">{errors.monthlyIncome}</p>
+                  <p className="text-error dark:text-error/50 text-sm mt-1">{errors.monthlyIncome}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Employment Status
                 </label>
                 <select
                   value={formData.employmentStatus}
                   onChange={(e) => setFormData(prev => ({ ...prev, employmentStatus: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
                   <option value="">Select status</option>
                   {employmentStatuses.map(status => (
@@ -249,7 +249,7 @@ const MobileLoanApplication = ({ onSubmit, onCancel }) => {
                   ))}
                 </select>
                 {errors.employmentStatus && (
-                  <p className="text-red-600 dark:text-red-400 text-sm mt-1">{errors.employmentStatus}</p>
+                  <p className="text-error dark:text-error/50 text-sm mt-1">{errors.employmentStatus}</p>
                 )}
               </div>
             </div>
@@ -259,25 +259,25 @@ const MobileLoanApplication = ({ onSubmit, onCancel }) => {
           {currentStep === 3 && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Collateral Document
                 </label>
-                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
+                <div className="border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-lg p-6 text-center">
                   {formData.collateral ? (
                     <div className="space-y-2">
-                      <CheckCircle className="h-8 w-8 text-green-500 mx-auto" />
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{formData.collateral.name}</p>
+                      <CheckCircle className="h-8 w-8 text-success mx-auto" />
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">{formData.collateral.name}</p>
                       <button
                         onClick={removeFile}
-                        className="text-red-600 dark:text-red-400 text-sm"
+                        className="text-error dark:text-error/50 text-sm"
                       >
                         Remove
                       </button>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <Upload className="h-8 w-8 text-gray-400 mx-auto" />
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <Upload className="h-8 w-8 text-neutral-400 mx-auto" />
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">
                         Upload collateral document
                       </p>
                       <input
@@ -297,12 +297,12 @@ const MobileLoanApplication = ({ onSubmit, onCancel }) => {
                   )}
                 </div>
                 {errors.collateral && (
-                  <p className="text-red-600 dark:text-red-400 text-sm mt-1">{errors.collateral}</p>
+                  <p className="text-error dark:text-error/50 text-sm mt-1">{errors.collateral}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Collateral Description
                 </label>
                 <textarea
@@ -310,10 +310,10 @@ const MobileLoanApplication = ({ onSubmit, onCancel }) => {
                   onChange={(e) => setFormData(prev => ({ ...prev, collateralDescription: e.target.value }))}
                   placeholder="Describe your collateral..."
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
                 {errors.collateralDescription && (
-                  <p className="text-red-600 dark:text-red-400 text-sm mt-1">{errors.collateralDescription}</p>
+                  <p className="text-error dark:text-error/50 text-sm mt-1">{errors.collateralDescription}</p>
                 )}
               </div>
             </div>
@@ -322,28 +322,28 @@ const MobileLoanApplication = ({ onSubmit, onCancel }) => {
           {/* Step 4: Review */}
           {currentStep === 4 && (
             <div className="space-y-4">
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Review Your Application</h3>
+              <div className="bg-white dark:bg-secondary-800 rounded-lg p-4 border border-neutral-200 dark:border-secondary-700">
+                <h3 className="font-semibold text-secondary-900 dark:text-white mb-4">Review Your Application</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Amount:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">₦{formData.amount?.toLocaleString()}</span>
+                    <span className="text-neutral-600 dark:text-neutral-400">Amount:</span>
+                    <span className="font-medium text-secondary-900 dark:text-white">${formData.amount?.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Purpose:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{formData.purpose}</span>
+                    <span className="text-neutral-600 dark:text-neutral-400">Purpose:</span>
+                    <span className="font-medium text-secondary-900 dark:text-white">{formData.purpose}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Duration:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{formData.duration} months</span>
+                    <span className="text-neutral-600 dark:text-neutral-400">Duration:</span>
+                    <span className="font-medium text-secondary-900 dark:text-white">{formData.duration} months</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Monthly Income:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">₦{formData.monthlyIncome?.toLocaleString()}</span>
+                    <span className="text-neutral-600 dark:text-neutral-400">Monthly Income:</span>
+                    <span className="font-medium text-secondary-900 dark:text-white">${formData.monthlyIncome?.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Employment:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{formData.employmentStatus}</span>
+                    <span className="text-neutral-600 dark:text-neutral-400">Employment:</span>
+                    <span className="font-medium text-secondary-900 dark:text-white">{formData.employmentStatus}</span>
                   </div>
                 </div>
               </div>
@@ -356,7 +356,7 @@ const MobileLoanApplication = ({ onSubmit, onCancel }) => {
           {currentStep > 1 && (
             <button
               onClick={handlePrevious}
-              className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="flex-1 px-4 py-3 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-secondary-800 transition-colors"
             >
               Previous
             </button>

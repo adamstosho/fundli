@@ -11,11 +11,14 @@ import {
   AlertTriangle,
   CheckCircle,
   Shield,
-  AlertCircle
+  AlertCircle,
+  MessageCircle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import KYCForm from '../../components/kyc/KYCForm';
 import ManualCollateralVerification from '../../components/collateral/ManualCollateralVerification';
+import PoolChatButton from '../../components/chat/PoolChatButton';
+import PoolChatModal from '../../components/chat/PoolChatModal';
 
 const BrowseLoans = () => {
   const { user, refreshUserData } = useAuth();
@@ -27,6 +30,9 @@ const BrowseLoans = () => {
   const [showCollateralModal, setShowCollateralModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [collateralStatus, setCollateralStatus] = useState(null);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [currentChat, setCurrentChat] = useState(null);
+  const [currentPool, setCurrentPool] = useState(null);
 
   // Debug function to check authentication status
   const debugAuth = () => {
@@ -163,7 +169,14 @@ const BrowseLoans = () => {
         console.log('✅ Lending pools loaded successfully:', result);
         
         // Transform lending pools into loan opportunities for borrowers
-        const loanOpportunities = (result.data?.pools || []).map(pool => ({
+        // Filter out pools that are fully funded or closed
+        const availablePools = (result.data?.pools || []).filter(pool => 
+          pool.status === 'active' && 
+          (pool.fundingProgress || 0) < 100 &&
+          pool.poolSize > 0
+        );
+        
+        const loanOpportunities = availablePools.map(pool => ({
           id: pool._id || pool.id,
           name: pool.name || 'Lending Pool',
           purpose: pool.name || 'Business Loan',
@@ -419,7 +432,8 @@ const BrowseLoans = () => {
         body: JSON.stringify({
           requestedAmount: applicationData.requestedAmount,
           purpose: applicationData.purpose,
-          duration: applicationData.duration,
+          // Enforce pool duration from lender
+          duration: selectedLoan.duration,
           lendingPoolId: selectedLoan.id,
           collateral: applicationData.collateral || 'Commercial property in downtown area'
         })
@@ -467,7 +481,8 @@ const BrowseLoans = () => {
         body: JSON.stringify({
           requestedAmount: applicationData.requestedAmount,
           purpose: applicationData.purpose,
-          duration: applicationData.duration,
+          // Enforce pool duration from lender
+          duration: selectedLoan.duration,
           lendingPoolId: selectedLoan.id,
           collateral: applicationData.collateral || 'Commercial property in downtown area'
         })
@@ -496,22 +511,54 @@ const BrowseLoans = () => {
     }
   };
 
+  const handleStartChat = (chat, pool) => {
+    setCurrentChat(chat);
+    setCurrentPool(pool);
+    setShowChatModal(true);
+  };
+
+  const handleCloseChat = () => {
+    setShowChatModal(false);
+    setCurrentChat(null);
+    setCurrentPool(null);
+  };
+
   const getRiskColor = (riskLevel) => {
     switch (riskLevel?.toLowerCase()) {
-      case 'low': return 'text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400';
-      case 'medium': return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400';
-      case 'high': return 'text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400';
-      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900/20 dark:text-gray-400';
+      case 'low': return 'text-success bg-success/20 dark:bg-success/20 dark:text-success/50';
+      case 'medium': return 'text-warning bg-warning/20 dark:bg-warning/20 dark:text-warning/50';
+      case 'high': return 'text-error bg-error/20 dark:bg-error/20 dark:text-error/50';
+      default: return 'text-neutral-600 bg-neutral-100 dark:bg-secondary-900/20 dark:text-neutral-400';
     }
   };
 
   const getCategoryColor = (category) => {
     switch (category?.toLowerCase()) {
-      case 'business': return 'text-blue-600 bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400';
-      case 'personal': return 'text-purple-600 bg-purple-100 dark:bg-purple-900/20 dark:text-purple-400';
+      case 'business': return 'text-primary-600 bg-primary-100 dark:bg-primary-900/20 dark:text-primary-400';
+      case 'personal': return 'text-accent-600 bg-accent-100 dark:bg-accent-900/20 dark:text-accent-400';
       case 'education': return 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-400';
-      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900/20 dark:text-gray-400';
+      default: return 'text-neutral-600 bg-neutral-100 dark:bg-secondary-900/20 dark:text-neutral-400';
     }
+  };
+
+  // Calculate total repayment based on flat interest rate
+  const calculateTotalRepayment = (loanAmount, interestRate, duration) => {
+    if (!loanAmount || !interestRate || !duration) return 0;
+    
+    const principal = parseFloat(loanAmount);
+    const rate = parseFloat(interestRate) / 100; // Convert percentage to decimal
+    const totalInterest = principal * rate; // Flat rate for the entire period
+    const totalRepayment = principal + totalInterest;
+    
+    return Math.round(totalRepayment * 100) / 100; // Round to 2 decimal places
+  };
+
+  // Calculate monthly payment
+  const calculateMonthlyPayment = (totalRepayment, duration) => {
+    if (!totalRepayment || !duration) return 0;
+    
+    const monthlyPayment = parseFloat(totalRepayment) / parseInt(duration);
+    return Math.round(monthlyPayment * 100) / 100; // Round to 2 decimal places
   };
 
   if (isLoading) {
@@ -526,10 +573,10 @@ const BrowseLoans = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-secondary-900 dark:text-white mb-2">
           Browse Available Loans
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-neutral-600 dark:text-neutral-400">
           Find and apply for loans that match your needs
         </p>
       </div>
@@ -538,20 +585,20 @@ const BrowseLoans = () => {
       {collateralStatus && (
         <div className={`p-4 rounded-lg border ${
           collateralStatus.verificationStatus === 'approved' 
-            ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
+            ? 'bg-success/10 border-success/30 dark:bg-success/20 dark:border-success'
             : collateralStatus.verificationStatus === 'rejected'
-            ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
-            : 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800'
+            ? 'bg-error/10 border-error/30 dark:bg-error/20 dark:border-error'
+            : 'bg-warning/10 border-warning/30 dark:bg-warning/20 dark:border-warning'
         }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              {collateralStatus.verificationStatus === 'approved' && <CheckCircle className="h-5 w-5 text-green-600" />}
-              {collateralStatus.verificationStatus === 'rejected' && <AlertCircle className="h-5 w-5 text-red-600" />}
-              {(collateralStatus.verificationStatus === 'submitted' || collateralStatus.verificationStatus === 'under_review') && <Clock className="h-5 w-5 text-yellow-600" />}
+              {collateralStatus.verificationStatus === 'approved' && <CheckCircle className="h-5 w-5 text-success" />}
+              {collateralStatus.verificationStatus === 'rejected' && <AlertCircle className="h-5 w-5 text-error" />}
+              {(collateralStatus.verificationStatus === 'submitted' || collateralStatus.verificationStatus === 'under_review') && <Clock className="h-5 w-5 text-warning" />}
               <p className={`text-sm font-medium ${
-                collateralStatus.verificationStatus === 'approved' ? 'text-green-800 dark:text-green-200' :
-                collateralStatus.verificationStatus === 'rejected' ? 'text-red-800 dark:text-red-200' :
-                'text-yellow-800 dark:text-yellow-200'
+                collateralStatus.verificationStatus === 'approved' ? 'text-success dark:text-success/30' :
+                collateralStatus.verificationStatus === 'rejected' ? 'text-error dark:text-error/30' :
+                'text-warning dark:text-warning/30'
               }`}>
                 {collateralStatus.verificationStatus === 'approved' && 'Collateral verification approved! You can apply for loans.'}
                 {collateralStatus.verificationStatus === 'rejected' && `Collateral verification rejected: ${collateralStatus.adminReview?.rejectionReason || 'Please contact support'}`}
@@ -561,7 +608,7 @@ const BrowseLoans = () => {
             {collateralStatus.verificationStatus !== 'approved' && (
               <button
                 onClick={() => setShowCollateralModal(true)}
-                className="text-sm px-3 py-1 rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="text-sm px-3 py-1 rounded-md bg-white dark:bg-secondary-800 border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
               >
                 {collateralStatus.verificationStatus === 'rejected' ? 'Resubmit Verification' : 'Complete Verification'}
               </button>
@@ -580,25 +627,25 @@ const BrowseLoans = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: index * 0.1 }}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+            className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
           >
             {/* Loan Header */}
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="p-6 border-b border-neutral-200 dark:border-secondary-700">
               <div className="flex items-start justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                   {loan.purpose}
                 </h3>
                 <div className="flex space-x-2">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskColor(loan.riskLevel)}`}>
                     {loan.riskLevel || 'Medium'}
                   </span>
-                  <span className="px-2 py-1 rounded-full text-xs font-medium text-blue-600 bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400">
+                  <span className="px-2 py-1 rounded-full text-xs font-medium text-primary-600 bg-primary-100 dark:bg-primary-900/20 dark:text-primary-400">
                     {loan.status === 'active' ? 'Running Loan' : loan.status || 'Pending'}
                   </span>
                 </div>
               </div>
               
-              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+              <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-4">
                 {loan.purposeDescription || 'No description available'}
               </p>
             </div>
@@ -608,51 +655,65 @@ const BrowseLoans = () => {
               {/* Amount and Progress */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Loan Amount</span>
-                  <span className="text-lg font-bold text-gray-900 dark:text-white">
+                  <span className="text-sm text-neutral-600 dark:text-neutral-400">Loan Amount</span>
+                  <span className="text-lg font-bold text-secondary-900 dark:text-white">
                     {loan.currency || 'USD'} {loan.loanAmount?.toLocaleString() || 'N/A'}
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Monthly Payment</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    {loan.currency || 'USD'} {loan.monthlyPayment?.toLocaleString() || 'N/A'}
+                  <span className="text-sm text-neutral-600 dark:text-neutral-400">Monthly Payment</span>
+                  <span className="text-sm font-medium text-secondary-900 dark:text-white">
+                    {loan.currency || 'USD'} {calculateMonthlyPayment(
+                      calculateTotalRepayment(loan.loanAmount, loan.interestRate, loan.duration), 
+                      loan.duration
+                    ).toLocaleString() || 'N/A'}
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Total Repayment</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    {loan.currency || 'USD'} {loan.totalRepayment?.toLocaleString() || 'N/A'}
+                  <span className="text-sm text-neutral-600 dark:text-neutral-400">Interest Amount</span>
+                  <span className="text-sm font-medium text-orange-600 dark:text-orange-400">
+                    {loan.currency || 'USD'} {(calculateTotalRepayment(loan.loanAmount, loan.interestRate, loan.duration) - (loan.loanAmount || 0)).toLocaleString() || 'N/A'}
                   </span>
+                </div>
+                
+                <div className="flex items-center justify-between border-t border-neutral-200 dark:border-secondary-700 pt-2">
+                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Total Repayment</span>
+                  <span className="text-lg font-bold text-secondary-900 dark:text-white">
+                    {loan.currency || 'USD'} {calculateTotalRepayment(loan.loanAmount, loan.interestRate, loan.duration).toLocaleString() || 'N/A'}
+                  </span>
+                </div>
+                
+                <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-2 p-2 bg-neutral-50 dark:bg-secondary-900/50 rounded">
+                  💡 <strong>Flat Rate:</strong> Interest is calculated once for the entire {loan.duration || 'X'} month period, not compounded monthly.
                 </div>
               </div>
 
               {/* Key Information */}
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center space-x-2">
-                  <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  <span className="text-gray-600 dark:text-gray-400">Interest:</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{loan.interestRate || 0}%</span>
+                  <TrendingUp className="h-4 w-4 text-success dark:text-success/50" />
+                  <span className="text-neutral-600 dark:text-neutral-400">Interest:</span>
+                  <span className="font-medium text-secondary-900 dark:text-white">{loan.interestRate || 0}%</span>
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  <span className="text-gray-600 dark:text-gray-400">Duration:</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{loan.duration || 0} months</span>
+                  <Calendar className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                  <span className="text-neutral-600 dark:text-neutral-400">Duration:</span>
+                  <span className="font-medium text-secondary-900 dark:text-white">{loan.duration || 0} months</span>
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <User className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                  <span className="text-gray-600 dark:text-gray-400">Lender:</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{loan.lender.name}</span>
+                  <User className="h-4 w-4 text-accent-600 dark:text-accent-400" />
+                  <span className="text-neutral-600 dark:text-neutral-400">Lender:</span>
+                  <span className="font-medium text-secondary-900 dark:text-white">{loan.lender.name}</span>
                 </div>
                 
                 <div className="flex items-center space-x-2">
                   <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                  <span className="text-gray-600 dark:text-gray-400">Created:</span>
-                  <span className="font-medium text-gray-900 dark:text-white">
+                  <span className="text-neutral-600 dark:text-neutral-400">Created:</span>
+                  <span className="font-medium text-secondary-900 dark:text-white">
                     {loan.createdAt ? new Date(loan.createdAt).toLocaleDateString() : 'N/A'}
                   </span>
                 </div>
@@ -661,13 +722,20 @@ const BrowseLoans = () => {
 
             {/* Action Buttons */}
             <div className="p-6 pt-0">
-              <button
-                onClick={() => handleViewDetails(loan)}
-                className="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
-              >
-                <DollarSign className="h-4 w-4" />
-                <span>Apply for Loan</span>
-              </button>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => handleViewDetails(loan)}
+                  className="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
+                >
+                  <DollarSign className="h-4 w-4" />
+                  <span>Apply for Loan</span>
+                </button>
+                <PoolChatButton
+                  pool={loan}
+                  currentUser={user}
+                  onStartChat={handleStartChat}
+                />
+              </div>
             </div>
           </motion.div>
         ))}
@@ -676,21 +744,21 @@ const BrowseLoans = () => {
       {/* No Loans Message */}
       {loans.length === 0 && !isLoading && (
         <div className="text-center py-12">
-          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <DollarSign className="h-8 w-8 text-gray-400" />
+          <div className="w-16 h-16 bg-neutral-100 dark:bg-secondary-800 rounded-full flex items-center justify-center mx-auto mb-4">
+            <DollarSign className="h-8 w-8 text-neutral-400" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          <h3 className="text-lg font-medium text-secondary-900 dark:text-white mb-2">
             No Loans Available
           </h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
+          <p className="text-neutral-500 dark:text-neutral-400 mb-4">
             There are currently no loans available for application. This could be because:
           </p>
-          <ul className="text-sm text-gray-500 dark:text-gray-400 text-left max-w-md mx-auto mb-4">
+          <ul className="text-sm text-neutral-500 dark:text-neutral-400 text-left max-w-md mx-auto mb-4">
             <li>• No loans have been submitted yet</li>
             <li>• All available loans have been funded</li>
             <li>• Loans are still being reviewed</li>
           </ul>
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-neutral-500 dark:text-neutral-400">
             Please check back later or contact support if you need assistance.
           </p>
         </div>
@@ -699,14 +767,14 @@ const BrowseLoans = () => {
       {/* KYC Modal */}
       {showKYCModal && selectedLoan && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-secondary-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                 Complete KYC for {selectedLoan.name}
               </h3>
               <button
                 onClick={() => setShowKYCModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
               >
                 ×
               </button>
@@ -724,28 +792,28 @@ const BrowseLoans = () => {
       {/* Collateral Verification Modal */}
       {showCollateralModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-secondary-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                 Collateral Verification Required
               </h3>
               <button
                 onClick={() => setShowCollateralModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
               >
                 ×
               </button>
             </div>
             
             {selectedLoan?.pendingApplication && (
-              <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="mb-6 p-4 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg">
                 <div className="flex items-center space-x-2">
-                  <FileText className="h-5 w-5 text-blue-600" />
-                  <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                  <FileText className="h-5 w-5 text-primary-600" />
+                  <p className="text-sm font-medium text-primary-800 dark:text-primary-200">
                     You have a pending loan application for {selectedLoan.name}. Complete collateral verification to proceed.
                   </p>
                 </div>
-                <div className="mt-2 text-xs text-blue-600 dark:text-blue-300">
+                <div className="mt-2 text-xs text-primary-600 dark:text-primary-300">
                   Requested Amount: ${selectedLoan.pendingApplication.requestedAmount?.toLocaleString()}
                 </div>
               </div>
@@ -763,14 +831,14 @@ const BrowseLoans = () => {
       {/* Loan Application Modal */}
       {showLoanApplicationModal && selectedLoan && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-secondary-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
                 Apply for Loan from {selectedLoan.name}
               </h3>
               <button
                 onClick={() => setShowLoanApplicationModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
               >
                 ×
               </button>
@@ -790,6 +858,15 @@ const BrowseLoans = () => {
           </div>
         </div>
       )}
+
+      {/* Chat Modal */}
+      <PoolChatModal
+        isOpen={showChatModal}
+        onClose={handleCloseChat}
+        chat={currentChat}
+        pool={currentPool}
+        currentUser={user}
+      />
     </div>
   );
 };
@@ -808,8 +885,7 @@ const LoanApplicationForm = ({
 }) => {
   const [formData, setFormData] = useState({
     requestedAmount: '',
-    purpose: '',
-    duration: ''
+    purpose: ''
   });
 
   const handleSubmit = (e) => {
@@ -828,32 +904,32 @@ const LoanApplicationForm = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Lending Pool Summary */}
-      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-        <h4 className="font-medium text-gray-900 dark:text-white mb-2">Lending Pool Summary</h4>
+      <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-4">
+        <h4 className="font-medium text-secondary-900 dark:text-white mb-2">Lending Pool Summary</h4>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="text-gray-600 dark:text-gray-400">Pool Size:</span>
-            <p className="font-medium text-gray-900 dark:text-white">${loan.poolSize?.toLocaleString()}</p>
+            <span className="text-neutral-600 dark:text-neutral-400">Pool Size:</span>
+            <p className="font-medium text-secondary-900 dark:text-white">${loan.poolSize?.toLocaleString()}</p>
           </div>
           <div>
-            <span className="text-gray-600 dark:text-gray-400">Interest Rate:</span>
-            <p className="font-medium text-gray-900 dark:text-white">{loan.interestRate}%</p>
+            <span className="text-neutral-600 dark:text-neutral-400">Interest Rate:</span>
+            <p className="font-medium text-secondary-900 dark:text-white">{loan.interestRate}%</p>
           </div>
           <div>
-            <span className="text-gray-600 dark:text-gray-400">Max Duration:</span>
-            <p className="font-medium text-gray-900 dark:text-white">{loan.duration} months</p>
+            <span className="text-neutral-600 dark:text-neutral-400">Max Duration:</span>
+            <p className="font-medium text-secondary-900 dark:text-white">{loan.duration} months</p>
           </div>
           <div>
-            <span className="text-gray-600 dark:text-gray-400">Risk Level:</span>
-            <p className="font-medium text-gray-900 dark:text-white capitalize">{loan.riskLevel}</p>
+            <span className="text-neutral-600 dark:text-neutral-400">Risk Level:</span>
+            <p className="font-medium text-secondary-900 dark:text-white capitalize">{loan.riskLevel}</p>
           </div>
           <div>
-            <span className="text-gray-600 dark:text-gray-400">Lender:</span>
-            <p className="font-medium text-gray-900 dark:text-white">{loan.lender?.name}</p>
+            <span className="text-neutral-600 dark:text-neutral-400">Lender:</span>
+            <p className="font-medium text-secondary-900 dark:text-white">{loan.lender?.name}</p>
           </div>
           <div>
-            <span className="text-gray-600 dark:text-gray-400">Min Investment:</span>
-            <p className="font-medium text-gray-900 dark:text-white">${loan.minInvestment?.toLocaleString()}</p>
+            <span className="text-neutral-600 dark:text-neutral-400">Min Investment:</span>
+            <p className="font-medium text-secondary-900 dark:text-white">${loan.minInvestment?.toLocaleString()}</p>
           </div>
         </div>
       </div>
@@ -861,8 +937,8 @@ const LoanApplicationForm = ({
       {/* Application Form */}
       <div className="space-y-4">
         <div>
-          <label htmlFor="requestedAmount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Requested Amount ($)
+          <label htmlFor="requestedAmount" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+            Requested Amount (₦)
           </label>
           <input
             type="number"
@@ -873,15 +949,15 @@ const LoanApplicationForm = ({
             placeholder="Enter amount"
             min="0"
             required
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-neutral-700 text-secondary-900 dark:text-neutral-100"
           />
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
             Pool size: ${loan.poolSize?.toLocaleString()}
           </p>
         </div>
 
         <div>
-          <label htmlFor="purpose" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label htmlFor="purpose" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
             Purpose
           </label>
           <select
@@ -890,7 +966,7 @@ const LoanApplicationForm = ({
             value={formData.purpose}
             onChange={handleInputChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-neutral-700 text-secondary-900 dark:text-neutral-100"
           >
             <option value="">Select purpose</option>
             <option value="business">Business</option>
@@ -905,41 +981,23 @@ const LoanApplicationForm = ({
           </select>
         </div>
 
-        <div>
-          <label htmlFor="duration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Duration (months)
-          </label>
-          <input
-            type="number"
-            id="duration"
-            name="duration"
-            value={formData.duration}
-            onChange={handleInputChange}
-            placeholder="Enter duration"
-            min="1"
-            required
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          />
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Pool duration: {loan.duration} months
-          </p>
-        </div>
+        {/* Duration field removed - lender's pool duration is enforced */}
 
         {/* Collateral Status Display */}
         {true ? (
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+          <div className="bg-success/10 dark:bg-success/20 border border-success/30 dark:border-success rounded-lg p-4">
             <div className="flex items-center space-x-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <p className="text-sm font-medium text-green-800 dark:text-green-200">
+              <CheckCircle className="h-5 w-5 text-success" />
+              <p className="text-sm font-medium text-success dark:text-success/30">
                 Collateral verification completed and approved
               </p>
             </div>
           </div>
         ) : (
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+          <div className="bg-warning/10 dark:bg-warning/20 border border-warning/30 dark:border-warning rounded-lg p-4">
             <div className="flex items-center space-x-2">
-              <AlertCircle className="h-5 w-5 text-yellow-600" />
-              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+              <AlertCircle className="h-5 w-5 text-warning" />
+              <p className="text-sm font-medium text-warning dark:text-warning/30">
                 Collateral verification required before submitting loan application
               </p>
             </div>
@@ -957,7 +1015,8 @@ const LoanApplicationForm = ({
             const applicationData = {
               requestedAmount: formData.requestedAmount,
               purpose: formData.purpose,
-              duration: formData.duration
+              // Use pool duration set by lender
+              duration: loan.duration
             };
             // Store pending application and show collateral modal
             setSelectedLoan(prev => ({
@@ -967,8 +1026,8 @@ const LoanApplicationForm = ({
             setShowLoanApplicationModal(false);
             setShowCollateralModal(true);
           }}
-          disabled={isSubmitting || !formData.requestedAmount || !formData.purpose || !formData.duration}
-          className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          disabled={isSubmitting || !formData.requestedAmount || !formData.purpose}
+          className="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
         >
           <Shield className="h-4 w-4" />
           <span>Continue to Collateral Verification</span>
@@ -997,7 +1056,7 @@ const LoanApplicationForm = ({
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Cancel
         </button>
