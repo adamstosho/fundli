@@ -17,7 +17,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
     <script>
       // Only register service worker in production
       if ('serviceWorker' in navigator && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
@@ -51,7 +50,8 @@
           });
         }
       }
-    </script>
+      </script>
+      <script type="module" src="src/main.jsx"></script>
   </body>
 </html>
 
