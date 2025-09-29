@@ -33,6 +33,7 @@ import TransferPage from './pages/TransferPage';
 import WithdrawPage from './pages/WithdrawPage';
 import NotificationsPage from './pages/NotificationsPage';
 import ChatPage from './pages/ChatPage';
+import LivenessCheck from './components/kyc/LivenessCheck';
 
 // 404 Error Component
 const NotFound = () => (
@@ -70,7 +71,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'liveness',
-        element: <Liveness />
+        element: <LivenessCheck />
       },
       {
         path: 'register',
