@@ -74,3 +74,13 @@
 [2025-09-29T11:00:00.925Z] INFO: Payment reminders sent {"sent":0,"failed":0,"errors":[]}
 [2025-09-29T11:00:00.928Z] INFO: Payment reminder sending completed {"sent":0,"failed":0,"errors":[]}
 [2025-09-29T11:26:03.704Z] INFO: GET / 304 {"method":"GET","url":"/","statusCode":304,"responseTime":"13ms","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"127.0.0.1","userId":"anonymous"}
+[2025-09-29T11:29:43.144Z] INFO: Starting cron service
+[2025-09-29T11:29:43.188Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-29T11:29:43.191Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-29T11:29:43.193Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-29T11:29:43.195Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-29T11:29:43.202Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-29T11:29:43.203Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-29T11:29:43.205Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-29T11:29:43.206Z] INFO: All cron jobs started successfully
+[2025-09-29T11:30:00.341Z] INFO: Running auto-release escrow check
