@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { DollarSign, Calendar, TrendingUp, Shield, CheckCircle, AlertCircle, ArrowRight, Calculator } from 'lucide-react';
@@ -124,7 +125,7 @@ const CreatePool = () => {
       console.log('Creating pool with data:', poolData);
 
       // Send the request to the backend
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/pools', {
+      const response = await fetch(buildApiUrl('/pools'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -162,7 +163,7 @@ const CreatePool = () => {
             if (newToken) {
               console.log('Token refreshed, retrying pool creation...');
               // Retry the request with the new token
-              const retryResponse = await fetch('https://fundli-hjqn.vercel.app/api/pools', {
+              const retryResponse = await fetch(buildApiUrl('/pools'), {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',

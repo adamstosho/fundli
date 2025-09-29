@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { Clock, CheckCircle, XCircle, AlertCircle, DollarSign, Calendar, FileText, Eye, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -21,7 +22,7 @@ const LoanStatus = () => {
         }
 
         // Fetch user's loans from the backend
-        const response = await fetch('https://fundli-hjqn.vercel.app/api/loans/user', {
+        const response = await fetch(buildApiUrl('/loans/user'), {
           headers: {
             'Authorization': `Bearer ${token}`
           }

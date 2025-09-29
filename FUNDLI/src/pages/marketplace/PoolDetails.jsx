@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { DollarSign, Users, TrendingUp, BarChart3, Eye, Shield, ArrowLeft } from 'lucide-react';
@@ -24,7 +25,7 @@ const PoolDetails = () => {
           throw new Error('Authentication required');
         }
 
-        const response = await fetch(`https://fundli-hjqn.vercel.app/api/pools/${id}`, {
+        const response = await fetch(buildApiUrl(`/pools/${id}`), {
           headers: {
             'Authorization': `Bearer ${token}`
           }

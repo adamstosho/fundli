@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { 
   Bell, 
@@ -41,7 +42,7 @@ const NotificationPreferences = () => {
       setLoading(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/notifications/preferences', {
+      const response = await fetch(buildApiUrl('/notifications/preferences'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -70,7 +71,7 @@ const NotificationPreferences = () => {
       
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/notifications/preferences', {
+      const response = await fetch(buildApiUrl('/notifications/preferences'), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

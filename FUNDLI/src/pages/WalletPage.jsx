@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { 
   Wallet as WalletIcon, 
@@ -38,10 +39,10 @@ const WalletPage = () => {
       const token = localStorage.getItem('accessToken');
       
       const [walletResponse, transactionsResponse] = await Promise.all([
-        fetch('https://fundli-hjqn.vercel.app/api/wallet', {
+        fetch(buildApiUrl('/wallet'), {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        fetch('https://fundli-hjqn.vercel.app/api/wallet/transactions', {
+        fetch(buildApiUrl('/wallet/transactions'), {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       ]);

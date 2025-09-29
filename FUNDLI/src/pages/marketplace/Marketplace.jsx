@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -34,7 +35,7 @@ const Marketplace = () => {
         }
 
         console.log('Making API call to /api/pools...');
-        const response = await fetch('https://fundli-hjqn.vercel.app/api/pools', {
+        const response = await fetch(buildApiUrl('/pools'), {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -55,7 +56,7 @@ const Marketplace = () => {
         if (user?.userType === 'lender') {
           try {
             console.log('Fetching user investments...');
-            const investmentsResponse = await fetch('https://fundli-hjqn.vercel.app/api/lender/funded-loans', {
+            const investmentsResponse = await fetch(buildApiUrl('/lender/funded-loans'), {
               headers: {
                 'Authorization': `Bearer ${token}`
               }
@@ -157,7 +158,7 @@ const Marketplace = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/pools/${deleteModal.loanId}`, {
+      const response = await fetch(buildApiUrl(`/pools/${deleteModal.loanId}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

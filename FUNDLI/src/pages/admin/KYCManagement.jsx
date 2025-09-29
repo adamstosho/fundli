@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { Shield, Search, Filter, Eye, CheckCircle, XCircle, Clock, FileText, AlertCircle, User, Mail, Phone, MapPin, Calendar, CreditCard, BarChart3, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -177,7 +178,7 @@ const KYCManagement = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/admin/kyc/approved', {
+      const response = await fetch(buildApiUrl('/admin/kyc/approved'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -225,7 +226,7 @@ const KYCManagement = () => {
         search: search || ''
       });
 
-      const url = `https://fundli-hjqn.vercel.app/api/admin/kyc/all?${params.toString()}`;
+      const url = buildApiUrl(`/admin/kyc/all?${params.toString()}`);
 
       const response = await fetch(url, {
         headers: {
@@ -316,7 +317,7 @@ const KYCManagement = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/admin/kyc/${userId}/approve`, {
+      const response = await fetch(buildApiUrl(`/admin/kyc/${userId}/approve`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -365,7 +366,7 @@ const KYCManagement = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/admin/kyc/${userId}/reject`, {
+      const response = await fetch(buildApiUrl(`/admin/kyc/${userId}/reject`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -438,7 +439,7 @@ const KYCManagement = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/admin/kyc/${kyc._id}/details`, {
+      const response = await fetch(buildApiUrl(`/admin/kyc/${kyc._id}/details`), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -519,7 +520,7 @@ const KYCManagement = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/admin/kyc/pending', {
+      const response = await fetch(buildApiUrl('/admin/kyc/pending'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }

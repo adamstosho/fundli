@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -82,19 +83,19 @@ const LenderDashboard = () => {
           chartDataResponse,
           myPoolsResponse
         ] = await Promise.all([
-          fetch('https://fundli-hjqn.vercel.app/api/lender/investment-stats', {
+          fetch(buildApiUrl('/lender/investment-stats'), {
             headers: { 'Authorization': `Bearer ${token}` }
           }),
-          fetch('https://fundli-hjqn.vercel.app/api/lender/funded-loans', {
+          fetch(buildApiUrl('/lender/funded-loans'), {
             headers: { 'Authorization': `Bearer ${token}` }
           }),
-          fetch('https://fundli-hjqn.vercel.app/api/lender/loan-applications', {
+          fetch(buildApiUrl('/lender/loan-applications'), {
             headers: { 'Authorization': `Bearer ${token}` }
           }),
-          fetch('https://fundli-hjqn.vercel.app/api/lender/dashboard-charts', {
+          fetch(buildApiUrl('/lender/dashboard-charts'), {
             headers: { 'Authorization': `Bearer ${token}` }
           }),
-          fetch('https://fundli-hjqn.vercel.app/api/pools/my-pools', {
+          fetch(buildApiUrl('/pools/my-pools'), {
             headers: { 'Authorization': `Bearer ${token}` }
           })
         ]);

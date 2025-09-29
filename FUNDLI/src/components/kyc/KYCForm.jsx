@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { Shield, CreditCard, Building2, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -23,7 +24,7 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
       setIsLoadingBanks(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/borrower/banks', {
+      const response = await fetch(buildApiUrl('/borrower/banks'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }

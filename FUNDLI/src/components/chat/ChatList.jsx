@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { 
   MessageCircle, 
@@ -26,7 +27,7 @@ const ChatList = ({ onSelectChat, selectedChatId }) => {
     try {
       setIsLoading(true);
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/chat/chats', {
+      const response = await fetch(buildApiUrl('/chat/chats'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

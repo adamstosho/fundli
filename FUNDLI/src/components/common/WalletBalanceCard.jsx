@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { 
   Wallet as WalletIcon, 
@@ -93,15 +94,15 @@ const WalletBalanceCard = ({ userType = 'user' }) => {
       // Try backend first, fallback to local storage
       try {
         // Use user-type-specific API endpoints
-        let apiEndpoint = 'https://fundli-hjqn.vercel.app/api/wallet';
+        let apiEndpoint = buildApiUrl('/wallet');
         
         // Use specific endpoints based on user type
         if (currentUserType === 'lender') {
-          apiEndpoint = 'https://fundli-hjqn.vercel.app/api/lender/wallet/balance';
+          apiEndpoint = buildApiUrl('/lender/wallet/balance');
         } else if (currentUserType === 'borrower') {
-          apiEndpoint = 'https://fundli-hjqn.vercel.app/api/borrower/wallet/balance';
+          apiEndpoint = buildApiUrl('/borrower/wallet/balance');
         } else if (currentUserType === 'admin') {
-          apiEndpoint = 'https://fundli-hjqn.vercel.app/api/admin/wallet/balance';
+          apiEndpoint = buildApiUrl('/admin/wallet/balance');
         }
         
         console.log('🔍 Wallet API endpoint:', apiEndpoint);

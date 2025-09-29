@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -45,7 +46,7 @@ const TransferPage = () => {
   const loadWalletData = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/wallet', {
+      const response = await fetch(buildApiUrl('/wallet'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -62,7 +63,7 @@ const TransferPage = () => {
     try {
       const token = localStorage.getItem('accessToken');
       console.log('Loading approved borrowers...');
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/wallet/approved-borrowers', {
+      const response = await fetch(buildApiUrl('/wallet/approved-borrowers'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -189,7 +190,7 @@ const TransferPage = () => {
       setRecipient(null);
 
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/users/search?email=${encodeURIComponent(recipientEmail)}`, {
+      const response = await fetch(buildApiUrl(`/users/search?email=${encodeURIComponent(recipientEmail)}`), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -285,7 +286,7 @@ const TransferPage = () => {
         recipient: transferData.recipient
       });
       
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/wallet/transfer', {
+      const response = await fetch(buildApiUrl('/wallet/transfer'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -74,7 +75,7 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
       try {
         const token = localStorage.getItem('accessToken');
         
-        const response = await fetch('https://fundli-hjqn.vercel.app/api/notifications', {
+        const response = await fetch(buildApiUrl('/notifications'), {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -137,7 +138,7 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
       // Try backend for non-local notifications
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/notifications/${notificationId}/read`, {
+      const response = await fetch(buildApiUrl(`/notifications/${notificationId}/read`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -175,7 +176,7 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
       // Try backend for non-local notifications
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/notifications/${notificationId}`, {
+      const response = await fetch(buildApiUrl(`/notifications/${notificationId}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

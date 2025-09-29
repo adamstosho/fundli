@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { Shield, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -15,7 +16,7 @@ const CollateralManagement = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/collateral/admin/pending', {
+      const response = await fetch(buildApiUrl('/collateral/admin/pending'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }

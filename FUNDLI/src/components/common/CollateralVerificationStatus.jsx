@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { 
   CheckCircle, 
@@ -29,7 +30,7 @@ const CollateralVerificationStatus = ({ userId, userType = 'borrower', onReapply
         return;
       }
 
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/collateral/status', {
+      const response = await fetch(buildApiUrl('/collateral/status'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }

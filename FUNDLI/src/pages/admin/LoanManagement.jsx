@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { FileText, Search, Filter, Eye, CheckCircle, XCircle, Clock, DollarSign, User, AlertCircle } from 'lucide-react';
 
@@ -43,7 +44,7 @@ const LoanManagement = () => {
           throw new Error('Authentication required');
         }
 
-        const response = await fetch(`https://fundli-hjqn.vercel.app/api/admin/loans?page=${currentPage}&limit=${loansPerPage}`, {
+        const response = await fetch(buildApiUrl(`/admin/loans?page=${currentPage}&limit=${loansPerPage}`), {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -117,8 +118,8 @@ const LoanManagement = () => {
       }
 
       const endpoint = action === 'approve' 
-        ? `https://fundli-hjqn.vercel.app/api/admin/loans/${loanId}/approve`
-        : `https://fundli-hjqn.vercel.app/api/admin/loans/${loanId}/reject`;
+        ? buildApiUrl(`/admin/loans/${loanId}/approve`)
+        : buildApiUrl(`/admin/loans/${loanId}/reject`);
 
       const body = action === 'approve' 
         ? JSON.stringify({ notes: reason || 'Approved by Admin' })

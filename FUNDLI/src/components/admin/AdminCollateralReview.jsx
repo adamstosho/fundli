@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { 
   FileText, 
@@ -69,17 +70,17 @@ const AdminCollateralReview = () => {
       const token = localStorage.getItem('accessToken');
       
       // Load pending verifications
-      const pendingResponse = await fetch('https://fundli-hjqn.vercel.app/api/collateral/admin/pending', {
+      const pendingResponse = await fetch(buildApiUrl('/collateral/admin/pending'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       // Load approved verifications
-      const approvedResponse = await fetch('https://fundli-hjqn.vercel.app/api/collateral/admin/approved', {
+      const approvedResponse = await fetch(buildApiUrl('/collateral/admin/approved'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       // Load deleted verifications
-      const deletedResponse = await fetch('https://fundli-hjqn.vercel.app/api/collateral/admin/deleted', {
+      const deletedResponse = await fetch(buildApiUrl('/collateral/admin/deleted'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -112,7 +113,7 @@ const AdminCollateralReview = () => {
   const loadPendingVerifications = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/collateral/admin/pending', {
+      const response = await fetch(buildApiUrl('/collateral/admin/pending'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -149,7 +150,7 @@ const AdminCollateralReview = () => {
 
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/collateral/admin/${selectedVerification.id}/review`, {
+      const response = await fetch(buildApiUrl(`/collateral/admin/${selectedVerification.id}/review`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -190,7 +191,7 @@ const AdminCollateralReview = () => {
     
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/collateral/admin/${selectedVerification.id}/delete`, {
+      const response = await fetch(buildApiUrl(`/collateral/admin/${selectedVerification.id}/delete`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

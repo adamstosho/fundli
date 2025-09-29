@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { 
   FileText, 
@@ -37,11 +38,11 @@ const PendingLoansSection = ({ userType, title = "Pending Loans" }) => {
       
       let endpoint;
       if (userType === 'borrower') {
-        endpoint = 'https://fundli-hjqn.vercel.app/api/loans/pending/borrower';
+        endpoint = buildApiUrl('/loans/pending/borrower');
       } else if (userType === 'lender') {
-        endpoint = 'https://fundli-hjqn.vercel.app/api/lender/loan-applications';
+        endpoint = buildApiUrl('/lender/loan-applications');
       } else if (userType === 'admin') {
-        endpoint = 'https://fundli-hjqn.vercel.app/api/admin/loans';
+        endpoint = buildApiUrl('/admin/loans');
       } else {
         throw new Error('Invalid user type');
       }
@@ -118,7 +119,7 @@ const PendingLoansSection = ({ userType, title = "Pending Loans" }) => {
       setIsProcessing(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/loans/${selectedLoan.id}/reject`, {
+      const response = await fetch(buildApiUrl(`/loans/${selectedLoan.id}/reject`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

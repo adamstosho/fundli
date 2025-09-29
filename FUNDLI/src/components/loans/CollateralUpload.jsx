@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { 
   Upload, 
@@ -123,7 +124,7 @@ const CollateralUpload = ({ onCollateralAdded, onCollateralRemoved }) => {
       });
 
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/collateral/verify', {
+      const response = await fetch(buildApiUrl('/collateral/verify'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

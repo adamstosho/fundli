@@ -181,3 +181,36 @@
 [2025-09-29T15:46:44.192Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
 [2025-09-29T15:46:44.195Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
 [2025-09-29T15:46:44.198Z] INFO: All cron jobs started successfully
+[2025-09-29T15:53:28.685Z] INFO: Starting cron service
+[2025-09-29T15:53:29.402Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-29T15:53:29.517Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-29T15:53:29.652Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-29T15:53:29.768Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-29T15:53:29.881Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-29T15:53:29.883Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-29T15:53:29.885Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-29T15:53:29.886Z] INFO: All cron jobs started successfully
+[2025-09-29T15:56:12.735Z] INFO: Starting cron service
+[2025-09-29T15:56:13.185Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-29T15:56:13.202Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-29T15:56:13.334Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-29T15:56:13.370Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-29T15:56:13.520Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-29T15:56:13.539Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-29T15:56:13.553Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-29T15:56:13.557Z] INFO: All cron jobs started successfully
+[2025-09-29T16:00:00.074Z] INFO: Running auto-release escrow check
+[2025-09-29T16:00:00.922Z] INFO: Running scheduled payment processing
+[2025-09-29T16:00:01.228Z] INFO: Processing scheduled payments {"count":0,"timestamp":"2025-09-29T16:00:00.926Z"}
+[2025-09-29T16:00:01.236Z] INFO: Scheduled payments processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}
+[2025-09-29T16:00:01.242Z] INFO: Scheduled payment processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}
+[2025-09-29T16:30:00.668Z] INFO: Running auto-release escrow check
+[2025-09-29T17:00:00.232Z] INFO: Running scheduled payment processing
+[2025-09-29T17:00:00.244Z] INFO: Running payment reminder sending
+[2025-09-29T17:00:00.253Z] INFO: Running auto-release escrow check
+[2025-09-29T17:00:00.403Z] INFO: Sending payment reminders {"count":0}
+[2025-09-29T17:00:00.405Z] INFO: Payment reminders sent {"sent":0,"failed":0,"errors":[]}
+[2025-09-29T17:00:00.406Z] INFO: Payment reminder sending completed {"sent":0,"failed":0,"errors":[]}
+[2025-09-29T17:00:00.408Z] INFO: Processing scheduled payments {"count":0,"timestamp":"2025-09-29T17:00:00.234Z"}
+[2025-09-29T17:00:00.410Z] INFO: Scheduled payments processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}
+[2025-09-29T17:00:00.411Z] INFO: Scheduled payment processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -58,9 +59,9 @@ const PayBackPage = () => {
     try {
       const token = localStorage.getItem('accessToken');
       console.log('🔍 Fetching loan data for loanId:', loanId);
-      console.log('🔍 API URL:', `https://fundli-hjqn.vercel.app/api/loans/${loanId}`);
+      console.log('🔍 API URL:', buildApiUrl(`/loans/${loanId}`));
       
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/loans/${loanId}`, {
+      const response = await fetch(buildApiUrl(`/loans/${loanId}`), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -97,7 +98,7 @@ const PayBackPage = () => {
   const fetchWalletBalance = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/wallet', {
+      const response = await fetch(buildApiUrl('/wallet'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -148,10 +149,10 @@ const PayBackPage = () => {
       }
 
       // Make repayment API call using Paystack-integrated route
-      console.log('🔍 Making repayment API call to:', `https://fundli-hjqn.vercel.app/api/borrower/repay-loan/${loanId}`);
+      console.log('🔍 Making repayment API call to:', buildApiUrl(`/borrower/repay-loan/${loanId}`));
       console.log('🔍 Request body:', { installmentNumber: null });
       
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/borrower/repay-loan/${loanId}`, {
+      const response = await fetch(buildApiUrl(`/borrower/repay-loan/${loanId}`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

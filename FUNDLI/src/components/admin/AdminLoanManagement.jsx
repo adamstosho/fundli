@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { 
   FileText, 
@@ -59,7 +60,7 @@ const AdminLoanManagement = () => {
       console.log('Loading loan applications...');
       
       // Use the admin loans endpoint to get ALL loans
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/admin/loans`, {
+      const response = await fetch(buildApiUrl(`/admin/loans`), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -101,7 +102,7 @@ const AdminLoanManagement = () => {
   const handleViewDetails = async (application) => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/loans/${application.id}`, {
+      const response = await fetch(buildApiUrl(`/loans/${application.id}`), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -166,8 +167,8 @@ const AdminLoanManagement = () => {
       const token = localStorage.getItem('accessToken');
       
       const endpoint = action === 'approve' 
-        ? `https://fundli-hjqn.vercel.app/api/admin/loan/${selectedApplication?.id}/approve`
-        : `https://fundli-hjqn.vercel.app/api/admin/loans/${selectedApplication?.id}/reject`;
+        ? buildApiUrl(`/admin/loan/${selectedApplication?.id}/approve`)
+        : buildApiUrl(`/admin/loans/${selectedApplication?.id}/reject`);
       
       const response = await fetch(endpoint, {
         method: action === 'approve' ? 'POST' : 'PUT',

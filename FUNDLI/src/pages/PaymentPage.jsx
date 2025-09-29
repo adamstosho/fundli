@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -31,7 +32,7 @@ const PaymentPage = () => {
       setIsLoading(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/loans/${loanId}`, {
+      const response = await fetch(buildApiUrl(`/loans/${loanId}`), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -72,7 +73,7 @@ const PaymentPage = () => {
       }
 
       // First, create a payment intent on the backend
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/payments/create-intent', {
+      const response = await fetch(buildApiUrl('/payments/create-intent'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -134,7 +135,7 @@ const PaymentPage = () => {
     try {
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/payments/verify', {
+      const response = await fetch(buildApiUrl('/payments/verify'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

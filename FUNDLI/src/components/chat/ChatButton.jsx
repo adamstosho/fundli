@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { MessageCircle, User, DollarSign } from 'lucide-react';
 
@@ -13,7 +14,7 @@ const ChatButton = ({ loan, currentUser, onStartChat }) => {
       
       // Get chat participants for this loan
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/chat/loans/${loan.id}/chat-participants`, {
+      const response = await fetch(buildApiUrl(`/chat/loans/${loan.id}/chat-participants`), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -21,7 +22,7 @@ const ChatButton = ({ loan, currentUser, onStartChat }) => {
         const data = await response.json();
         
         // Create or get chat
-        const chatResponse = await fetch(`https://fundli-hjqn.vercel.app/api/chat/chats/loan/${loan.id}`, {
+        const chatResponse = await fetch(buildApiUrl(`/chat/chats/loan/${loan.id}`), {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,

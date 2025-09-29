@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { MessageCircle, Users, DollarSign, Clock } from 'lucide-react';
 import ChatList from '../components/chat/ChatList';
@@ -16,7 +17,7 @@ const ChatPage = () => {
   const loadCurrentUser = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/users/profile', {
+      const response = await fetch(buildApiUrl('/users/profile'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

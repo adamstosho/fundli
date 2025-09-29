@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -52,7 +53,7 @@ const AdminDashboard = () => {
       }
 
         // Fetch admin dashboard statistics
-        const response = await fetch('https://fundli-hjqn.vercel.app/api/admin/dashboard/stats', {
+        const response = await fetch(buildApiUrl('/admin/dashboard/stats'), {
           headers: {
             'Authorization': `Bearer ${token}`
           }

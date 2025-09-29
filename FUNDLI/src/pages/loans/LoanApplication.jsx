@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { DollarSign, Calendar, FileText, CheckCircle, AlertCircle, ArrowRight, Shield, Upload } from 'lucide-react';
@@ -38,7 +39,7 @@ const LoanApplication = () => {
       const token = localStorage.getItem('accessToken');
       if (!token) return;
 
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/collateral/status', {
+      const response = await fetch(buildApiUrl('/collateral/status'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -106,7 +107,7 @@ const LoanApplication = () => {
       
       // Collateral validation is handled by backend - we provide default collateral if needed
       
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/borrower/loan/apply', {
+      const response = await fetch(buildApiUrl('/borrower/loan/apply'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -188,10 +189,10 @@ const LoanApplication = () => {
         } : null
       };
 
-      console.log('Sending request to:', 'https://fundli-hjqn.vercel.app/api/collateral/submit');
+      console.log('Sending request to:', buildApiUrl('/collateral/submit'));
       console.log('Request payload size:', JSON.stringify(submitData).length, 'bytes');
       
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/collateral/submit', {
+      const response = await fetch(buildApiUrl('/collateral/submit'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

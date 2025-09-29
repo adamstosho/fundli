@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { 
   DollarSign, 
@@ -48,7 +49,7 @@ const MyInvestments = () => {
 
       console.log('🔍 Loading funded loans for lender:', user?.email);
 
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/lender/funded-loans', {
+      const response = await fetch(buildApiUrl('/lender/funded-loans'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

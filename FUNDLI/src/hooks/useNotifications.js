@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
+import { buildApiUrl } from '../utils/config';
 const useNotifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -12,7 +13,7 @@ const useNotifications = () => {
       const token = localStorage.getItem('accessToken');
       if (!token) return;
 
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/notifications', {
+      const response = await fetch(buildApiUrl('/notifications'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -33,7 +34,7 @@ const useNotifications = () => {
     try {
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/notifications/${notificationId}/read`, {
+      const response = await fetch(buildApiUrl(`/notifications/${notificationId}/read`), {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -60,7 +61,7 @@ const useNotifications = () => {
     try {
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/notifications/mark-all-read', {
+      const response = await fetch(buildApiUrl('/notifications/mark-all-read'), {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -83,7 +84,7 @@ const useNotifications = () => {
     try {
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/notifications/${notificationId}`, {
+      const response = await fetch(buildApiUrl(`/notifications/${notificationId}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

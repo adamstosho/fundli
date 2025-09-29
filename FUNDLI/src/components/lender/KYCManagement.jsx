@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { 
   Shield, 
@@ -31,7 +32,7 @@ const KYCManagement = () => {
       setIsLoading(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/lender/loan-applications', {
+      const response = await fetch(buildApiUrl('/lender/loan-applications'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -54,7 +55,7 @@ const KYCManagement = () => {
     try {
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/lender/borrower/${borrowerId}/kyc`, {
+      const response = await fetch(buildApiUrl(`/lender/borrower/${borrowerId}/kyc`), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -82,7 +83,7 @@ const KYCManagement = () => {
       setIsProcessing(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/lender/borrower/${selectedBorrower.id}/kyc/approve`, {
+      const response = await fetch(buildApiUrl(`/lender/borrower/${selectedBorrower.id}/kyc/approve`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

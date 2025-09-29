@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { 
   Clock,
@@ -29,7 +30,7 @@ const InProgressLoansSection = () => {
       setError('');
       
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/loans/user', {
+      const response = await fetch(buildApiUrl('/loans/user'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

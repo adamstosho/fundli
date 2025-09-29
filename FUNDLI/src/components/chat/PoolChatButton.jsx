@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
 
@@ -13,7 +14,7 @@ const PoolChatButton = ({ pool, currentUser, onStartChat }) => {
       
       // Create or get chat for the lending pool
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/chat/chats/pool/${pool.id}`, {
+      const response = await fetch(buildApiUrl(`/chat/chats/pool/${pool.id}`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

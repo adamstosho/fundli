@@ -393,46 +393,66 @@ export const AuthProvider = ({ children }) => {
       console.log('AuthContext: Starting login process for email:', credentials.email);
       dispatch({ type: 'AUTH_START' });
       const response = await authAPI.login(credentials);
-      console.log('AuthContext: Login API response:', response);
       
-      // Handle the nested response structure from backend
+      // Log the raw backend response
+      console.log('AuthContext: Raw backend response:', response);
+      console.log('AuthContext: Response status:', response.status);
+      console.log('AuthContext: Response data:', response.data);
+      console.log('AuthContext: Response data type:', typeof response.data);
+      console.log('AuthContext: Response data keys:', Object.keys(response.data || {}));
+      
       const responseData = response.data;
-      console.log('AuthContext: Response data structure:', responseData);
       
-      // Check if data is nested under response.data.data
-      const userData = responseData.data?.user || responseData.user;
-      const accessToken = responseData.data?.accessToken || responseData.accessToken;
-      const refreshToken = responseData.data?.refreshToken || responseData.refreshToken;
-      
-      console.log('AuthContext: Extracted user data:', userData);
-      console.log('AuthContext: userType from response:', userData?.userType);
-      console.log('AuthContext: userType type:', typeof userData?.userType);
-      
-      // Validate that userType is present and correct
-      if (!userData?.userType) {
-        console.error('AuthContext: ERROR - No userType in response!');
-        console.error('AuthContext: Full response data:', responseData);
-        throw new Error('Invalid user data received from server');
+      // Handle error responses from backend
+      if (responseData.status === 'error') {
+        console.log('AuthContext: Backend returned error:', responseData.message);
+        throw new Error(responseData.message || 'Login failed');
       }
       
-      // Store tokens and user data
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('user', JSON.stringify(userData));
-      console.log('AuthContext: Stored user data in localStorage:', userData);
-      console.log('AuthContext: Stored userType in localStorage:', userData.userType);
+      // Handle success response from backend
+      if (responseData.status === 'success' && responseData.data) {
+        const { user, accessToken, refreshToken } = responseData.data;
+        
+        console.log('AuthContext: Success response - user:', user);
+        console.log('AuthContext: Success response - userType:', user?.userType);
+        console.log('AuthContext: Success response - accessToken exists:', !!accessToken);
+        console.log('AuthContext: Success response - refreshToken exists:', !!refreshToken);
+        
+        // Validate required fields
+        if (!user || !user.userType || !accessToken) {
+          console.error('AuthContext: Missing required fields in success response');
+          console.error('AuthContext: user:', user);
+          console.error('AuthContext: userType:', user?.userType);
+          console.error('AuthContext: accessToken:', !!accessToken);
+          throw new Error('Invalid user data received from server');
+        }
+        
+        // Validate userType
+        if (!['borrower', 'lender', 'admin'].includes(user.userType)) {
+          console.error('AuthContext: Invalid userType:', user.userType);
+          throw new Error('Invalid user type received from server');
+        }
+        
+        // Store tokens and user data
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('user', JSON.stringify(user));
+        console.log('AuthContext: Stored user data in localStorage:', user);
+        
+        // Update authentication state
+        dispatch({
+          type: 'AUTH_SUCCESS',
+          payload: { user }
+        });
+        console.log('AuthContext: Login completed successfully for userType:', user.userType);
+        
+        return { success: true, message: 'Login successful!' };
+      }
       
-      // Update authentication state with the complete user data
-      dispatch({
-        type: 'AUTH_SUCCESS',
-        payload: { user: userData }
-      });
-      console.log('AuthContext: Dispatched AUTH_SUCCESS with userType:', userData.userType);
+      // Handle unexpected response format
+      console.error('AuthContext: Unexpected response format:', responseData);
+      throw new Error('Unexpected response format from server');
       
-      // Verify the state was updated correctly
-      console.log('AuthContext: Login completed successfully for userType:', userData.userType);
-      
-      return { success: true, message: 'Login successful!' };
     } catch (error) {
       console.error('AuthContext: Login error:', error);
       const errorInfo = handleAPIError(error);

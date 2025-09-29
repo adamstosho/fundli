@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -74,7 +75,7 @@ const BorrowerDashboard = () => {
 
         // Fetch comprehensive borrower stats
         console.log('📡 Fetching borrower stats from: https://fundli-hjqn.vercel.app/api/loans/borrower-stats');
-        const statsResponse = await fetch('https://fundli-hjqn.vercel.app/api/loans/borrower-stats', {
+        const statsResponse = await fetch(buildApiUrl('/loans/borrower-stats'), {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -183,7 +184,7 @@ const BorrowerDashboard = () => {
       console.log('📊 Fetching chart data...');
       
       // Fetch loan trends data
-      const trendsResponse = await fetch('https://fundli-hjqn.vercel.app/api/loans/trends', {
+      const trendsResponse = await fetch(buildApiUrl('/loans/trends'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -212,7 +213,7 @@ const BorrowerDashboard = () => {
       }
 
       // Fetch repayment status data
-      const repaymentResponse = await fetch('https://fundli-hjqn.vercel.app/api/loans/repayment-status', {
+      const repaymentResponse = await fetch(buildApiUrl('/loans/repayment-status'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -239,7 +240,7 @@ const BorrowerDashboard = () => {
       }
 
       // Fetch credit score distribution data
-      const creditResponse = await fetch('https://fundli-hjqn.vercel.app/api/loans/credit-score-distribution', {
+      const creditResponse = await fetch(buildApiUrl('/loans/credit-score-distribution'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -371,7 +372,7 @@ const BorrowerDashboard = () => {
       if (!confirmed) return;
       
       // Set up auto repay API call
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/loans/${loan._id}/auto-repay`, {
+      const response = await fetch(buildApiUrl(`/loans/${loan._id}/auto-repay`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

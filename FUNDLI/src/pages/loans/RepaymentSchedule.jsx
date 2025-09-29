@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { 
   Calendar, 
@@ -41,7 +42,7 @@ const RepaymentSchedule = () => {
       console.log('🔍 Loading repayment schedule...');
       
       // Fetch repayment schedule from API
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/loans/repayment-schedule', {
+      const response = await fetch(buildApiUrl('/loans/repayment-schedule'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

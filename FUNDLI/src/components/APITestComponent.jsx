@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { buildApiUrl } from '../utils/config';
 const APITestComponent = () => {
   const [testResults, setTestResults] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -21,10 +22,10 @@ const APITestComponent = () => {
 
       // Test each endpoint
       const endpoints = [
-        { name: 'investment-stats', url: 'https://fundli-hjqn.vercel.app/api/lender/investment-stats' },
-        { name: 'funded-loans', url: 'https://fundli-hjqn.vercel.app/api/lender/funded-loans' },
-        { name: 'my-pools', url: 'https://fundli-hjqn.vercel.app/api/pools/my-pools' },
-        { name: 'dashboard-charts', url: 'https://fundli-hjqn.vercel.app/api/lender/dashboard-charts' }
+        { name: 'investment-stats', url: buildApiUrl('/lender/investment-stats') },
+        { name: 'funded-loans', url: buildApiUrl('/lender/funded-loans') },
+        { name: 'my-pools', url: buildApiUrl('/pools/my-pools') },
+        { name: 'dashboard-charts', url: buildApiUrl('/lender/dashboard-charts') }
       ];
 
       for (const endpoint of endpoints) {

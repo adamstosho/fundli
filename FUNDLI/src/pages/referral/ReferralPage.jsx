@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { Copy, Share2, Award, Users, DollarSign, TrendingUp, CheckCircle, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -25,7 +26,7 @@ const ReferralPage = () => {
 
         // Try to fetch real referral data from the API
         try {
-          const response = await fetch('https://fundli-hjqn.vercel.app/api/referrals/stats', {
+          const response = await fetch(buildApiUrl('/referrals/stats'), {
             headers: {
               'Authorization': `Bearer ${token}`
             }

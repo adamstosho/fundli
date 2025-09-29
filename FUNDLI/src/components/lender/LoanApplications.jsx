@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
 import { 
   FileText, 
@@ -46,7 +47,7 @@ const LoanApplications = () => {
       setIsLoading(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch('https://fundli-hjqn.vercel.app/api/lender/loan-applications', {
+      const response = await fetch(buildApiUrl('/lender/loan-applications'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -83,7 +84,7 @@ const LoanApplications = () => {
       setIsProcessing(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/lender/loan/${selectedApplication.id}/invest`, {
+      const response = await fetch(buildApiUrl(`/lender/loan/${selectedApplication.id}/invest`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -123,7 +124,7 @@ const LoanApplications = () => {
       const token = localStorage.getItem('accessToken');
       
       // First, invest in the loan application
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/lender/loan/${selectedApplication.id}/invest`, {
+      const response = await fetch(buildApiUrl(`/lender/loan/${selectedApplication.id}/invest`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -207,7 +208,7 @@ const LoanApplications = () => {
       setIsProcessing(true);
       const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`https://fundli-hjqn.vercel.app/api/lender/loan/${selectedApplication.id}/reject`, {
+      const response = await fetch(buildApiUrl(`/lender/loan/${selectedApplication.id}/reject`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -282,7 +283,7 @@ const LoanApplications = () => {
       // Try to send notifications to backend, but don't fail if it doesn't work
       try {
         // Send borrower notification
-        const borrowerResponse = await fetch('https://fundli-hjqn.vercel.app/api/notifications/create', {
+        const borrowerResponse = await fetch(buildApiUrl('/notifications/create'), {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -297,7 +298,7 @@ const LoanApplications = () => {
         }
 
         // Send admin notification
-        const adminResponse = await fetch('https://fundli-hjqn.vercel.app/api/notifications/create', {
+        const adminResponse = await fetch(buildApiUrl('/notifications/create'), {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
