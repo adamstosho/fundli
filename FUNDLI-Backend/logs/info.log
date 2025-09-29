@@ -45,3 +45,22 @@
 [2025-09-29T10:23:48.349Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
 [2025-09-29T10:23:48.354Z] INFO: All cron jobs started successfully
 [2025-09-29T10:23:59.799Z] INFO: GET / 200 {"method":"GET","url":"/","statusCode":200,"responseTime":"18ms","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"127.0.0.1","userId":"anonymous"}
+[2025-09-29T10:30:00.311Z] INFO: Running auto-release escrow check
+[2025-09-29T10:37:51.272Z] INFO: Starting cron service
+[2025-09-29T10:37:51.529Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-29T10:37:51.536Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-29T10:37:51.547Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-29T10:37:51.553Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-29T10:37:51.557Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-29T10:37:51.571Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-29T10:37:51.605Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-29T10:37:51.631Z] INFO: All cron jobs started successfully
+[2025-09-29T10:38:05.588Z] INFO: Starting cron service
+[2025-09-29T10:38:05.677Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-29T10:38:05.680Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-29T10:38:05.686Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-29T10:38:05.690Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-29T10:38:05.694Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-29T10:38:05.704Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-29T10:38:05.708Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-29T10:38:05.712Z] INFO: All cron jobs started successfully
