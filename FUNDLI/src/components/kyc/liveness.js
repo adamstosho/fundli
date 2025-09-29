@@ -16,9 +16,19 @@ export async function startLivenessCheck(videoElement, onComplete, setProgress, 
     if (setProgress) setProgress((p) => (p < 90 ? progress : p));
   }, 200);
 
-  await faceapi.nets.ssdMobilenetv1.loadFromUri("/models");
-  await faceapi.nets.faceLandmark68Net.loadFromUri("/models");
-  await faceapi.nets.faceRecognitionNet.loadFromUri("/models");
+  // Load face-api.js models with error handling
+  try {
+    console.log('Loading face-api.js models...');
+    await faceapi.nets.ssdMobilenetv1.loadFromUri("/models");
+    await faceapi.nets.faceLandmark68Net.loadFromUri("/models");
+    await faceapi.nets.faceRecognitionNet.loadFromUri("/models");
+    console.log('Face-api.js models loaded successfully');
+  } catch (error) {
+    console.error('Error loading face-api.js models:', error);
+    if (setStatus) setStatus("Failed to load face detection models ❌");
+    if (onComplete) onComplete(false);
+    return;
+  }
 
   speak("Please blink your eyes to start the liveness check.");
 
@@ -31,11 +41,12 @@ export async function startLivenessCheck(videoElement, onComplete, setProgress, 
   let headTurned = false;
 
   const interval = setInterval(async () => {
-    const detections = await faceapi
-      .detectSingleFace(videoElement, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.6 }))
-      .withFaceLandmarks();
+    try {
+      const detections = await faceapi
+        .detectSingleFace(videoElement, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.6 }))
+        .withFaceLandmarks();
 
-    if (detections) {
+      if (detections) {
       const landmarks = detections.landmarks;
       const leftEye = landmarks.getLeftEye();
       const rightEye = landmarks.getRightEye();
@@ -67,6 +78,13 @@ export async function startLivenessCheck(videoElement, onComplete, setProgress, 
           if (onComplete) onComplete(true);
         }, 3000);
       }
+    } else {
+      // No face detected
+      if (setStatus) setStatus("Please position your face in the camera view...");
+    }
+    } catch (error) {
+      console.error('Face detection error:', error);
+      if (setStatus) setStatus("Face detection error. Please try again.");
     }
   }, 500);
 

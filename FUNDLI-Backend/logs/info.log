@@ -214,3 +214,4 @@
 [2025-09-29T17:00:00.408Z] INFO: Processing scheduled payments {"count":0,"timestamp":"2025-09-29T17:00:00.234Z"}
 [2025-09-29T17:00:00.410Z] INFO: Scheduled payments processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}
 [2025-09-29T17:00:00.411Z] INFO: Scheduled payment processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}
+[2025-09-29T17:30:00.025Z] INFO: Running auto-release escrow check

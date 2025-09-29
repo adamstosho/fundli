@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
-import { Shield, CreditCard, Building2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Shield, CreditCard, Building2, CheckCircle, AlertCircle, Camera } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import LivenessCheck from './LivenessCheck';
 
 const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
   const { user } = useAuth();
@@ -14,6 +15,8 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
   const [banks, setBanks] = useState([]);
   const [errors, setErrors] = useState({});
   const [isLoadingBanks, setIsLoadingBanks] = useState(true);
+  const [showLivenessCheck, setShowLivenessCheck] = useState(false);
+  const [livenessCompleted, setLivenessCompleted] = useState(false);
 
   useEffect(() => {
     loadBanks();
@@ -62,6 +65,10 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
       newErrors.bankCode = 'Bank selection is required';
     }
 
+    if (!livenessCompleted) {
+      newErrors.liveness = 'Facial verification is required';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -75,12 +82,19 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
       console.log('✅ Form validation passed, submitting:', {
         bvn: formData.bvn ? formData.bvn.substring(0, 3) + '***' : 'not provided',
         accountNumber: formData.accountNumber ? formData.accountNumber.substring(0, 3) + '***' : 'not provided',
-        bankCode: formData.bankCode
+        bankCode: formData.bankCode,
+        livenessCompleted
       });
-      onSubmit(formData);
+      onSubmit({ ...formData, livenessCompleted });
     } else {
       console.log('❌ Form validation failed, errors:', errors);
     }
+  };
+
+  const handleLivenessSuccess = () => {
+    setLivenessCompleted(true);
+    setShowLivenessCheck(false);
+    setErrors(prev => ({ ...prev, liveness: '' }));
   };
 
   const handleInputChange = (e) => {
@@ -237,6 +251,41 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
             </p>
           </div>
 
+          {/* Facial Verification Section */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="flex items-start space-x-3">
+              <Camera className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+              <div className="flex-1">
+                <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">
+                  Facial Verification Required
+                </h4>
+                <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+                  Complete facial verification to enhance security and verify your identity.
+                </p>
+                {livenessCompleted ? (
+                  <div className="flex items-center text-green-600 dark:text-green-400">
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <span className="text-sm">Facial verification completed ✅</span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowLivenessCheck(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                  >
+                    Start Facial Verification
+                  </button>
+                )}
+                {errors.liveness && (
+                  <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-1" />
+                    {errors.liveness}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Security Notice */}
           <div className="bg-success/10 dark:bg-success/20 border border-success/30 dark:border-success rounded-lg p-4">
             <div className="flex items-start space-x-3">
@@ -280,6 +329,22 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
           </div>
         </form>
       </div>
+      
+      {/* Liveness Check Modal */}
+      {showLivenessCheck && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Facial Verification</h3>
+            <LivenessCheck onSuccess={handleLivenessSuccess} />
+            <button
+              onClick={() => setShowLivenessCheck(false)}
+              className="mt-4 w-full bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };
