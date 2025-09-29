@@ -120,6 +120,11 @@ app.get('/api/health', (req, res) => {
 });
 
 // API routes
+app.use('/', (req, res) => {
+  res.json({
+    message: 'Server is running'
+  });
+});
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/loans', loanRoutes);
