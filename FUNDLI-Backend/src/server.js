@@ -119,14 +119,19 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// API routes
-app.use('/', (req, res) => {
-  res.json({
-    message: 'Server is running'
-  });
-});
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
+// API routes - Add logging to debug route mounting
+console.log('🔗 Mounting API routes...');
+
+app.use('/api/auth', (req, res, next) => {
+  console.log(`🔐 Auth route hit: ${req.method} ${req.path}`);
+  next();
+}, authRoutes);
+
+app.use('/api/users', (req, res, next) => {
+  console.log(`👤 Users route hit: ${req.method} ${req.path}`);
+  next();
+}, userRoutes);
+
 app.use('/api/loans', loanRoutes);
 app.use('/api/pools', poolRoutes);
 app.use('/api/investments', investmentRoutes);
@@ -150,11 +155,32 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/repayment-notifications', repaymentNotificationRoutes);
 
+console.log('✅ All API routes mounted successfully');
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Fundli Backend API Server is running',
+    status: 'ok',
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      auth: '/api/auth',
+      users: '/api/users',
+      loans: '/api/loans',
+      health: '/api/health'
+    }
+  });
+});
+
 // 404 handler for undefined routes
 app.use('*', (req, res) => {
+  console.log(`404 - Route not found: ${req.method} ${req.originalUrl}`);
   res.status(404).json({
     status: 'error',
-    message: `Route ${req.originalUrl} not found`
+    message: `Route ${req.originalUrl} not found`,
+    method: req.method,
+    timestamp: new Date().toISOString()
   });
 });
 
