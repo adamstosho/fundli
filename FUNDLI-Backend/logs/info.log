@@ -215,3 +215,18 @@
 [2025-09-29T17:00:00.410Z] INFO: Scheduled payments processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}
 [2025-09-29T17:00:00.411Z] INFO: Scheduled payment processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}
 [2025-09-29T17:30:00.025Z] INFO: Running auto-release escrow check
+[2025-09-30T01:30:00.875Z] INFO: Running auto-release escrow check
+[2025-09-30T11:54:10.201Z] INFO: Starting cron service
+[2025-09-30T11:54:10.278Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-30T11:54:10.280Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-30T11:54:10.283Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-30T11:54:10.285Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-30T11:54:10.291Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-30T11:54:10.296Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-30T11:54:10.299Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-30T11:54:10.300Z] INFO: All cron jobs started successfully
+[2025-09-30T12:00:00.954Z] INFO: Running scheduled payment processing
+[2025-09-30T12:00:00.969Z] INFO: Running auto-release escrow check
+[2025-09-30T12:00:01.104Z] INFO: Processing scheduled payments {"count":0,"timestamp":"2025-09-30T12:00:00.956Z"}
+[2025-09-30T12:00:01.106Z] INFO: Scheduled payments processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}
+[2025-09-30T12:00:01.107Z] INFO: Scheduled payment processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}

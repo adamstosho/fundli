@@ -193,7 +193,7 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
               </div>
 
               {/* ID Number */}
-              <div>
+            <div>
                 <label htmlFor="idNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   ID Number
                 </label>
@@ -277,20 +277,20 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
                     {errors.streetAddress}
                   </p>
                 )}
-              </div>
+        </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* City */}
-                <div>
+          <div>
                   <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     City
-                  </label>
-                  <input
-                    type="text"
+            </label>
+              <input
+                type="text"
                     id="city"
                     name="city"
                     value={formData.city}
-                    onChange={handleInputChange}
+                onChange={handleInputChange}
                     placeholder="Enter your city"
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       errors.city 
@@ -300,22 +300,22 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
                   />
                   {errors.city && (
                     <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center">
-                      <AlertCircle className="h-4 w-4 mr-1" />
+                <AlertCircle className="h-4 w-4 mr-1" />
                       {errors.city}
-                    </p>
-                  )}
-                </div>
+              </p>
+            )}
+          </div>
 
                 {/* Country */}
-                <div>
+          <div>
                   <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Country
-                  </label>
-                  <select
+            </label>
+              <select
                     id="country"
                     name="country"
                     value={formData.country}
-                    onChange={handleInputChange}
+                onChange={handleInputChange}
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       errors.country 
                         ? 'border-red-500 bg-red-50 dark:bg-red-900/20' 
@@ -326,28 +326,28 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
                     {countries.map((country) => (
                       <option key={country.value} value={country.value}>
                         {country.label}
-                      </option>
+                    </option>
                     ))}
-                  </select>
+              </select>
                   {errors.country && (
                     <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center">
-                      <AlertCircle className="h-4 w-4 mr-1" />
+                <AlertCircle className="h-4 w-4 mr-1" />
                       {errors.country}
-                    </p>
-                  )}
-                </div>
+              </p>
+            )}
+          </div>
 
                 {/* Postal Code */}
-                <div>
+          <div>
                   <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Postal Code
-                  </label>
-                  <input
-                    type="text"
+            </label>
+            <input
+              type="text"
                     id="postalCode"
                     name="postalCode"
                     value={formData.postalCode}
-                    onChange={handleInputChange}
+              onChange={handleInputChange}
                     placeholder="Enter your postal code"
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       errors.postalCode 
@@ -507,10 +507,10 @@ const KYCForm = ({ onSubmit, onCancel, isSubmitting = false }) => {
                 </div>
                 {errors.selfieWithId && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center">
-                    <AlertCircle className="h-4 w-4 mr-1" />
+                <AlertCircle className="h-4 w-4 mr-1" />
                     {errors.selfieWithId}
-                  </p>
-                )}
+              </p>
+            )}
               </div>
 
               {/* Facial Verification */}

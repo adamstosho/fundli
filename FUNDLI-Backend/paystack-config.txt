@@ -1,6 +1,0 @@
-# Paystack Configuration
-PAYSTACK_PUBLIC_KEY=pk_test_your_public_key_here
-PAYSTACK_SECRET_KEY=sk_test_your_secret_key_here
-
-# Add these to your .env file in the backend
-# Replace with your actual Paystack keys from https://paystack.com
