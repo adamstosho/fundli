@@ -380,3 +380,8 @@
 [2025-09-30T13:48:58.043Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
 [2025-09-30T13:48:58.048Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
 [2025-09-30T13:48:58.051Z] INFO: All cron jobs started successfully
+[2025-09-30T14:00:00.330Z] INFO: Running scheduled payment processing
+[2025-09-30T14:00:00.392Z] INFO: Running auto-release escrow check
+[2025-09-30T14:00:00.516Z] INFO: Processing scheduled payments {"count":0,"timestamp":"2025-09-30T14:00:00.332Z"}
+[2025-09-30T14:00:00.524Z] INFO: Scheduled payments processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}
+[2025-09-30T14:00:00.529Z] INFO: Scheduled payment processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}
