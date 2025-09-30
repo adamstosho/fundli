@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { buildApiUrl } from '../utils/config';
+import { buildApiUrl } from '../../utils/config';
 import { Shield, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 

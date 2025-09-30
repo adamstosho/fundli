@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { buildApiUrl } from '../utils/config';
+import { buildApiUrl } from '../../utils/config';
 import { motion } from 'framer-motion';
 import { Copy, Share2, Award, Users, DollarSign, TrendingUp, CheckCircle, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';

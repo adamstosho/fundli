@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { buildApiUrl } from '../utils/config';
+import { buildApiUrl } from '../../utils/config';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 

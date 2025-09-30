@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { buildApiUrl } from '../utils/config';
+import { buildApiUrl } from '../../utils/config';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Send, 

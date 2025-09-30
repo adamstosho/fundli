@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { buildApiUrl } from '../utils/config';
+import { buildApiUrl } from '../../utils/config';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { DollarSign, Calendar, FileText, CheckCircle, AlertCircle, ArrowRight, Shield, Upload } from 'lucide-react';

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { buildApiUrl } from '../utils/config';
+import { buildApiUrl } from '../../utils/config';
 import { motion } from 'framer-motion';
 import { Users, Search, Filter, Eye, Edit, Shield, CheckCircle, XCircle, MoreVertical, AlertCircle } from 'lucide-react';
 

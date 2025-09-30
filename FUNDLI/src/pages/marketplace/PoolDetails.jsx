@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { buildApiUrl } from '../utils/config';
+import { buildApiUrl } from '../../utils/config';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { DollarSign, Users, TrendingUp, BarChart3, Eye, Shield, ArrowLeft } from 'lucide-react';
