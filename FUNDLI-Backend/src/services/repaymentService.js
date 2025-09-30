@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 const paystackService = require('./paystackService');
 const emailService = require('./emailService');
+const penaltyService = require('./penaltyService');
 const NotificationService = require('./notificationService');
 const logger = require('../utils/logger');
 
@@ -106,7 +107,11 @@ class RepaymentService {
 
       // Calculate late fee if applicable
       const lateFee = this.calculateLateFee(duePayment.amount, daysOverdue);
-      const totalAmount = duePayment.amount + lateFee;
+      
+      // Calculate penalty charges if applicable
+      const penaltyCharges = duePayment.penaltyCharges || 0;
+      
+      const totalAmount = duePayment.amount + lateFee + penaltyCharges;
 
       // Check borrower's wallet balance
       const borrower = await User.findById(loan.borrowerId);
@@ -131,15 +136,16 @@ class RepaymentService {
         duePayment,
         totalAmount,
         borrower,
-        lateFee
+        lateFee,
+        penaltyCharges
       );
 
       if (paymentResult.success) {
         // Update loan status
-        await this.updateLoanAfterPayment(loan, duePayment, totalAmount, lateFee);
+        await this.updateLoanAfterPayment(loan, duePayment, totalAmount, lateFee, penaltyCharges);
         
         // Send confirmation email
-        await this.sendPaymentConfirmation(loan, duePayment, totalAmount, lateFee);
+        await this.sendPaymentConfirmation(loan, duePayment, totalAmount, lateFee, penaltyCharges);
         
         // Send notification to lender about repayment received
         try {
@@ -204,6 +210,7 @@ class RepaymentService {
           success: true,
           amount: totalAmount,
           lateFee,
+          penaltyCharges,
           paymentId: duePayment._id
         };
       } else {
@@ -230,9 +237,10 @@ class RepaymentService {
    * @param {number} amount - Total amount to pay
    * @param {Object} borrower - Borrower object
    * @param {number} lateFee - Late fee amount
+   * @param {number} penaltyCharges - Penalty charges amount
    * @returns {Promise<Object>} Payment result
    */
-  async processPayment(loan, payment, amount, borrower, lateFee) {
+  async processPayment(loan, payment, amount, borrower, lateFee, penaltyCharges = 0) {
     try {
       // Initialize payment with Paystack
       const paymentResult = await paystackService.initializePayment({
@@ -247,7 +255,8 @@ class RepaymentService {
           loanId: loan._id,
           paymentId: payment._id,
           installmentNumber: payment.installmentNumber,
-          lateFee: lateFee
+          lateFee: lateFee,
+          penaltyCharges: penaltyCharges
         }
       });
 
@@ -279,6 +288,7 @@ class RepaymentService {
           amount,
           borrower,
           lateFee,
+          penaltyCharges,
           paymentResult.reference
         );
 
@@ -312,14 +322,16 @@ class RepaymentService {
    * @param {Object} payment - Payment object
    * @param {number} amount - Total amount paid
    * @param {number} lateFee - Late fee amount
+   * @param {number} penaltyCharges - Penalty charges amount
    */
-  async updateLoanAfterPayment(loan, payment, amount, lateFee) {
+  async updateLoanAfterPayment(loan, payment, amount, lateFee, penaltyCharges = 0) {
     try {
       // Update payment status
       payment.status = 'paid';
       payment.paidAt = new Date();
       payment.amountPaid = amount;
       payment.lateFee = lateFee;
+      payment.penaltyCharges = penaltyCharges;
 
       // Check if this was the last payment
       const remainingPayments = loan.repayments.filter(r => r.status === 'pending');
@@ -341,6 +353,7 @@ class RepaymentService {
         paymentId: payment._id,
         amount,
         lateFee,
+        penaltyCharges,
         remainingPayments: remainingPayments.length,
         loanStatus: loan.status
       });
@@ -555,8 +568,9 @@ class RepaymentService {
    * @param {Object} payment - Payment object
    * @param {number} amount - Total amount paid
    * @param {number} lateFee - Late fee amount
+   * @param {number} penaltyCharges - Penalty charges amount
    */
-  async sendPaymentConfirmation(loan, payment, amount, lateFee) {
+  async sendPaymentConfirmation(loan, payment, amount, lateFee, penaltyCharges = 0) {
     try {
       const borrower = await User.findById(loan.borrowerId);
       if (!borrower) {
@@ -571,6 +585,7 @@ class RepaymentService {
           borrower.firstName,
           amount,
           lateFee,
+          penaltyCharges,
           payment.installmentNumber
         )
       });
@@ -606,9 +621,10 @@ class RepaymentService {
    * @param {number} amount - Total amount
    * @param {Object} borrower - Borrower object
    * @param {number} lateFee - Late fee amount
+   * @param {number} penaltyCharges - Penalty charges amount
    * @param {string} reference - Payment reference
    */
-  async createRepaymentTransaction(loan, payment, amount, borrower, lateFee, reference) {
+  async createRepaymentTransaction(loan, payment, amount, borrower, lateFee, penaltyCharges = 0, reference) {
     try {
       const transaction = new Transaction({
         type: 'loan_repayment',
@@ -628,6 +644,7 @@ class RepaymentService {
           paymentId: payment._id,
           installmentNumber: payment.installmentNumber,
           lateFee: lateFee,
+          penaltyCharges: penaltyCharges,
           reference: reference
         }
       });
@@ -647,7 +664,7 @@ class RepaymentService {
   /**
    * Generate payment confirmation email HTML
    */
-  generatePaymentConfirmationEmailHTML(name, amount, lateFee, installmentNumber) {
+  generatePaymentConfirmationEmailHTML(name, amount, lateFee, penaltyCharges = 0, installmentNumber) {
     return `
       <!DOCTYPE html>
       <html>
@@ -686,6 +703,12 @@ class RepaymentService {
               <div class="detail-row">
                 <span>Late Fee:</span>
                 <strong>₦${lateFee}</strong>
+              </div>
+              ` : ''}
+              ${penaltyCharges > 0 ? `
+              <div class="detail-row">
+                <span>Penalty Charges:</span>
+                <strong>₦${penaltyCharges}</strong>
               </div>
               ` : ''}
             </div>

@@ -2,6 +2,7 @@ const cron = require('node-cron');
 const repaymentService = require('./repaymentService');
 const escrowService = require('./escrowService');
 const creditScoreService = require('./creditScoreService');
+const penaltyService = require('./penaltyService');
 const NotificationService = require('./notificationService');
 const Loan = require('../models/Loan');
 const User = require('../models/User');
@@ -44,6 +45,17 @@ class CronService {
         logger.info('Payment reminder sending completed', result);
       } catch (error) {
         logger.error('Payment reminder sending failed', { error: error.message });
+      }
+    });
+
+    // Calculate penalty charges daily at 1 AM
+    this.scheduleJob('calculate-penalties', '0 1 * * *', async () => {
+      try {
+        logger.info('Running penalty charges calculation');
+        const result = await penaltyService.calculatePenaltyCharges();
+        logger.info('Penalty charges calculation completed', result);
+      } catch (error) {
+        logger.error('Penalty charges calculation failed', { error: error.message });
       }
     });
 

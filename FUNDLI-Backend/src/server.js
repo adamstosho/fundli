@@ -39,6 +39,7 @@ const pushNotificationRoutes = require('./routes/pushNotifications');
 const feedbackRoutes = require('./routes/feedback');
 const chatRoutes = require('./routes/chat');
 const repaymentNotificationRoutes = require('./routes/repaymentNotifications');
+const penaltyRoutes = require('./routes/penalties');
 
 const { errorHandler } = require('./middleware/errorHandler');
 const { connectDB } = require('./config/database');
@@ -154,6 +155,7 @@ app.use('/api/push-notifications', pushNotificationRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/repayment-notifications', repaymentNotificationRoutes);
+app.use('/api/penalties', penaltyRoutes);
 
 console.log('✅ All API routes mounted successfully');
 

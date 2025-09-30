@@ -230,3 +230,144 @@
 [2025-09-30T12:00:01.104Z] INFO: Processing scheduled payments {"count":0,"timestamp":"2025-09-30T12:00:00.956Z"}
 [2025-09-30T12:00:01.106Z] INFO: Scheduled payments processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}
 [2025-09-30T12:00:01.107Z] INFO: Scheduled payment processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}
+[2025-09-30T12:58:53.514Z] INFO: Starting cron service
+[2025-09-30T12:58:53.612Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-30T12:58:53.621Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-30T12:58:53.634Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-30T12:58:53.643Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-30T12:58:53.647Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-30T12:58:53.656Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-30T12:58:53.663Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-30T12:58:53.672Z] INFO: All cron jobs started successfully
+[2025-09-30T12:59:59.499Z] INFO: Starting cron service
+[2025-09-30T12:59:59.578Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-30T12:59:59.580Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-30T12:59:59.583Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-30T12:59:59.585Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-30T12:59:59.587Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-30T12:59:59.590Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-30T12:59:59.593Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-30T12:59:59.594Z] INFO: All cron jobs started successfully
+[2025-09-30T13:00:00.586Z] INFO: Running scheduled payment processing
+[2025-09-30T13:00:00.628Z] INFO: Running auto-release escrow check
+[2025-09-30T13:00:01.311Z] INFO: Processing scheduled payments {"count":0,"timestamp":"2025-09-30T13:00:00.588Z"}
+[2025-09-30T13:00:01.313Z] INFO: Scheduled payments processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}
+[2025-09-30T13:00:01.327Z] INFO: Scheduled payment processing completed {"processed":0,"successful":0,"failed":0,"skipped":0,"errors":[]}
+[2025-09-30T13:03:23.211Z] INFO: Starting cron service
+[2025-09-30T13:03:23.244Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-30T13:03:23.246Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-30T13:03:23.248Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-30T13:03:23.249Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-30T13:03:23.251Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-30T13:03:23.253Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-30T13:03:23.254Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-30T13:03:23.255Z] INFO: All cron jobs started successfully
+[2025-09-30T13:04:06.982Z] INFO: Starting cron service
+[2025-09-30T13:04:07.122Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-30T13:04:07.137Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-30T13:04:07.151Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-30T13:04:07.155Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-30T13:04:07.168Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-30T13:04:07.183Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-30T13:04:07.190Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-30T13:04:07.201Z] INFO: All cron jobs started successfully
+[2025-09-30T13:04:12.874Z] INFO: Starting cron service
+[2025-09-30T13:04:12.952Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-30T13:04:12.957Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-30T13:04:12.960Z] INFO: Scheduled cron job: calculate-penalties with schedule: 0 1 * * *
+[2025-09-30T13:04:12.972Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-30T13:04:12.975Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-30T13:04:12.977Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-30T13:04:12.982Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-30T13:04:12.987Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-30T13:04:12.990Z] INFO: All cron jobs started successfully
+[2025-09-30T13:06:30.187Z] INFO: Starting cron service
+[2025-09-30T13:06:30.374Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-30T13:06:30.392Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-30T13:06:30.405Z] INFO: Scheduled cron job: calculate-penalties with schedule: 0 1 * * *
+[2025-09-30T13:06:30.409Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-30T13:06:30.440Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-30T13:06:30.484Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-30T13:06:30.485Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-30T13:06:30.487Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-30T13:06:30.488Z] INFO: All cron jobs started successfully
+[2025-09-30T13:06:42.962Z] INFO: Starting cron service
+[2025-09-30T13:06:43.077Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-30T13:06:43.095Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-30T13:06:43.108Z] INFO: Scheduled cron job: calculate-penalties with schedule: 0 1 * * *
+[2025-09-30T13:06:43.112Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-30T13:06:43.124Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-30T13:06:43.128Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-30T13:06:43.133Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-30T13:06:43.141Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-30T13:06:43.143Z] INFO: All cron jobs started successfully
+[2025-09-30T13:06:59.264Z] INFO: Starting cron service
+[2025-09-30T13:06:59.389Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-30T13:06:59.398Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-30T13:06:59.407Z] INFO: Scheduled cron job: calculate-penalties with schedule: 0 1 * * *
+[2025-09-30T13:06:59.412Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-30T13:06:59.415Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-30T13:06:59.417Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-30T13:06:59.429Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-30T13:06:59.432Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-30T13:06:59.434Z] INFO: All cron jobs started successfully
+[2025-09-30T13:07:10.599Z] INFO: Starting cron service
+[2025-09-30T13:07:10.683Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-30T13:07:10.685Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-30T13:07:10.693Z] INFO: Scheduled cron job: calculate-penalties with schedule: 0 1 * * *
+[2025-09-30T13:07:10.697Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-30T13:07:10.699Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-30T13:07:10.701Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-30T13:07:10.703Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-30T13:07:10.715Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-30T13:07:10.718Z] INFO: All cron jobs started successfully
+[2025-09-30T13:07:24.255Z] INFO: Starting cron service
+[2025-09-30T13:07:24.438Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-30T13:07:24.446Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-30T13:07:24.452Z] INFO: Scheduled cron job: calculate-penalties with schedule: 0 1 * * *
+[2025-09-30T13:07:24.456Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-30T13:07:24.465Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-30T13:07:24.469Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-30T13:07:24.472Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-30T13:07:24.482Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-30T13:07:24.484Z] INFO: All cron jobs started successfully
+[2025-09-30T13:07:33.643Z] INFO: Starting cron service
+[2025-09-30T13:07:33.703Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-30T13:07:33.706Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-30T13:07:33.708Z] INFO: Scheduled cron job: calculate-penalties with schedule: 0 1 * * *
+[2025-09-30T13:07:33.717Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-30T13:07:33.721Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-30T13:07:33.724Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-30T13:07:33.726Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-30T13:07:33.735Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-30T13:07:33.739Z] INFO: All cron jobs started successfully
+[2025-09-30T13:07:48.195Z] INFO: Starting cron service
+[2025-09-30T13:07:48.288Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-30T13:07:48.294Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-30T13:07:48.304Z] INFO: Scheduled cron job: calculate-penalties with schedule: 0 1 * * *
+[2025-09-30T13:07:48.307Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-30T13:07:48.311Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-30T13:07:48.319Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-30T13:07:48.325Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-30T13:07:48.327Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-30T13:07:48.335Z] INFO: All cron jobs started successfully
+[2025-09-30T13:07:59.336Z] INFO: Starting cron service
+[2025-09-30T13:07:59.491Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-30T13:07:59.503Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-30T13:07:59.526Z] INFO: Scheduled cron job: calculate-penalties with schedule: 0 1 * * *
+[2025-09-30T13:07:59.547Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-30T13:07:59.560Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-30T13:07:59.563Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-30T13:07:59.575Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-30T13:07:59.588Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-30T13:07:59.592Z] INFO: All cron jobs started successfully
+[2025-09-30T13:09:12.765Z] INFO: Starting cron service
+[2025-09-30T13:09:12.841Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-09-30T13:09:12.844Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-09-30T13:09:12.846Z] INFO: Scheduled cron job: calculate-penalties with schedule: 0 1 * * *
+[2025-09-30T13:09:12.848Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-09-30T13:09:12.855Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-09-30T13:09:12.862Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-09-30T13:09:12.863Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-09-30T13:09:12.865Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-09-30T13:09:12.870Z] INFO: All cron jobs started successfully

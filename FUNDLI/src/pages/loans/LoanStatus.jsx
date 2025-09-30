@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { buildApiUrl } from '../utils/config';
 import { motion } from 'framer-motion';
-import { Clock, CheckCircle, XCircle, AlertCircle, DollarSign, Calendar, FileText, Eye, Shield } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, AlertCircle, DollarSign, Calendar, FileText, Eye, Shield, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const LoanStatus = () => {
   const { user } = useAuth();
   const [loans, setLoans] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [penaltyData, setPenaltyData] = useState({});
 
   // KYC verification is now optional - all users can view loan status
 
@@ -30,7 +31,11 @@ const LoanStatus = () => {
 
         if (response.ok) {
           const result = await response.json();
-          setLoans(result.data.loans || []);
+          const loansData = result.data.loans || [];
+          setLoans(loansData);
+          
+          // Load penalty data for active loans
+          await loadPenaltyData(loansData, token);
         } else {
           console.error('Failed to load loans:', response.statusText);
           setLoans([]);
@@ -41,6 +46,38 @@ const LoanStatus = () => {
       } finally {
         setIsLoading(false);
       }
+    };
+
+    const loadPenaltyData = async (loans, token) => {
+      const penaltyPromises = loans
+        .filter(loan => loan.status === 'active')
+        .map(async (loan) => {
+          try {
+            const response = await fetch(buildApiUrl(`/penalties/summary/${loan.id}`), {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (response.ok) {
+              const result = await response.json();
+              return { loanId: loan.id, data: result.data };
+            }
+            return { loanId: loan.id, data: null };
+          } catch (error) {
+            console.error(`Error loading penalty data for loan ${loan.id}:`, error);
+            return { loanId: loan.id, data: null };
+          }
+        });
+
+      const penaltyResults = await Promise.all(penaltyPromises);
+      const penaltyMap = {};
+      penaltyResults.forEach(({ loanId, data }) => {
+        if (data) {
+          penaltyMap[loanId] = data;
+        }
+      });
+      setPenaltyData(penaltyMap);
     };
 
     loadLoans();
@@ -231,6 +268,50 @@ const LoanStatus = () => {
                       <p className="text-sm text-success/80">
                         Your loan has been funded and disbursed. Check your account for the funds.
                       </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Penalty Information */}
+              {loan.status === 'active' && penaltyData[loan.id] && (
+                <div className="bg-warning/10 border border-warning/20 rounded-lg p-4 mb-4">
+                  <div className="flex items-start space-x-2">
+                    <AlertTriangle className="h-5 w-5 text-warning mt-0.5" />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-warning mb-2">Penalty Charges Information</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-warning/80">Total Penalty Charges:</span>
+                          <span className="font-medium text-warning">
+                            ${penaltyData[loan.id].totalPenaltyCharges?.toLocaleString() || '0'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-warning/80">Current Penalty Amount:</span>
+                          <span className="font-medium text-warning">
+                            ${penaltyData[loan.id].currentPenaltyAmount?.toLocaleString() || '0'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-warning/80">Daily Penalty Rate:</span>
+                          <span className="font-medium text-warning">
+                            {penaltyData[loan.id].penaltyRate || 0.5}% per day
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-warning/80">Overdue Repayments:</span>
+                          <span className="font-medium text-warning">
+                            {penaltyData[loan.id].overdueRepayments || 0}
+                          </span>
+                        </div>
+                        {penaltyData[loan.id].currentPenaltyAmount > 0 && (
+                          <div className="mt-3 p-2 bg-warning/20 rounded text-xs text-warning/90">
+                            <strong>Important:</strong> Penalty charges will continue to accrue daily until your loan is fully repaid. 
+                            Please make your payment as soon as possible to avoid additional charges.
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

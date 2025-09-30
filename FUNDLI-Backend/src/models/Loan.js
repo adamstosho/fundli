@@ -221,7 +221,13 @@ const loanSchema = new mongoose.Schema({
     lateFees: {
       type: Number,
       default: 0
-    }
+    },
+    penaltyCharges: {
+      type: Number,
+      default: 0
+    },
+    penaltyStartDate: Date,
+    lastPenaltyCalculation: Date
   }],
   
   // Financial Tracking
@@ -233,6 +239,22 @@ const loanSchema = new mongoose.Schema({
   amountRemaining: {
     type: Number,
     required: true
+  },
+
+  // Penalty Tracking
+  totalPenaltyCharges: {
+    type: Number,
+    default: 0
+  },
+
+  penaltyRate: {
+    type: Number,
+    default: 0.5 // 0.5% per day
+  },
+
+  penaltyGracePeriod: {
+    type: Number,
+    default: 24 // 24 hours in hours
   },
   
   nextPaymentDate: Date,
