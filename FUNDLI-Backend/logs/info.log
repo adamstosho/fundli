@@ -1005,3 +1005,12 @@
 [2025-10-01T05:08:32.904Z] INFO: GET /api/collateral/status 304 {"method":"GET","url":"/api/collateral/status","statusCode":304,"responseTime":"458ms","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"127.0.0.1","userId":"68c530387cdd2df874ca9de8"}
 [2025-10-01T05:08:33.612Z] INFO: GET /api/borrower/loan/68ccb42f05e093132050fdee/penalty-status 200 {"method":"GET","url":"/api/borrower/loan/68ccb42f05e093132050fdee/penalty-status","statusCode":200,"responseTime":"946ms","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"127.0.0.1","userId":"68c530387cdd2df874ca9de8"}
 [2025-10-01T05:09:02.779Z] INFO: GET /api/borrower/wallet/balance 304 {"method":"GET","url":"/api/borrower/wallet/balance","statusCode":304,"responseTime":"767ms","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"127.0.0.1","userId":"68c530387cdd2df874ca9de8"}
+[2025-10-01T17:42:56.985Z] INFO: Starting cron service
+[2025-10-01T17:42:57.068Z] INFO: Scheduled cron job: process-payments with schedule: 0 * * * *
+[2025-10-01T17:42:57.070Z] INFO: Scheduled cron job: send-reminders with schedule: 0 */6 * * *
+[2025-10-01T17:42:57.073Z] INFO: Scheduled cron job: auto-release-escrow with schedule: */30 * * * *
+[2025-10-01T17:42:57.075Z] INFO: Scheduled cron job: update-credit-scores with schedule: 0 2 * * *
+[2025-10-01T17:42:57.076Z] INFO: Scheduled cron job: check-repayment-due with schedule: 0 9 * * *
+[2025-10-01T17:42:57.077Z] INFO: Scheduled cron job: cleanup-notifications with schedule: 0 3 * * 0
+[2025-10-01T17:42:57.078Z] INFO: Scheduled cron job: daily-reports with schedule: 0 6 * * *
+[2025-10-01T17:42:57.078Z] INFO: All cron jobs started successfully

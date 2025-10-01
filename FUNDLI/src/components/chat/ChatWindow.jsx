@@ -43,13 +43,68 @@ const ChatWindow = ({ chat, onBack, currentUser }) => {
     if (chat) {
       loadMessages();
       initializeWebRTC();
+      
+      // Initialize Socket.IO connection for chat
+      const token = localStorage.getItem('accessToken');
+      if (token && currentUser) {
+        chatSocketService.initialize(currentUser.id || currentUser._id, token);
+        
+        // Set up callbacks for real-time messaging
+        chatSocketService.setCallbacks({
+          onNewMessage: (data) => {
+            console.log('📨 New message received in ChatWindow:', data);
+            if (data.chatId === chat._id) {
+              setMessages(prev => {
+                // Check if message already exists to prevent duplicates
+                const messageExists = prev.some(msg => 
+                  (msg._id && data.message._id && msg._id === data.message._id) ||
+                  (msg.id && data.message.id && msg.id === data.message.id)
+                );
+                
+                if (messageExists) {
+                  console.log('📨 Message already exists, skipping duplicate');
+                  return prev;
+                }
+                
+                console.log('📨 Adding new message to chat');
+                return [...prev, data.message];
+              });
+              
+              // Scroll to bottom when new message arrives
+              setTimeout(() => {
+                if (messagesEndRef.current) {
+                  messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+                }
+              }, 100);
+            }
+          },
+          onConnectionReady: () => {
+            console.log('🔌 Chat Socket.IO connection ready');
+            // Join the chat room once connection is ready
+            chatSocketService.joinChat(chat._id);
+          },
+          onConnectionLost: () => {
+            console.log('🔌 Chat Socket.IO connection lost');
+          },
+          onError: (error) => {
+            console.error('❌ Chat Socket.IO error:', error);
+          }
+        });
+      }
     }
-  }, [chat]);
+    
+    // Cleanup on unmount
+    return () => {
+      if (chat) {
+        chatSocketService.leaveChat(chat._id);
+      }
+    };
+  }, [chat, currentUser]);
 
   const initializeWebRTC = () => {
     const token = localStorage.getItem('accessToken');
     webrtcService.initialize(currentUser.id, token);
-    chatSocketService.initialize(currentUser.id, token);
+    // chatSocketService.initialize is now called in useEffect above
     
     webrtcService.setCallbacks({
       onIncomingCall: (callData) => {

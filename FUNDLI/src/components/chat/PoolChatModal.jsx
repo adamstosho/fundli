@@ -97,6 +97,19 @@ const PoolChatModal = ({ isOpen, onClose, chat, pool, currentUser }) => {
       onUserTyping: (data) => {
         console.log('⌨️ User typing:', data);
         // You can add typing indicator UI here if needed
+      },
+      onConnectionReady: () => {
+        console.log('🔌 Chat Socket.IO connection ready in PoolChatModal');
+        // Join the chat room once connection is ready
+        if (chat?.id) {
+          chatSocketService.joinChat(chat.id);
+        }
+      },
+      onConnectionLost: () => {
+        console.log('🔌 Chat Socket.IO connection lost in PoolChatModal');
+      },
+      onError: (error) => {
+        console.error('❌ Chat Socket.IO error in PoolChatModal:', error);
       }
     });
   };

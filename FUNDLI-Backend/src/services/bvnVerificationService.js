@@ -2,6 +2,9 @@ const axios = require('axios');
 
 class BVNVerificationService {
   constructor() {
+    // Load environment variables
+    require('dotenv').config();
+    
     this.secretKey = process.env.PAYSTACK_SECRET_KEY;
     this.baseURL = 'https://api.paystack.co';
     
@@ -9,7 +12,7 @@ class BVNVerificationService {
       console.warn('⚠️ PAYSTACK_SECRET_KEY not found. BVN verification will be disabled.');
       this.disabled = true;
     } else {
-      console.log('✅ BVN Verification Service initialized');
+      console.log('✅ BVN Verification Service initialized with real Paystack API');
       this.disabled = false;
     }
   }
@@ -35,9 +38,9 @@ class BVNVerificationService {
    */
   async verifyBVN(bvn, userDetails = {}) {
     try {
+      // Always use real Paystack API - no mock data
       if (this.disabled) {
-        // Return mock data for development
-        return this.getMockBVNResult(bvn, userDetails);
+        throw new Error('BVN verification service is disabled. Please configure PAYSTACK_SECRET_KEY environment variable.');
       }
 
       console.log('🔍 Verifying BVN:', bvn.substring(0, 3) + '***' + bvn.substring(6));
@@ -115,8 +118,9 @@ class BVNVerificationService {
    */
   async verifyBVNWithAccount(bvn, accountNumber, bankCode) {
     try {
+      // Always use real Paystack API - no mock data
       if (this.disabled) {
-        return this.getMockBVNAccountResult(bvn, accountNumber, bankCode);
+        throw new Error('BVN verification service is disabled. Please configure PAYSTACK_SECRET_KEY environment variable.');
       }
 
       console.log('🔍 Verifying BVN with account details');
@@ -263,7 +267,7 @@ class BVNVerificationService {
     
     return {
       verified: true,
-      bvnResult: this.getMockBVNResult(bvn),
+      bvnResult: this.getMockBVNResult(bvn, { firstName: 'John', lastName: 'Doe' }),
       accountResult: {
         accountNumber: accountNumber,
         accountName: 'John Doe Michael',
