@@ -12,16 +12,16 @@ const Sidebar = ({ open, onClose }) => {
   const navigation = {
     borrower: [
       { name: 'Dashboard', href: '/dashboard/borrower', icon: Home },
-      ...(userType !== 'admin' ? [{ name: 'KYC Verification', href: '/kyc-upload', icon: Shield }] : []),
       { name: 'Loan Status', href: '/loans/status', icon: FileText },
       { name: 'Achievements', href: '/achievements', icon: Trophy },
+      { name: 'KYC Verification', href: '/kyc', icon: Shield },
       { name: 'Notifications', href: '/notifications', icon: Bell },
       { name: 'Profile', href: '/settings/profile', icon: UserCheck },
       { name: 'Settings', href: '/settings', icon: Settings },
     ],
     lender: [
       { name: 'Dashboard', href: '/dashboard/lender', icon: Home },
-      ...(userType !== 'admin' ? [{ name: 'KYC Verification', href: '/kyc-upload', icon: Shield }] : []),
+      { name: 'KYC Verification', href: '/kyc', icon: Shield },
       { name: 'Create Pool', href: '/marketplace/create-pool', icon: DollarSign },
       { name: 'Browse Loans', href: '/marketplace/browse', icon: CreditCard },
       { name: 'My Investments', href: '/lender/investments', icon: TrendingUp },

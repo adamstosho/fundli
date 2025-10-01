@@ -35,6 +35,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import ChatPage from './pages/ChatPage';
 import LivenessCheck from './components/kyc/LivenessCheck';
 import AchievementsPage from './pages/achievements/AchievementsPage';
+import KYCPage from './pages/kyc/KYCPage';
 
 // 404 Error Component
 const NotFound = () => (
@@ -234,14 +235,22 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         )
       },
-      {
-        path: 'achievements',
-        element: (
-          <ProtectedRoute>
-            <AchievementsPage />
-          </ProtectedRoute>
-        )
-      },
+        {
+          path: 'achievements',
+          element: (
+            <ProtectedRoute>
+              <AchievementsPage />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: 'kyc',
+          element: (
+            <ProtectedRoute>
+              <KYCPage />
+            </ProtectedRoute>
+          )
+        },
       {
         path: 'payment/:loanId',
         element: (

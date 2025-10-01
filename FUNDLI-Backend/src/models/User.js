@@ -59,13 +59,56 @@ const userSchema = new mongoose.Schema({
   // KYC Information
   kycStatus: {
     type: String,
-    enum: ['pending', 'approved', 'rejected'],
+    enum: ['pending', 'verified', 'failed', 'approved', 'rejected'],
     default: 'pending'
   },
   
   kycVerified: {
     type: Boolean,
     default: false
+  },
+
+  // KYC Facial Verification
+  documentImage: {
+    type: String,
+    default: null
+  },
+
+  liveFaceImage: {
+    type: String,
+    default: null
+  },
+
+  verificationScore: {
+    type: Number,
+    default: null,
+    min: 0,
+    max: 100
+  },
+
+  kycVerificationDetails: {
+    documentType: {
+      type: String,
+      enum: ['passport', 'national_id', 'driver_license', 'other'],
+      default: null
+    },
+    documentNumber: {
+      type: String,
+      default: null
+    },
+    verificationDate: {
+      type: Date,
+      default: null
+    },
+    verificationMethod: {
+      type: String,
+      enum: ['facial_verification', 'manual_review'],
+      default: 'facial_verification'
+    },
+    livenessCheckPassed: {
+      type: Boolean,
+      default: false
+    }
   },
   
   kycData: {

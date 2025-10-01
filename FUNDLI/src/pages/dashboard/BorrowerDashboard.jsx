@@ -21,7 +21,8 @@ import {
   Trophy,
   Star,
   Target,
-  Award
+  Award,
+  Shield
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import PendingLoansSection from '../../components/common/PendingLoansSection';
@@ -1068,7 +1069,37 @@ const BorrowerDashboard = () => {
       {/* In Progress Loans Section */}
       <InProgressLoansSection />
 
-      {/* KYC verification is now optional */}
+      {/* KYC Verification Status */}
+      {user?.kycStatus !== 'verified' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-warning-100 dark:bg-warning-900/20 rounded-lg flex items-center justify-center">
+                <Shield className="h-5 w-5 text-warning-600 dark:text-warning-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
+                  KYC Verification Required
+                </h3>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                  Complete identity verification to access all features
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/kyc"
+              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
+            >
+              Verify Now
+            </Link>
+          </div>
+        </motion.div>
+      )}
 
       {/* Feedback Modal */}
       {showFeedbackModal && (
