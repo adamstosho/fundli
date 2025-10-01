@@ -1210,11 +1210,16 @@ router.post('/repay-loan/:loanId', protect, async (req, res) => {
       });
     }
 
-    // Calculate repayment amount (Principal + Interest)
+    // Update penalties before calculating repayment
+    await loan.updatePenalties();
+    
+    // Calculate repayment amount (Principal + Interest + Penalties)
     const principal = loan.loanAmount || 0;
     const interestRate = loan.interestRate || 0;
     const interestAmount = principal * (interestRate / 100);
-    const totalRepayment = principal + interestAmount;
+    const baseRepayment = principal + interestAmount;
+    const penaltyCharges = loan.totalPenaltyCharges || 0;
+    const totalRepayment = baseRepayment + penaltyCharges;
     const amountPaid = loan.amountPaid || 0;
     const remainingAmount = totalRepayment - amountPaid;
     
@@ -1300,10 +1305,8 @@ router.post('/repay-loan/:loanId', protect, async (req, res) => {
       const NotificationService = require('../services/notificationService');
       const borrower = await User.findById(loan.borrower._id || loan.borrower);
       if (borrower) {
-        // Determine on-time: compare today with loan.endDate (or nextPaymentDate if available)
-        const today = new Date();
-        const dueDate = loan.endDate || loan.nextPaymentDate || today;
-        const onTime = today <= new Date(dueDate);
+        // Determine on-time: check if penalty charges were applied
+        const onTime = penaltyCharges === 0;
 
         const earnedPoints = onTime ? 10 : 2; // 10 points on-time, 2 points late but completed
 
@@ -1409,9 +1412,11 @@ router.post('/repay-loan/:loanId', protect, async (req, res) => {
         amount: remainingAmount,
         principal: principal,
         interest: interestAmount,
+        penaltyCharges: penaltyCharges,
         totalRepayment: totalRepayment,
         platformFee,
         amountToLender,
+        onTimePayment: penaltyCharges === 0,
         lender: {
           name: `${lender.firstName} ${lender.lastName}`,
           email: lender.email
@@ -1424,6 +1429,66 @@ router.post('/repay-loan/:loanId', protect, async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to process loan repayment'
+    });
+  }
+});
+
+// @desc    Get current penalty status for a loan
+// @route   GET /api/borrower/loan/:loanId/penalty-status
+// @access  Private (Borrowers only)
+router.get('/loan/:loanId/penalty-status', protect, async (req, res) => {
+  try {
+    const loanId = req.params.loanId;
+
+    // Check if user is a borrower
+    if (req.user.userType !== 'borrower') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Only borrowers can view penalty status'
+      });
+    }
+
+    // Find the loan
+    const loan = await Loan.findById(loanId)
+      .populate('borrower', 'email firstName lastName');
+
+    if (!loan) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Loan not found'
+      });
+    }
+
+    // Check if the borrower owns this loan
+    if (loan.borrower._id.toString() !== req.user.id) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'You can only view penalty status for your own loans'
+      });
+    }
+
+    // Update penalties and get current status
+    await loan.updatePenalties();
+    const penaltyStatus = loan.getCurrentPenaltyStatus();
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        loanId: loan._id,
+        loanAmount: loan.loanAmount,
+        totalPenaltyCharges: loan.totalPenaltyCharges,
+        lastPenaltyUpdate: loan.lastPenaltyUpdate,
+        penaltyStatus: penaltyStatus,
+        nextPaymentDate: loan.nextPaymentDate,
+        status: loan.status
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error fetching penalty status:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch penalty status'
     });
   }
 });

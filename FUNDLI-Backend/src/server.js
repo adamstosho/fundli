@@ -39,6 +39,7 @@ const pushNotificationRoutes = require('./routes/pushNotifications');
 const feedbackRoutes = require('./routes/feedback');
 const chatRoutes = require('./routes/chat');
 const repaymentNotificationRoutes = require('./routes/repaymentNotifications');
+const penaltyConfigRoutes = require('./routes/penaltyConfig');
 
 const { errorHandler } = require('./middleware/errorHandler');
 const { connectDB } = require('./config/database');
@@ -51,7 +52,7 @@ const io = new Server(server, {
   cors: {
     origin: process.env.NODE_ENV === 'production' 
       ? process.env.FRONTEND_URL 
-      : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
+      : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174'],
     methods: ['GET', 'POST']
   }
 });
@@ -64,7 +65,7 @@ app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? process.env.FRONTEND_URL 
-    : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173', 'https://fundli.vercel.app'],
+    : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174', 'https://fundli.vercel.app'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -138,6 +139,7 @@ app.use('/api/investments', investmentRoutes);
 app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/referrals', referralRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin/penalty-config', penaltyConfigRoutes);
 app.use('/api/collateral', manualCollateralRoutes);
 app.use('/api/borrower', borrowerRoutes);
 app.use('/api/lender', lenderRoutes);

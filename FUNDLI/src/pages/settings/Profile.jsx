@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { User, Mail, Phone, MapPin, Camera, Save, Edit, CheckCircle, AlertCircle, Upload, X } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Camera, Save, Edit, CheckCircle, AlertCircle, Upload, X, Trophy, Star, Target, Award } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const Profile = () => {
@@ -187,6 +187,43 @@ const Profile = () => {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  // Badge system data
+  const badgesCatalog = [
+    { key: 'seed', name: 'Seed Starter', min: 10, icon: '🌱' },
+    { key: 'sprout', name: 'Sprout Saver', min: 30, icon: '🌿' },
+    { key: 'ember', name: 'Ember Earner', min: 60, icon: '🔥' },
+    { key: 'river', name: 'River Reliable', min: 100, icon: '🌊' },
+    { key: 'steel', name: 'Steel Steady', min: 150, icon: '🛡️' },
+    { key: 'hawk', name: 'Hawk Honest', min: 210, icon: '🦅' },
+    { key: 'oak', name: 'Oak On‑time', min: 280, icon: '🌳' },
+    { key: 'aurum', name: 'Aurum Achiever', min: 360, icon: '🏅' },
+    { key: 'titan', name: 'Titan Trustworthy', min: 450, icon: '🏆' },
+    { key: 'legend', name: 'Legendary Lender‑Friend', min: 550, icon: '👑' }
+  ];
+
+  const getNextBadge = () => {
+    const currentPoints = user?.reliabilityPoints || 0;
+    const ownedKeys = new Set((user?.badges || []).map(b => b.key));
+    return badgesCatalog.find(badge => !ownedKeys.has(badge.key) && badge.min > currentPoints);
+  };
+
+  const getProgressToNextBadge = () => {
+    const currentPoints = user?.reliabilityPoints || 0;
+    const nextBadge = getNextBadge();
+    if (!nextBadge) return { progress: 100, pointsNeeded: 0 };
+    
+    const previousBadge = badgesCatalog
+      .filter(b => b.min <= currentPoints)
+      .sort((a, b) => b.min - a.min)[0];
+    
+    const startPoints = previousBadge ? previousBadge.min : 0;
+    const endPoints = nextBadge.min;
+    const progress = ((currentPoints - startPoints) / (endPoints - startPoints)) * 100;
+    const pointsNeeded = endPoints - currentPoints;
+    
+    return { progress: Math.min(100, Math.max(0, progress)), pointsNeeded };
   };
 
   return (
@@ -520,6 +557,131 @@ const Profile = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Badge Collection Section - Only show for borrowers */}
+      {user?.role === 'borrower' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="mt-8"
+        >
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white flex items-center">
+                <Trophy className="h-5 w-5 mr-2 text-primary-600" />
+                Achievement Badges
+              </h3>
+              <div className="text-sm text-neutral-600 dark:text-neutral-400">
+                {user?.reliabilityPoints || 0} Reliability Points
+              </div>
+            </div>
+
+            {/* Progress to Next Badge */}
+            {getNextBadge() && (
+              <div className="mb-6 p-4 bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20 rounded-lg border border-primary-200 dark:border-primary-800">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-secondary-900 dark:text-white flex items-center">
+                    <Target className="h-4 w-4 mr-2 text-primary-600" />
+                    Next Badge: {getNextBadge().name}
+                  </h4>
+                  <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                    {getProgressToNextBadge().pointsNeeded} points needed
+                  </span>
+                </div>
+                <div className="w-full bg-neutral-200 dark:bg-secondary-700 rounded-full h-3">
+                  <div 
+                    className="bg-gradient-to-r from-primary-500 to-accent-500 h-3 rounded-full transition-all duration-500"
+                    style={{ width: `${getProgressToNextBadge().progress}%` }}
+                  ></div>
+                </div>
+                <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                  <span>{user?.reliabilityPoints || 0} points</span>
+                  <span>{getNextBadge().min} points</span>
+                </div>
+              </div>
+            )}
+
+            {/* Badge Collection Grid */}
+            <div className="achievement-shelf">
+              {badgesCatalog.map((badge) => {
+                const isEarned = user?.badges?.some(userBadge => userBadge.key === badge.key);
+                const earnedBadge = user?.badges?.find(userBadge => userBadge.key === badge.key);
+                
+                return (
+                  <motion.div
+                    key={badge.key}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: badgesCatalog.indexOf(badge) * 0.1 }}
+                    className={`relative p-4 rounded-lg text-center transition-all duration-300 ${
+                      isEarned 
+                        ? 'bg-gradient-to-br from-primary-100 to-accent-100 dark:from-primary-900/30 dark:to-accent-900/30 border-2 border-primary-300 dark:border-primary-700 shadow-lg' 
+                        : 'bg-neutral-100 dark:bg-secondary-800 border-2 border-neutral-200 dark:border-secondary-700 opacity-60'
+                    }`}
+                  >
+                    <div className="text-4xl mb-2">
+                      {badge.icon}
+                    </div>
+                    <h5 className={`font-semibold text-sm mb-1 ${
+                      isEarned 
+                        ? 'text-secondary-900 dark:text-white' 
+                        : 'text-neutral-500 dark:text-neutral-400'
+                    }`}>
+                      {badge.name}
+                    </h5>
+                    <p className={`text-xs ${
+                      isEarned 
+                        ? 'text-neutral-600 dark:text-neutral-300' 
+                        : 'text-neutral-400 dark:text-neutral-500'
+                    }`}>
+                      {badge.min} points
+                    </p>
+                    {isEarned && earnedBadge?.earnedAt && (
+                      <div className="absolute top-2 right-2">
+                        <CheckCircle className="h-4 w-4 text-success" />
+                      </div>
+                    )}
+                    {isEarned && earnedBadge?.earnedAt && (
+                      <p className="text-xs text-success mt-2">
+                        Earned {new Date(earnedBadge.earnedAt).toLocaleDateString()}
+                      </p>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Badge Stats */}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-neutral-50 dark:bg-secondary-800 rounded-lg">
+                <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
+                  {user?.badges?.length || 0}
+                </div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">
+                  Badges Earned
+                </div>
+              </div>
+              <div className="text-center p-4 bg-neutral-50 dark:bg-secondary-800 rounded-lg">
+                <div className="text-2xl font-bold text-accent-600 dark:text-accent-400">
+                  {user?.reliabilityPoints || 0}
+                </div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">
+                  Total Points
+                </div>
+              </div>
+              <div className="text-center p-4 bg-neutral-50 dark:bg-secondary-800 rounded-lg">
+                <div className="text-2xl font-bold text-success-600 dark:text-success-400">
+                  {Math.round(((user?.badges?.length || 0) / badgesCatalog.length) * 100)}%
+                </div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">
+                  Collection
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 };

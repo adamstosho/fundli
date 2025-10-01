@@ -221,6 +221,27 @@ const loanSchema = new mongoose.Schema({
     lateFees: {
       type: Number,
       default: 0
+    },
+    // Penalty system fields
+    penaltyCharges: {
+      type: Number,
+      default: 0
+    },
+    totalRepayment: {
+      type: Number,
+      default: 0
+    },
+    isPaid: {
+      type: Boolean,
+      default: false
+    },
+    penaltyDays: {
+      type: Number,
+      default: 0
+    },
+    lastPenaltyCalculation: {
+      type: Date,
+      default: Date.now
     }
   }],
   
@@ -236,6 +257,17 @@ const loanSchema = new mongoose.Schema({
   },
   
   nextPaymentDate: Date,
+  
+  // Penalty system fields
+  totalPenaltyCharges: {
+    type: Number,
+    default: 0
+  },
+  
+  lastPenaltyUpdate: {
+    type: Date,
+    default: Date.now
+  },
   
   // Default and Collections
   isDefaulted: {
@@ -360,6 +392,7 @@ loanSchema.methods.processRepayment = function(amount, installmentNumber) {
   if (repayment && repayment.status === 'pending') {
     repayment.status = 'paid';
     repayment.paidAt = new Date();
+    repayment.isPaid = true;
     this.amountPaid += amount;
     this.amountRemaining -= amount;
     
@@ -374,6 +407,64 @@ loanSchema.methods.processRepayment = function(amount, installmentNumber) {
   }
   
   return this.save();
+};
+
+// Method to update penalties for all pending repayments
+loanSchema.methods.updatePenalties = function() {
+  const { calculatePenalty } = require('../utils/penaltyCalculator');
+  const currentDate = new Date();
+  let totalPenaltyUpdate = 0;
+  
+  this.repayments.forEach(repayment => {
+    if (repayment.status === 'pending' && !repayment.isPaid) {
+      const penaltyResult = calculatePenalty(repayment.amount, repayment.dueDate, currentDate);
+      
+      repayment.penaltyCharges = penaltyResult.penaltyAmount;
+      repayment.totalRepayment = penaltyResult.totalRepayment;
+      repayment.penaltyDays = penaltyResult.penaltyDays;
+      repayment.lastPenaltyCalculation = currentDate;
+      
+      // Update status to overdue if penalty applies
+      if (penaltyResult.isLate && repayment.status === 'pending') {
+        repayment.status = 'overdue';
+      }
+      
+      totalPenaltyUpdate += penaltyResult.penaltyAmount;
+    }
+  });
+  
+  this.totalPenaltyCharges = totalPenaltyUpdate;
+  this.lastPenaltyUpdate = currentDate;
+  
+  return this.save();
+};
+
+// Method to get current penalty status
+loanSchema.methods.getCurrentPenaltyStatus = function() {
+  const { getCurrentPenalty } = require('../utils/penaltyCalculator');
+  const currentDate = new Date();
+  
+  const pendingRepayments = this.repayments.filter(r => r.status === 'pending' && !r.isPaid);
+  const penaltyStatus = pendingRepayments.map(repayment => {
+    const penalty = getCurrentPenalty({
+      dueDate: repayment.dueDate,
+      repaymentAmount: repayment.amount
+    }, currentDate);
+    
+    return {
+      installmentNumber: repayment.installmentNumber,
+      dueDate: repayment.dueDate,
+      originalAmount: repayment.amount,
+      ...penalty
+    };
+  });
+  
+  return {
+    hasPendingPenalties: penaltyStatus.some(p => p.isLate),
+    totalPenaltyAmount: penaltyStatus.reduce((sum, p) => sum + p.penaltyAmount, 0),
+    totalRepaymentAmount: penaltyStatus.reduce((sum, p) => sum + p.totalRepayment, 0),
+    repayments: penaltyStatus
+  };
 };
 
 // Static methods

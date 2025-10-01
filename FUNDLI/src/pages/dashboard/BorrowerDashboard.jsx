@@ -17,7 +17,11 @@ import {
   BarChart3,
   Search,
   RefreshCw,
-  MessageSquare
+  MessageSquare,
+  Trophy,
+  Star,
+  Target,
+  Award
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import PendingLoansSection from '../../components/common/PendingLoansSection';
@@ -26,10 +30,11 @@ import WalletBalanceCard from '../../components/common/WalletBalanceCard';
 import CollateralVerificationStatus from '../../components/common/CollateralVerificationStatus';
 import { 
   LoanTrendsChart, 
-  RepaymentStatusChart, 
-  CreditScoreDistributionChart 
+  RepaymentStatusChart 
 } from '../../components/charts/DashboardCharts';
 import FeedbackInbox from '../../components/common/FeedbackInbox';
+import NotificationManager from '../../components/notifications/NotificationManager';
+import PenaltyStatus from '../../components/common/PenaltyStatus';
 
 const BorrowerDashboard = () => {
   const { user, kycStatus } = useAuth();
@@ -38,7 +43,8 @@ const BorrowerDashboard = () => {
     totalBorrowed: 0,
     activeLoans: 0,
     totalRepaid: 0,
-    creditScore: 0
+    reliabilityPoints: 0,
+    badges: []
   });
   const [recentLoans, setRecentLoans] = useState([]);
   const [upcomingPayments, setUpcomingPayments] = useState([]);
@@ -47,13 +53,35 @@ const BorrowerDashboard = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [chartData, setChartData] = useState({
     loanTrends: null,
-    repaymentStatus: null,
-    creditScoreDistribution: null
+    repaymentStatus: null
   });
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [unreadFeedbackCount, setUnreadFeedbackCount] = useState(0);
   const [showLoanDetailsModal, setShowLoanDetailsModal] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [activeLoan, setActiveLoan] = useState(null);
+
+  // Load notifications
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const response = await fetch(buildApiUrl('/notifications'), {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setNotifications(data.data.notifications || []);
+        }
+      } catch (error) {
+        console.error('Error loading notifications:', error);
+      }
+    };
+
+    loadNotifications();
+  }, []);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -94,8 +122,7 @@ const BorrowerDashboard = () => {
           const newStats = {
             totalBorrowed: statsData.data?.stats?.totalBorrowed || 0,
             activeLoans: statsData.data?.stats?.activeLoans || 0,
-            totalRepaid: statsData.data?.stats?.totalRepaid || 0,
-            creditScore: statsData.data?.stats?.creditScore || user?.creditScore || 0
+            totalRepaid: statsData.data?.stats?.totalRepaid || 0
           };
           
           console.log('📊 Setting stats to:', newStats);
@@ -105,6 +132,14 @@ const BorrowerDashboard = () => {
           setRecentLoans(statsData.data?.recentLoans || []);
           setUpcomingPayments(statsData.data?.upcomingPayments || []);
           
+          // Set active loan for penalty status (first active loan)
+          const activeLoans = (statsData.data?.recentLoans || []).filter(loan => 
+            loan.status === 'funded' || loan.status === 'active'
+          );
+          if (activeLoans.length > 0) {
+            setActiveLoan(activeLoans[0]);
+          }
+          
           // Show success message
           setSuccessMessage('Dashboard data loaded successfully!');
           setTimeout(() => setSuccessMessage(''), 3000);
@@ -112,8 +147,7 @@ const BorrowerDashboard = () => {
           console.log('📊 Stats updated:', {
             totalBorrowed: statsData.data?.stats?.totalBorrowed || 0,
             activeLoans: statsData.data?.stats?.activeLoans || 0,
-            totalRepaid: statsData.data?.stats?.totalRepaid || 0,
-            creditScore: statsData.data?.stats?.creditScore || user?.creditScore || 0
+            totalRepaid: statsData.data?.stats?.totalRepaid || 0
           });
         } else {
           const errorData = await statsResponse.json().catch(() => ({ message: 'Unknown error' }));
@@ -124,8 +158,7 @@ const BorrowerDashboard = () => {
           setStats({
             totalBorrowed: 0,
             activeLoans: 0,
-            totalRepaid: 0,
-            creditScore: user?.creditScore || 0
+            totalRepaid: 0
           });
           setRecentLoans([]);
           setUpcomingPayments([]);
@@ -142,8 +175,7 @@ const BorrowerDashboard = () => {
         setStats({
           totalBorrowed: 0,
           activeLoans: 0,
-          totalRepaid: 0,
-          creditScore: user?.creditScore || 0
+          totalRepaid: 0
         });
         setRecentLoans([]);
         setUpcomingPayments([]);
@@ -159,10 +191,6 @@ const BorrowerDashboard = () => {
           repaymentStatus: {
             labels: ['On Time', 'Late', 'Overdue', 'Paid'],
             values: [0, 0, 0, 0]
-          },
-          creditScoreDistribution: {
-            labels: ['Excellent (750+)', 'Good (700-749)', 'Fair (650-699)', 'Poor (600-649)', 'Very Poor (<600)'],
-            values: [0, 0, 1, 0, 0] // Default to Fair
           }
         });
       } finally {
@@ -239,40 +267,6 @@ const BorrowerDashboard = () => {
         }));
       }
 
-      // Fetch credit score distribution data
-      const creditResponse = await fetch(buildApiUrl('/loans/credit-score-distribution'), {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (creditResponse.ok) {
-        const creditData = await creditResponse.json();
-        console.log('✅ Credit score distribution data:', creditData.data);
-        setChartData(prev => ({
-          ...prev,
-          creditScoreDistribution: creditData.data
-        }));
-      } else {
-        console.warn('❌ Failed to fetch credit score distribution:', creditResponse.status);
-        // Set fallback data based on user's credit score
-        const userCreditScore = user?.creditScore || 650;
-        let fallbackValues = [0, 0, 0, 0, 0];
-        if (userCreditScore >= 750) fallbackValues[0] = 1;
-        else if (userCreditScore >= 700) fallbackValues[1] = 1;
-        else if (userCreditScore >= 650) fallbackValues[2] = 1;
-        else if (userCreditScore >= 600) fallbackValues[3] = 1;
-        else fallbackValues[4] = 1;
-        
-        setChartData(prev => ({
-          ...prev,
-          creditScoreDistribution: {
-            labels: ['Excellent (750+)', 'Good (700-749)', 'Fair (650-699)', 'Poor (600-649)', 'Very Poor (<600)'],
-            values: fallbackValues
-          }
-        }));
-      }
 
     } catch (error) {
       console.error('Error fetching chart data:', error);
@@ -287,10 +281,6 @@ const BorrowerDashboard = () => {
         repaymentStatus: {
           labels: ['On Time', 'Late', 'Overdue', 'Paid'],
           values: [0, 0, 0, 0]
-        },
-        creditScoreDistribution: {
-          labels: ['Excellent (750+)', 'Good (700-749)', 'Fair (650-699)', 'Poor (600-649)', 'Very Poor (<600)'],
-          values: [0, 0, 1, 0, 0] // Default to Fair
         }
       });
     }
@@ -326,6 +316,81 @@ const BorrowerDashboard = () => {
     navigate(`/payback/${loan._id}`, { 
       state: { loan } 
     });
+  };
+
+  // Badge system data
+  const badgesCatalog = [
+    { key: 'seed', name: 'Seed Starter', min: 10, icon: '🌱' },
+    { key: 'sprout', name: 'Sprout Saver', min: 30, icon: '🌿' },
+    { key: 'ember', name: 'Ember Earner', min: 60, icon: '🔥' },
+    { key: 'river', name: 'River Reliable', min: 100, icon: '🌊' },
+    { key: 'steel', name: 'Steel Steady', min: 150, icon: '🛡️' },
+    { key: 'hawk', name: 'Hawk Honest', min: 210, icon: '🦅' },
+    { key: 'oak', name: 'Oak On‑time', min: 280, icon: '🌳' },
+    { key: 'aurum', name: 'Aurum Achiever', min: 360, icon: '🏅' },
+    { key: 'titan', name: 'Titan Trustworthy', min: 450, icon: '🏆' },
+    { key: 'legend', name: 'Legendary Lender‑Friend', min: 550, icon: '👑' }
+  ];
+
+  const getNextBadge = () => {
+    const currentPoints = user?.reliabilityPoints || 0;
+    const ownedKeys = new Set((user?.badges || []).map(b => b.key));
+    return badgesCatalog.find(badge => !ownedKeys.has(badge.key) && badge.min > currentPoints);
+  };
+
+  const getProgressToNextBadge = () => {
+    const currentPoints = user?.reliabilityPoints || 0;
+    const nextBadge = getNextBadge();
+    if (!nextBadge) return { progress: 100, pointsNeeded: 0 };
+    
+    const previousBadge = badgesCatalog
+      .filter(b => b.min <= currentPoints)
+      .sort((a, b) => b.min - a.min)[0];
+    
+    const startPoints = previousBadge ? previousBadge.min : 0;
+    const endPoints = nextBadge.min;
+    const progress = ((currentPoints - startPoints) / (endPoints - startPoints)) * 100;
+    const pointsNeeded = endPoints - currentPoints;
+    
+    return { progress: Math.min(100, Math.max(0, progress)), pointsNeeded };
+  };
+
+  const handleMarkNotificationAsRead = async (notificationId) => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(buildApiUrl(`/notifications/${notificationId}/read`), {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        setNotifications(prev => 
+          prev.map(notif => 
+            notif._id === notificationId 
+              ? { ...notif, readAt: new Date().toISOString() }
+              : notif
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const handleRemoveNotification = async (notificationId) => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(buildApiUrl(`/notifications/${notificationId}`), {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        setNotifications(prev => prev.filter(notif => notif._id !== notificationId));
+      }
+    } catch (error) {
+      console.error('Error removing notification:', error);
+    }
   };
 
   const handleSetAutoRepay = async (loan) => {
@@ -455,6 +520,12 @@ const BorrowerDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Notification Manager */}
+      <NotificationManager
+        notifications={notifications}
+        onMarkAsRead={handleMarkNotificationAsRead}
+        onRemove={handleRemoveNotification}
+      />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -596,32 +667,129 @@ const BorrowerDashboard = () => {
           </div>
         </motion.div>
 
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
           className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-                Credit Score
+                Reliability Points
               </p>
               <p className="text-2xl font-bold text-secondary-900 dark:text-white">
-                {stats.creditScore}
+                {user?.reliabilityPoints || 0}
+              </p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                {user?.badges?.length || 0} badges earned
               </p>
             </div>
-            <div className="w-12 h-12 bg-accent-100 dark:bg-accent-900/20 rounded-lg flex items-center justify-center">
-              <BarChart3 className="h-6 w-6 text-accent-600 dark:text-accent-400" />
+            <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center">
+              <Trophy className="h-6 w-6 text-primary-600 dark:text-primary-400" />
             </div>
           </div>
         </motion.div>
       </div>
 
+      {/* Badge Progress Section */}
+      {getNextBadge() && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="mb-8"
+        >
+          <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white flex items-center">
+                <Target className="h-5 w-5 mr-2 text-primary-600" />
+                Next Badge Progress
+              </h3>
+              <Link
+                to="/achievements"
+                className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+              >
+                View All Badges
+              </Link>
+            </div>
+
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium text-secondary-900 dark:text-white">
+                  {getNextBadge().name} {getNextBadge().icon}
+                </h4>
+                <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                  {getProgressToNextBadge().pointsNeeded} points needed
+                </span>
+              </div>
+              <div className="w-full bg-neutral-200 dark:bg-secondary-700 rounded-full h-3">
+                <div 
+                  className="bg-gradient-to-r from-primary-500 to-accent-500 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${getProgressToNextBadge().progress}%` }}
+                ></div>
+              </div>
+              <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                <span>{user?.reliabilityPoints || 0} points</span>
+                <span>{getNextBadge().min} points</span>
+              </div>
+            </div>
+
+            {/* Recent Badges */}
+            {user?.badges && user.badges.length > 0 && (
+              <div>
+                <h5 className="text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">
+                  Recent Badges
+                </h5>
+                <div className="flex space-x-2">
+                  {user.badges
+                    .sort((a, b) => new Date(b.earnedAt) - new Date(a.earnedAt))
+                    .slice(0, 3)
+                    .map((badge) => (
+                      <div
+                        key={badge.key}
+                        className="flex items-center space-x-2 px-3 py-2 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-800"
+                      >
+                        <span className="text-lg">{badge.icon}</span>
+                        <div>
+                          <p className="text-xs font-medium text-secondary-900 dark:text-white">
+                            {badge.name}
+                          </p>
+                          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                            {new Date(badge.earnedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      )}
+
       {/* Wallet Balance */}
       <div className="mb-8">
         <WalletBalanceCard userType="borrower" />
       </div>
+
+      {/* Penalty Status */}
+      {activeLoan && (
+        <div className="mb-8">
+          <PenaltyStatus 
+            loanId={activeLoan._id} 
+            onUpdate={(penaltyData) => {
+              // Update loan data when penalty status changes
+              setRecentLoans(prev => prev.map(loan => 
+                loan._id === activeLoan._id 
+                  ? { ...loan, penaltyData }
+                  : loan
+              ));
+            }}
+          />
+        </div>
+      )}
 
       {/* Collateral Verification Status */}
       <div className="mb-8">
@@ -893,22 +1061,6 @@ const BorrowerDashboard = () => {
         </motion.div>
       </div>
 
-      {/* Credit Score Distribution Chart */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 1.0 }}
-      >
-        {isLoading ? (
-          <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-8">
-            <div className="h-[400px] w-full flex items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-            </div>
-          </div>
-        ) : (
-          <CreditScoreDistributionChart data={chartData.creditScoreDistribution} />
-        )}
-      </motion.div>
 
       {/* Pending Loans Section */}
       <PendingLoansSection userType="borrower" title="My Pending Loans" />

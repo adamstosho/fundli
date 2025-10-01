@@ -12,7 +12,9 @@ import {
   User,
   Calendar,
   TrendingUp,
-  Shield
+  Shield,
+  AlertTriangle,
+  Info
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -32,21 +34,50 @@ const PayBackPage = () => {
   const [success, setSuccess] = useState('');
   const [walletBalance, setWalletBalance] = useState(0);
   const [repaymentAmount, setRepaymentAmount] = useState(0);
+  const [penaltyData, setPenaltyData] = useState(null);
+
+  // Fetch penalty status
+  const fetchPenaltyStatus = async () => {
+    if (!loanId) return;
+    
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(buildApiUrl(`/borrower/loan/${loanId}/penalty-status`), {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPenaltyData(data.data);
+        
+        // Update repayment amount with penalties
+        if (data.data.penaltyStatus) {
+          const totalWithPenalties = data.data.penaltyStatus.totalRepaymentAmount;
+          setRepaymentAmount(totalWithPenalties);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching penalty status:', error);
+    }
+  };
 
   useEffect(() => {
     if (location.state?.loan) {
       setLoan(location.state.loan);
       setIsLoading(false);
       
-      // Calculate repayment amount
+      // Calculate base repayment amount (will be updated with penalties)
       const principal = location.state.loan.loanAmount || 0;
       const interestRate = location.state.loan.interestRate || 0;
       const interestAmount = principal * (interestRate / 100);
-      const totalRepayment = principal + interestAmount;
+      const baseRepayment = principal + interestAmount;
       const amountPaid = location.state.loan.amountPaid || 0;
-      const remaining = totalRepayment - amountPaid;
+      const remaining = baseRepayment - amountPaid;
       
       setRepaymentAmount(remaining);
+      
+      // Fetch penalty status
+      fetchPenaltyStatus();
     } else {
       // Fetch loan data if not passed via state
       fetchLoanData();
@@ -352,6 +383,46 @@ const PayBackPage = () => {
               </div>
             </div>
 
+            {/* Penalty Information */}
+            {penaltyData && penaltyData.penaltyStatus.hasPendingPenalties && (
+              <div className="bg-warning-50 dark:bg-warning-900/20 rounded-lg border border-warning-200 dark:border-warning-800 p-6">
+                <h2 className="text-xl font-semibold text-warning-800 dark:text-warning-200 mb-4 flex items-center">
+                  <AlertTriangle className="h-6 w-6 mr-2 text-warning-600" />
+                  Late Payment Penalties
+                </h2>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-warning-700 dark:text-warning-300">Penalty Charges</span>
+                    <span className="font-bold text-lg text-warning-800 dark:text-warning-200">
+                      ${penaltyData.penaltyStatus.totalPenaltyAmount.toFixed(2)}
+                    </span>
+                  </div>
+                  
+                  <div className="text-sm text-warning-600 dark:text-warning-400">
+                    <Info className="h-4 w-4 inline mr-1" />
+                    Penalty rate: 0.5% per day after 24-hour grace period
+                  </div>
+                  
+                  {penaltyData.penaltyStatus.repayments.map((repayment, index) => (
+                    <div key={index} className="bg-warning-100 dark:bg-warning-900/30 rounded-lg p-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-warning-700 dark:text-warning-300">
+                          Payment #{repayment.installmentNumber}
+                        </span>
+                        <span className="text-sm font-medium text-warning-800 dark:text-warning-200">
+                          +${repayment.penaltyAmount.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="text-xs text-warning-600 dark:text-warning-400 mt-1">
+                        Due: {new Date(repayment.dueDate).toLocaleDateString()} • {repayment.penaltyDays} days late
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Repayment Information */}
             <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-neutral-200 dark:border-secondary-700 p-6">
               <h2 className="text-xl font-semibold text-secondary-900 dark:text-white mb-4 flex items-center">
@@ -361,9 +432,25 @@ const PayBackPage = () => {
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center py-2 border-b border-neutral-200 dark:border-secondary-700">
-                  <span className="text-neutral-600 dark:text-neutral-400">Total Repayment</span>
-                  <span className="font-bold text-lg text-secondary-900 dark:text-white">
+                  <span className="text-neutral-600 dark:text-neutral-400">Base Repayment</span>
+                  <span className="font-semibold text-secondary-900 dark:text-white">
                     ${totalRepayment.toLocaleString()}
+                  </span>
+                </div>
+                
+                {penaltyData && penaltyData.penaltyStatus.hasPendingPenalties && (
+                  <div className="flex justify-between items-center py-2 border-b border-warning-200 dark:border-warning-800">
+                    <span className="text-warning-600 dark:text-warning-400">Penalty Charges</span>
+                    <span className="font-semibold text-warning-600 dark:text-warning-400">
+                      +${penaltyData.penaltyStatus.totalPenaltyAmount.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                
+                <div className="flex justify-between items-center py-2 border-b border-neutral-200 dark:border-secondary-700">
+                  <span className="text-neutral-600 dark:text-neutral-400">Total Due</span>
+                  <span className="font-bold text-lg text-secondary-900 dark:text-white">
+                    ${repaymentAmount.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-neutral-200 dark:border-secondary-700">

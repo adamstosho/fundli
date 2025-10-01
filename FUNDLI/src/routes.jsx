@@ -34,6 +34,7 @@ import WithdrawPage from './pages/WithdrawPage';
 import NotificationsPage from './pages/NotificationsPage';
 import ChatPage from './pages/ChatPage';
 import LivenessCheck from './components/kyc/LivenessCheck';
+import AchievementsPage from './pages/achievements/AchievementsPage';
 
 // 404 Error Component
 const NotFound = () => (
@@ -230,6 +231,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ChatPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: 'achievements',
+        element: (
+          <ProtectedRoute>
+            <AchievementsPage />
           </ProtectedRoute>
         )
       },
