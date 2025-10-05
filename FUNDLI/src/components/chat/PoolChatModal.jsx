@@ -71,11 +71,22 @@ const PoolChatModal = ({ isOpen, onClose, chat, pool, currentUser }) => {
         console.log('📨 New message received via Socket.IO:', data);
         if (data.chatId === chat?._id) {
           setMessages(prev => {
-            // Check if message already exists to prevent duplicates
-            const messageExists = prev.some(msg => 
-              (msg._id && data.message._id && msg._id === data.message._id) ||
-              (msg.id && data.message.id && msg.id === data.message.id)
-            );
+            // Enhanced duplicate detection - check multiple fields
+            const messageExists = prev.some(msg => {
+              // Check by message ID
+              if (msg._id && data.message._id && msg._id === data.message._id) return true;
+              if (msg.id && data.message.id && msg.id === data.message.id) return true;
+              
+              // Check by content and timestamp (fallback)
+              if (msg.content === data.message.content && 
+                  msg.sender && data.message.sender &&
+                  msg.sender._id === data.message.sender._id &&
+                  Math.abs(new Date(msg.createdAt) - new Date(data.message.createdAt)) < 1000) {
+                return true;
+              }
+              
+              return false;
+            });
             
             if (messageExists) {
               console.log('📨 Message already exists, skipping duplicate');
@@ -174,7 +185,8 @@ const PoolChatModal = ({ isOpen, onClose, chat, pool, currentUser }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setMessages(prev => [...prev, data.data.message]);
+        // Don't add message here - let Socket.IO broadcast handle it to avoid duplicates
+        // The message will be added when we receive the Socket.IO broadcast
         setNewMessage('');
       }
     } catch (error) {
@@ -421,7 +433,28 @@ const PoolChatModal = ({ isOpen, onClose, chat, pool, currentUser }) => {
               </div>
             ) : (
               messages.map((message, index) => {
-                const isOwn = message.sender._id === currentUser.id;
+                // Robust sender detection with fallbacks
+                const senderId = message.sender._id || message.sender.id;
+                const userId = currentUser.id || currentUser._id;
+                
+                // Convert both to strings for reliable comparison
+                const senderIdStr = senderId?.toString();
+                const userIdStr = userId?.toString();
+                
+                // Check if the sender is the current user
+                let isOwn = senderIdStr === userIdStr;
+                
+                // Fallback: if IDs don't match, check by name
+                if (!isOwn && message.sender?.firstName === currentUser?.firstName) {
+                  console.log('⚠️ ID mismatch but name match in PoolChatModal - using name for alignment');
+                  isOwn = true;
+                }
+                
+                // Additional fallback: check by email if available
+                if (!isOwn && message.sender?.email === currentUser?.email) {
+                  console.log('⚠️ ID mismatch but email match in PoolChatModal - using email for alignment');
+                  isOwn = true;
+                }
                 
                 return (
                   <motion.div
