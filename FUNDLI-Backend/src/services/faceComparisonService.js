@@ -3,7 +3,7 @@ const path = require('path');
 
 class FaceComparisonService {
   constructor() {
-    this.similarityThreshold = 85; // 85% similarity required for verification
+    this.similarityThreshold = 70; // 70% similarity required for verification
   }
 
   /**

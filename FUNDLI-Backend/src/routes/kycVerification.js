@@ -194,7 +194,7 @@ router.post('/verify-faces', protect, async (req, res) => {
     user.kycVerificationDetails.livenessCheckPassed = comparisonResult.livenessCheckPassed;
 
     // Determine verification status based on score
-    if (comparisonResult.similarityScore >= 85 && comparisonResult.livenessCheckPassed) {
+    if (comparisonResult.similarityScore >= 70 && comparisonResult.livenessCheckPassed) {
       user.kycStatus = 'verified';
       user.kycVerified = true;
     } else {
@@ -410,7 +410,7 @@ router.post('/complete-verification', protect, async (req, res) => {
 
     // Step 4: Check if all KYC requirements are met
     const hasDocumentUpload = user.documentImage && user.liveFaceImage;
-    const hasFaceVerification = user.verificationScore >= 85 && user.kycVerificationDetails.livenessCheckPassed;
+    const hasFaceVerification = user.verificationScore >= 70 && user.kycVerificationDetails.livenessCheckPassed;
     const hasBVNVerification = bvnResult.verified;
     const hasBankVerification = bankResult.verified;
 
